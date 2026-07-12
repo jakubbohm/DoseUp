@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/doseup.apphost/">
+    <Project Path="src/doseup.apphost/DoseUp.AppHost.csproj" />
+  </Folder>
+  <Folder Name="/src/doseup.servicedefaults/">
+    <Project Path="src/doseup.servicedefaults/DoseUp.ServiceDefaults.csproj" />
+  </Folder>
+</Solution>
