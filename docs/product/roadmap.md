@@ -2,7 +2,7 @@
 
 **Status:** living document · **Last updated:** 2026-07-13
 
-A milestone is a coherent, shippable slice delivered through OpenSpec changes. When a change is archived: tick it here and update the `Status` column in [requirements.md](requirements.md). Candidate change names are just that — candidates; the actual slicing is decided when each change is proposed.
+A milestone is a coherent, shippable slice delivered through OpenSpec changes. When a change is archived: tick it here and update the `Status` column in [requirements.md](requirements.md). Candidate change names are just that — candidates; the actual slicing is decided when each change is proposed. Final change ids carry a 3-digit sequential prefix (PRE-12), e.g. `001-add-walking-skeleton`.
 
 ## M0 — Walking skeleton on Azure
 

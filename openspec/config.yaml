@@ -38,8 +38,13 @@ context: |
   schedule, and dose log entry belongs to exactly one profile. Schedule times are
   profile-local and DST-safe. Never log dose contents (ids only — NFR-5).
 
+  Change naming (PRE-12): every new change takes a 3-digit sequential prefix +
+  kebab-case name — NNN-verb-topic (e.g. 001-add-walking-skeleton). NNN is the
+  next number across openspec/changes/ and the archive; numbering never resets.
+
 rules:
   proposal:
+    - Confirm the change id carries the next 3-digit sequential prefix (NNN-kebab-name; check openspec/changes/ and the archive for the highest NNN)
     - Cite the FR/NFR ids from docs/product/requirements.md and the roadmap milestone this change serves
     - Include a Non-goals section
   specs:

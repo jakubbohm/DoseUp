@@ -21,7 +21,7 @@ Each resolved item lands somewhere durable — an ADR, a convention doc, a requi
 - [ ] **PRE-9** — devops, branching strategy incl. neon
 - [ ] **PRE-10** — permissions, RBAC, casbin.net
 - [ ] **PRE-11** — re-org the docs/adrs/skills/claude.md/memory
-- [ ] **PRE-12** — openspec change numbering
+- [x] **PRE-12** — openspec change numbering
 - [ ] **PRE-13** — setup codebase-memory-mcp
 - [ ] **PRE-14** — design personas
 - [ ] **PRE-15** — design code-review
@@ -43,7 +43,7 @@ Filled in as items are processed — link the ADR / convention / spec / change t
 | PRE-9 | |
 | PRE-10 | |
 | PRE-11 | |
-| PRE-12 | |
+| PRE-12 | 2026-07-13 — change ids get a 3-digit sequential prefix (NNN-kebab-name, never resets) — rule in [openspec/config.yaml](../../openspec/config.yaml) (context + proposal rule), noted in roadmap intro and software-factory F-37 |
 | PRE-13 | |
 | PRE-14 | |
 | PRE-15 | |

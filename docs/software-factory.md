@@ -209,7 +209,7 @@ DoseUp: **docs-first** — `docs/conventions/` is authoritative; tooling and `.c
 ## I. AI-assisted workflow (the factory's own process)
 
 **F-37 · Spec-driven development?**
-DoseUp: **OpenSpec** — behavior changes go through proposal/specs/design/tasks artifacts; proposals must cite requirement ids + milestone; archiving syncs specs and updates roadmap/requirement statuses.
+DoseUp: **OpenSpec** — behavior changes go through proposal/specs/design/tasks artifacts; proposals must cite requirement ids + milestone; archiving syncs specs and updates roadmap/requirement statuses. Change ids carry a 3-digit sequential prefix (`001-…`, PRE-12) so ordering and cross-references stay stable.
 *Generalizes:* the traceability chain (requirement id → milestone → change → spec → code → test) is the product of this choice; any spec workflow that maintains it qualifies.
 
 **F-38 · Who gates stage progression?**
