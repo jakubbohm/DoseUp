@@ -1,0 +1,4 @@
+- [Memory lives in the repo](memory-in-repo.md) — autoMemoryDirectory redirect; must be re-created per machine
+- [User gates stage progression](user-gates-stage-progression.md) — never advance stages or declare a phase done without Jakub's explicit go
+- [User working style](user-working-style.md) — structured interviews work well; firm tech choices, may override recommendations
+- [DoseUp project state](doseup-project-state.md) — founding interview done 2026-07-13; decisions live in docs/, software-factory.md is a maintained catalog

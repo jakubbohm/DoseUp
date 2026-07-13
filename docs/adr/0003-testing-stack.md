@@ -1,0 +1,27 @@
+# ADR-0003: Testing stack
+
+**Status:** Accepted · **Date:** 2026-07-13 · **Decided by:** Jakub (interview 2026-07-13, based on ecosystem research of the same date)
+
+## Context
+
+Quality bar is showcase-grade (vision G3): full test pyramid, CI-gated. Ecosystem facts as of 2026-07: FluentAssertions v8+ is commercial; NetArchTest is unmaintained (since 2021); the Cosmos DB Linux "vNext" emulator went GA 2026-06 but Aspire 13.4 still wraps it behind the experimental `RunAsPreviewEmulator()`; Stryker.NET's xUnit-v3 support is broken (open bug) and its Microsoft.Testing.Platform runner is preview-grade.
+
+## Decisions
+
+| Layer | Choice | Rationale | Alternatives considered |
+|-------|--------|-----------|------------------------|
+| Test framework | **TUnit** (source-generated, Microsoft.Testing.Platform-native) | Modern, AOT-capable, matches the bleeding-edge identity of the project; official ArchUnitNET adapter exists | xUnit v3 (the mature default — rejected in favor of learning value; also currently broken with Stryker), NUnit (adapter-based MTP) |
+| Assertions | **Shouldly** | BSD-3, no licensing asterisks, pleasant API | AwesomeAssertions (FA-v7 fork; richer equivalency but fork-dependency), FluentAssertions v8 (commercial), built-ins |
+| Unit tests | Domain logic (recurrence/DST engine, Result invariants) tested exhaustively — the pyramid's base | — | — |
+| Integration tests | **Aspire harness only**: `DistributedApplicationTestingBuilder` runs the real AppHost graph with the **Cosmos vNext emulator** via `RunAsPreviewEmulator()` (suppress `ASPIRECOSMOSDB001` until Aspire graduates it) | One harness, tests the real orchestration | Testcontainers for narrow per-dependency loops (explicitly not adopted — accepted cost below), WebApplicationFactory-only |
+| Architecture tests | **ArchUnitNET** (TUnit adapter) enforcing the ADR-0002 dependency rules, plus Roslyn analyzers/BannedApiAnalyzers for must-never-happen rules | Only maintained option; compile-time + test-time coverage | NetArchTest (dead) |
+| E2E | **`@playwright/test` (TypeScript)** beside the frontend; smoke subset on PR, full suite nightly | Flagship runner: HTML report, traces, UI mode, sharding | Microsoft.Playwright .NET binding (no HTML reporter/UI mode, constrained parallelism) |
+| Mutation testing | **Pending a spike**: Stryker.NET × TUnit compatibility is unverified. If viable → nightly diff/dashboard job, never a PR gate | Honest — the chosen framework is young | Skipping entirely |
+| Coverage | Reported in the nightly quality job; **no PR threshold gate** | Signal without fighting the gate | Changed-lines threshold on PR |
+
+## Consequences
+
+- **Persistence-level tests pay full-graph startup cost** (Aspire-only harness). Accepted; revisit (Testcontainers or WebApplicationFactory tier) if the loop gets painful — record the reversal here.
+- CI runs integration tests on **ubuntu runners** with **health-probe waits + explicit timeouts** (known Aspire-in-CI hang risk).
+- TUnit's weekly release cadence folds into the eager-upgrade policy (ADR-0001).
+- Test-naming/AAA conventions land in `docs/conventions/` during M0, once real tests exist.
