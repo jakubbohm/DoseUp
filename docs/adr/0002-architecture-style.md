@@ -1,6 +1,6 @@
 # ADR-0002: Architecture style — hybrid modular monolith
 
-**Status:** Accepted · **Date:** 2026-07-13 · **Decided by:** Jakub (interview 2026-07-13) · **Amended:** 2026-07-13 — persistence/outbox mechanics: Cosmos → Postgres (PRE-2) · 2026-07-13 — dispatch, unit-of-work & messaging mechanics (PRE-4)
+**Status:** Accepted · **Date:** 2026-07-13 · **Decided by:** Jakub (interview 2026-07-13) · **Amended:** 2026-07-13 — persistence/outbox mechanics: Cosmos → Postgres (PRE-2) · 2026-07-13 — dispatch, unit-of-work & messaging mechanics (PRE-4) · 2026-07-14 — authorization rings (PRE-10)
 
 ## Context
 
@@ -59,6 +59,22 @@ Rich domains (e.g. Scheduling: DST-safe recurrence) get the full core. Trivial m
 
 Request shape → FluentValidation validators in FastEndpoints (automatic 400 ProblemDetails). Business invariants → domain code returning `Result` errors, mapped to ProblemDetails at the edge (ADR-0001).
 
+### Authorization: three rings, engine-free (PRE-10)
+
+No policy engine — the dominant check (ownership) is domain data, not policy (rationale and rejected alternatives in ADR-0001):
+
+- **Ring 0 — authenticate (Platform):** Entra External ID JWT bearer; endpoints are secure by default, `AllowAnonymous` is an explicit, architecture-tested allowlist. Entra's `oid` claim is the account key (stable; `sub` is pairwise per app).
+- **Ring 1 — account gate + role (Platform, declarative):** a default `ActiveAccount` policy on every endpoint resolves `oid` → account row and rejects unknown/revoked callers (403) — tokens outlive revocation, so FR-2 bites on the next request, not at token expiry. Resolution yields the request-scoped **`CallerContext`** (AccountId, IsAdmin) — the only identity type handlers and ports see; claims never travel past Platform. Admin endpoints live in one FastEndpoints group carrying the `AdminOnly` policy. Account status and the admin flag are **database columns, not Entra app roles**: the invite/revoke lifecycle is in-app (FR-2), changes take effect immediately, tests need no IdP.
+- **Ring 2 — ownership by construction (modules):** every profile-scoped read/write flows through queries scoped to the caller's account (join/`EXISTS` from `CallerContext`); a miss surfaces as `Result` `NotFound`. There is no ownership check to forget — unowned data is unqueryable. Aggregates stay caller-free: they enforce invariants (PRE-7's territory), not access. Defense-in-depth candidate for M1 design: EF Core global query filters keyed by `CallerContext` (caveat: caller-less system paths — reminder firing, outbox consumers — need an explicit system context).
+
+**Admin ≠ data access:** the admin role grants account-lifecycle powers only; there is no admin bypass of Ring 2 (NFR-5 stance).
+
+**Denial semantics:** 401 unauthenticated · 403 only for request-class denials that leak nothing resource-specific (inactive account; non-admin on admin endpoints) · 404 for any profile-scoped resource the caller can't see — foreign-or-nonexistent deliberately indistinguishable (anti-enumeration; RFC 9110 permits 404 to conceal existence), including foreign profile ids referenced in payloads. The Result union's `Forbidden → 403` case is narrowed to "visible but not permitted" — dormant until FR-21-style permission levels.
+
+**The unauthenticated path never touches the database** — JWT validation is local (cached OIDC metadata), the `ActiveAccount` lookup runs only after token validation, health probes are DB-free — so bot-triggered scale-from-zero wakes never reach Neon (cost consequences in ADR-0001).
+
+**Testing (M3 `harden-authz`, first rows in M0):** a behavioral matrix — endpoint catalog × caller classes {anonymous, member-owner, member-other, admin, revoked} → expected status; cross-account probes assert 404 (not 403, not 2xx); revocation asserts 403 with a still-valid token; new endpoints fail the matrix until classified. ArchUnitNET owns the structural rules (anonymous allowlist; admin endpoints ∈ admin group); ownership is enforced behaviorally by the matrix. Matrix mechanics slot into PRE-8's test organisation.
+
 The **module list is not fixed here** — bounded contexts (likely candidates: Access, Tracking, Scheduling) are decided in each change's design artifact.
 
 ## Alternatives considered
@@ -69,7 +85,7 @@ The **module list is not fixed here** — bounded contexts (likely candidates: A
 
 ## Consequences
 
-- Architecture tests (ArchUnitNET) are **the** boundary mechanism → they must exist from M0 and run as a PR gate.
+- Architecture tests (ArchUnitNET) are **the** boundary mechanism → they must exist from M0 and run as a PR gate. They enforce dependency rules 1–5 plus PRE-10's structural authorization rules (anonymous-endpoint allowlist; admin endpoints confined to the admin group).
 - Framework magic is confined to the async seam: the synchronous request path stays framework-free (FastEndpoints endpoint = handler, explicit domain-event dispatcher); Wolverine conventions apply only from the outbox outward. Wolverine.HTTP is the named alternative if this seam chafes (ADR-0001).
 - The Wolverine adoption details (outbox configuration, inbox/idempotency conventions, KEDA queue-depth wake on ACA, `codegen write` for reviewable generated code) get their own design artifact when the first integration event ships.
 - Single project keeps builds/refactors fast; if the project ever splits, the namespace discipline maps 1:1 onto csproj boundaries.

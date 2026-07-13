@@ -1,6 +1,6 @@
 # DoseUp — Engineering Conventions
 
-**Status:** living document, docs-first · **Last updated:** 2026-07-13
+**Status:** living document, docs-first · **Last updated:** 2026-07-14
 
 This directory is the **source of truth for conventions** (decided in the founding interview): a convention is authored here first, then mirrored into enforcement (formatters, analyzers, architecture tests, CI gates) and into `.claude/rules/` so Claude follows it while writing code. If tooling can't express a rule, this doc is still authoritative. Changing a convention = PR touching this doc **and** its enforcement together.
 
@@ -22,12 +22,16 @@ Several sections below are deliberately skeletal — they get filled by the chan
 
 Modular monolith in one project; dependency rules 1–5 of ADR-0002 are enforced by ArchUnitNET tests. Module grades are declared. Cross-module = contracts + integration events only.
 
+## Authorization (decided — see ADR-0002 § Authorization)
+
+Three rings, engine-free (PRE-10): endpoints secure by default — `AllowAnonymous` is an explicit, arch-tested allowlist · the `ActiveAccount` default policy resolves Entra `oid` → account row into the request-scoped `CallerContext`, the only identity type past Platform (account status + admin flag are DB columns, so revocation bites on the next request) · admin endpoints in one group with `AdminOnly` · all profile-scoped queries are account-scoped by construction; misses are `NotFound` · admin has no data access · the unauthenticated path (incl. health probes) never touches the database. AuthZ test matrix: M3 `harden-authz`, first rows in M0.
+
 ## API conventions (decided at policy level; matrix finalized in the first API change)
 
 - FastEndpoints REPR; one endpoint per use-case slice. No mediator — the endpoint *is* the handler (PRE-4).
 - Request/response DTOs are simultaneously the API contract and the handler payload — no anticipatory mapping layer; a separate internal type appears only when the public contract must stay stable across an internal change; DTOs never cross the domain boundary (PRE-4).
 - **Every non-2xx response is ProblemDetails** (RFC 9457) — including FluentValidation 400s and Result-mapped domain errors.
-- Result-case → status-code matrix (seed, to finalize): `NotFound → 404`, `Validation → 400`, `Conflict → 409`, `Forbidden → 403`, `Unexpected → 500` (never leaks internals).
+- Result-case → status-code matrix: `NotFound → 404`, `Validation → 400`, `Conflict → 409`, `Forbidden → 403`, `Unexpected → 500` (never leaks internals). Denial semantics (PRE-10): cross-account access to profile-scoped resources — including foreign profile ids in payloads — is `NotFound`/404, indistinguishable from nonexistence by design (anti-enumeration); `Forbidden`/403 is reserved for request-class denials (inactive account, non-admin on admin endpoints) and later FR-21-style "visible but not permitted". Auth-middleware 401/403 responses are ProblemDetails too (mechanism wired + verified in M0).
 - OpenAPI is the contract (PRE-6): FastEndpoints exports `openapi.json` via `--exportswaggerjson` (committed); openapi-typescript generates the TS types file (committed, never hand-edited); the web app calls through openapi-fetch, whose `{ data, error }` result continues the Result pattern into TS. One script does export + regenerate; API-touching changes run it as an explicit task (CI drift-gates both artifacts).
 - Wire payloads are plain object literals, never classes (structured clone and React state punish instances) and never hand-written wire types — the generated types are the only TS source of contract truth. React hooks binding (openapi-react-query) and any fluent facade layer: decided at PRE-5.
 - Versioning: not before it hurts — revisit when the first breaking change threatens (record here).
@@ -46,7 +50,7 @@ Domain events: sync, in-module, in-UoW — drained by a `SaveChanges` intercepto
 
 ## Testing conventions (skeleton — fill in M0 with the first real tests)
 
-TUnit + Shouldly patterns · AAA structure · naming · what each pyramid layer is *for* (unit = domain behavior; integration = wiring + persistence semantics through the Aspire harness; E2E = user journeys; arch = ADR-0002 rules).
+TUnit + Shouldly patterns · AAA structure · naming · what each pyramid layer is *for* (unit = domain behavior; integration = wiring + persistence semantics through the Aspire harness; E2E = user journeys; arch = ADR-0002 rules) · the authZ matrix (endpoint catalog × caller classes — ADR-0002 § Authorization; lands M3, first rows M0).
 
 ## Observability (skeleton — wire in M0)
 

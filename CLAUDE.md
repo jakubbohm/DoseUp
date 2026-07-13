@@ -26,6 +26,7 @@ Division of labor: product docs say **why**, specs say **precisely what**, conve
 - **Jakub gates stage progression.** Propose, summarize state, wait for his explicit go. Never declare an interview, phase, or plan complete on your own.
 - Behavior changes go through **OpenSpec** (opsx skills). Trivial non-behavioral fixes may be direct.
 - **Result end-to-end:** expected failures return the SharedKernel `union Result`, mapped to ProblemDetails at the edge. Exceptions only for bugs/infrastructure.
+- **Authorization is layered and engine-free (PRE-10):** edge policies gate active-account + admin (`CallerContext` is the only identity past Platform); profile-scoped data is enforced by account-scoped queries — cross-account access is `NotFound`/404 (anti-enumeration), `Forbidden`/403 only for request-class denials; the unauthenticated path (incl. health probes) never touches the database.
 - **Sync path is framework-free; the async seam is Wolverine's.** No mediator — the FastEndpoints endpoint *is* the handler; domain events dispatch synchronously inside the unit of work (`DbContext` = UoW); integration events leave only via Wolverine's transactional outbox in the same transaction; consumers are idempotent (ADR-0002/PRE-4).
 - ADR-0002's module/dependency rules are enforced by ArchUnitNET tests — **never weaken a failing architecture test to make it pass**; raise the conflict instead.
 - Changes touching the API contract include an explicit "regenerate TS client" task; CI only gates drift.

@@ -1,6 +1,6 @@
 # DoseUp — Roadmap
 
-**Status:** living document · **Last updated:** 2026-07-13
+**Status:** living document · **Last updated:** 2026-07-14
 
 A milestone is a coherent, shippable slice delivered through OpenSpec changes. When a change is archived: tick it here and update the `Status` column in [requirements.md](requirements.md). Candidate change names are just that — candidates; the actual slicing is decided when each change is proposed. Final change ids carry a 3-digit sequential prefix (PRE-12), e.g. `001-add-walking-skeleton`.
 
@@ -13,7 +13,7 @@ Scope:
 - Aspire AppHost wires the real stack: FastEndpoints API (`net11.0` preview) + React/Vite PWA shell + Neon Postgres (Aspire Postgres container locally), ServiceDefaults/OTel on everything
 - Tooling baseline: CSharpier + `.editorconfig` + strict analyzers, ESLint + Prettier, TUnit + Shouldly + ArchUnitNET + Playwright scaffolds, module skeleton with first architecture tests
 - SharedKernel seed: `union`-based `Result`, Error model, ProblemDetails mapping
-- Entra External ID sign-in end-to-end: SPA login → API validates token → response proves identity and one database round-trip
+- Entra External ID sign-in end-to-end: SPA login → API validates token → response proves identity and one database round-trip — the round-trip *is* PRE-10's `ActiveAccount` resolution (Entra `oid` → account row → `CallerContext`); health probes stay DB-free so bot-triggered wakes never touch Neon
 - Contract pipeline wired (PRE-6): FastEndpoints `--exportswaggerjson` → committed `openapi.json` → openapi-typescript types + openapi-fetch client, one regen script, CI drift check on both artifacts
 - GitHub Actions: all PR gates from [ADR-0004](../adr/0004-delivery-and-process.md); merge to main deploys the single prod environment on Azure Container Apps
 - FastEndpoints- and Wolverine-on-net11-preview compatibility spikes, incl. Wolverine on ASB Basic queue-only (fallbacks: pin the last working preview; EF Core 10 GA as the data-access pin; CloudAMQP if Basic can't carry Wolverine)
@@ -57,7 +57,7 @@ Candidate changes: `add-schedules`, `add-reminder-engine`, `add-web-push`, `add-
 
 **Goal:** first external users (G2).
 
-Scope: invite/revoke admin (FR-2), onboarding + PWA install UX polish (FR-15 finished, OQ-3 validated), adherence view (FR-14) if not in M2, authZ hardening tests (NFR-4), backup restore verified (OQ-4), cost check (OQ-1), "not medical advice" note (NFR-5), language decision (OQ-2).
+Scope: invite/revoke admin (FR-2), onboarding + PWA install UX polish (FR-15 finished, OQ-3 validated), adherence view (FR-14) if not in M2, authZ hardening tests (NFR-4 — PRE-10 matrix: endpoint catalog × caller classes, cross-account 404 probes, revocation bite), backup restore verified (OQ-4), cost check (OQ-1), "not medical advice" note (NFR-5), language decision (OQ-2).
 
 **Done when:** ≥ 2 non-Jakub users active for 2+ consecutive weeks without support.
 

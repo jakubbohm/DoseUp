@@ -1,6 +1,6 @@
 # DoseUp — Product Requirements
 
-**Status:** living document · **Last updated:** 2026-07-13
+**Status:** living document · **Last updated:** 2026-07-14
 
 Scope-level requirements only — *what*, not precise behavior. Precise, testable behavior lives in `openspec/specs/` and grows change by change. OpenSpec proposals **must cite the FR/NFR ids** they serve (rule in `openspec/config.yaml`).
 
@@ -66,7 +66,7 @@ Priorities: MoSCoW (**M**ust / **S**hould / **C**ould / **W**on't-for-now). Stat
 | NFR-1 | **Platform reach:** current Android Chrome and iOS Safari (≥ 16.4, installed to home screen for push) |
 | NFR-2 | **Performance:** the core loop feels instant; API reads P95 < 300 ms at circle scale (≤ 50 accounts); app-open → dose-logged < 10 s on a mid-range phone over LTE |
 | NFR-3 | **Reliability:** best-effort availability (hobby operations, no SLO) — but reminder computation and delivery are server-side, so an idle client or scaled-down app never loses them |
-| NFR-4 | **Security:** HTTPS only; every API call authenticated (Entra External ID); per-account authorization enforced server-side and covered by tests; secrets never in the repo — managed identity where available, the Neon connection string via ACA secrets/Key Vault |
+| NFR-4 | **Security:** HTTPS only; every API call authenticated (Entra External ID); per-account authorization enforced server-side and covered by tests — cross-account access indistinguishable from nonexistence (404, no existence leaks — PRE-10); secrets never in the repo — managed identity where available, the Neon connection string via ACA secrets/Key Vault |
 | NFR-5 | **Privacy:** encryption at rest (Azure + Neon); automated backups with point-in-time restore (Neon); dose contents never appear in logs/telemetry (ids only); in-app "not medical advice" note |
 | NFR-6 | **Cost:** fits a hobby budget at circle scale — working target ≤ €20/month, outlook ≈ €0 after PRE-3 (OQ-1): Neon + ACA free grants, ASB Basic + Storage Queue ops in cents (2026-07), minimal compute footprint |
 | NFR-7 | **Quality & process:** behavior changes flow through OpenSpec; test pyramid and gates per [ADR-0003](../adr/0003-testing-stack.md) and [ADR-0004](../adr/0004-delivery-and-process.md) |

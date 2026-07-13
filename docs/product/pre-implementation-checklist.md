@@ -1,6 +1,6 @@
 # DoseUp — Pre-implementation checklist
 
-**Status:** living document · **Last updated:** 2026-07-13
+**Status:** living document · **Last updated:** 2026-07-14
 
 Topics Jakub wants to consult and settle **before** implementation starts. Each item is a raw note — a reminder of a conversation to kick off, not a task to act on. Notes are recorded verbatim; nobody (human or agent) edits their wording. Work them one at a time, in an order Jakub picks.
 
@@ -19,7 +19,7 @@ Each resolved item lands somewhere durable — an ADR, a convention doc, a requi
 - [ ] **PRE-7** — domain, business checks, side effects, integration events, smartenum
 - [ ] **PRE-8** — testing organisation (unit, integration, e2e, architecture, contract)
 - [ ] **PRE-9** — devops, branching strategy incl. neon
-- [ ] **PRE-10** — permissions, RBAC, casbin.net
+- [x] **PRE-10** — permissions, RBAC, casbin.net
 - [ ] **PRE-11** — re-org the docs/adrs/skills/claude.md/memory
 - [x] **PRE-12** — openspec change numbering
 - [ ] **PRE-13** — setup codebase-memory-mcp
@@ -41,7 +41,7 @@ Filled in as items are processed — link the ADR / convention / spec / change t
 | PRE-7 | |
 | PRE-8 | |
 | PRE-9 | |
-| PRE-10 | |
+| PRE-10 | 2026-07-14 — layered, engine-free authorization ("three rings"): FastEndpoints secure-by-default + ASP.NET named policies at the edge (`ActiveAccount`: Entra `oid` → DB account row → request-scoped `CallerContext`; `AdminOnly` group; status/admin flag in DB so revocation bites next request), ownership **by construction** via account-scoped queries → `NotFound` (cross-account = 404 anti-enumeration, `Forbidden` narrowed to request-class denials), admin ≠ data access, unauthenticated path incl. health probes never touches the DB (authN can't gate ACA scale-from-zero — verified: auth sidecar is per-replica — so bot wakes are priced-in cents and Neon sleeps; Cloudflare front = recorded contingency); casbin.net rejected **on fit, not health** (v2.21.2 active, Apache-2.0, ran on net11 preview 5 — spike: complete ruleset ≈ 30 lines of runtime DSL vs two C# booleans, ownership needs the DB row loaded anyway), OpenFGA/SpiceDB = FR-21-scale escape hatch; M3 `harden-authz` = endpoint × caller-class matrix — landed in [ADR-0001](../adr/0001-platform-and-stack.md)/[ADR-0002](../adr/0002-architecture-style.md), [conventions](../conventions/README.md), NFR-4, roadmap M0/M3, CLAUDE.md, openspec config; deposited as [software-factory F-49–F-52](../software-factory.md) |
 | PRE-11 | |
 | PRE-12 | 2026-07-13 — change ids get a 3-digit sequential prefix (NNN-kebab-name, never resets) — rule in [openspec/config.yaml](../../openspec/config.yaml) (context + proposal rule), noted in roadmap intro and software-factory F-37 |
 | PRE-13 | |
