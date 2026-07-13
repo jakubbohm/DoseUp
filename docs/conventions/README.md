@@ -28,7 +28,8 @@ Modular monolith in one project; dependency rules 1–5 of ADR-0002 are enforced
 - Request/response DTOs are simultaneously the API contract and the handler payload — no anticipatory mapping layer; a separate internal type appears only when the public contract must stay stable across an internal change; DTOs never cross the domain boundary (PRE-4).
 - **Every non-2xx response is ProblemDetails** (RFC 9457) — including FluentValidation 400s and Result-mapped domain errors.
 - Result-case → status-code matrix (seed, to finalize): `NotFound → 404`, `Validation → 400`, `Conflict → 409`, `Forbidden → 403`, `Unexpected → 500` (never leaks internals).
-- OpenAPI is the contract; TS types are generated, committed, and never hand-edited. API-touching changes regenerate them as an explicit task (CI drift gate verifies).
+- OpenAPI is the contract (PRE-6): FastEndpoints exports `openapi.json` via `--exportswaggerjson` (committed); openapi-typescript generates the TS types file (committed, never hand-edited); the web app calls through openapi-fetch, whose `{ data, error }` result continues the Result pattern into TS. One script does export + regenerate; API-touching changes run it as an explicit task (CI drift-gates both artifacts).
+- Wire payloads are plain object literals, never classes (structured clone and React state punish instances) and never hand-written wire types — the generated types are the only TS source of contract truth. React hooks binding (openapi-react-query) and any fluent facade layer: decided at PRE-5.
 - Versioning: not before it hurts — revisit when the first breaking change threatens (record here).
 
 ## C# style beyond tooling (skeleton — fill in M0/M1)

@@ -14,8 +14,8 @@ Each resolved item lands somewhere durable — an ADR, a convention doc, a requi
 - [x] **PRE-2** — cosmos db -> neon (postgres)
 - [x] **PRE-3** — adr 1 - container apps jobs vs SB scheduled delivery
 - [x] **PRE-4** — mediator (yes/no), wolverine, no anti-corruption layer by default, unit of work container
-- [ ] **PRE-5** — react, radix, zustand
-- [ ] **PRE-6** — TS client generation
+- [ ] **PRE-5** — react, radix, zustand, TanStack vs generated facade
+- [x] **PRE-6** — TS client generation
 - [ ] **PRE-7** — domain, business checks, side effects, integration events, smartenum
 - [ ] **PRE-8** — testing organisation (unit, integration, e2e, architecture, contract)
 - [ ] **PRE-9** — devops, branching strategy incl. neon
@@ -37,7 +37,7 @@ Filled in as items are processed — link the ADR / convention / spec / change t
 | PRE-3 | 2026-07-13 — reminder triggers = Storage Queue visibility-timeout alarms + KEDA `visibleonly` wake (ACA cron rejected at this scale; ASB Standard scheduled messages = the recorded paid upgrade path behind the `IReminderAlarm` port); transport consolidated CloudAMQP → ASB Basic (managed identity; M0 spike gates it); cost outlook ≈ €0/month — landed in [ADR-0001](../adr/0001-platform-and-stack.md)/[ADR-0002](../adr/0002-architecture-style.md), CLAUDE.md, openspec config, NFR-6, roadmap; deposited as [software-factory F-47](../software-factory.md) (+ F-44 revised) |
 | PRE-4 | 2026-07-13 — no mediator (endpoint = handler); Wolverine (MIT) + CloudAMQP at the async seam only (MassTransit rejected: v9 commercial); EF Core 11 previews, `DbContext` = UoW, domain events sync in-UoW, integration events via Wolverine outbox in the same transaction; one-DTO payload rule, no ACL by default; scheduled messages rejected as reminder primitive — landed in [ADR-0001](../adr/0001-platform-and-stack.md) + [ADR-0002](../adr/0002-architecture-style.md), conventions, CLAUDE.md, openspec config; deposited as [software-factory F-43–F-46](../software-factory.md) |
 | PRE-5 | |
-| PRE-6 | |
+| PRE-6 | 2026-07-13 — contract pipeline: FastEndpoints `--exportswaggerjson` → committed `openapi.json` → openapi-typescript → committed TS types, consumed via openapi-fetch (`{ data, error }` continues the Result union into TS); one regen script, explicit task in API-touching changes, CI drift-gates both artifacts; Kiota/FE.ClientGen.Kiota rejected on generated-output evidence (erases required-ness, `@ts-ignore`d output, throws vs Result edge, TS pipeline preview), hey-api = recorded fallback; hooks binding (openapi-react-query) + facade question moved to PRE-5 (reworded by Jakub) — landed in [ADR-0001](../adr/0001-platform-and-stack.md), [conventions](../conventions/README.md), roadmap M0, CLAUDE.md, openspec config; deposited as [software-factory F-22 firmed + new F-48](../software-factory.md) |
 | PRE-7 | |
 | PRE-8 | |
 | PRE-9 | |

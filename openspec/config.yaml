@@ -12,7 +12,8 @@ context: |
   - docs/conventions/ (source of truth for conventions)
 
   Stack: .NET 11 previews for services (AppHost stays net10) · Aspire 13.4 ·
-  FastEndpoints · React + Vite + TypeScript PWA · Neon serverless Postgres
+  FastEndpoints · React + Vite + TypeScript PWA · openapi-typescript +
+  openapi-fetch (generated TS contract client) · Neon serverless Postgres
   (Aspire Postgres container locally) · EF Core 11 previews + Npgsql ·
   Wolverine + Azure Service Bus Basic (async seam) · Storage Queue visibility
   alarms (reminders) · Entra External ID · Azure Container Apps ·
@@ -55,5 +56,5 @@ rules:
     - Changes touching the API contract plan the TS client regeneration explicitly
   tasks:
     - Slice tasks to complete in one sitting (~2h max), each ending with build and tests green
-    - Changes touching the API contract include an explicit "regenerate TS client" task (CI only gates drift)
+    - Changes touching the API contract include an explicit "regenerate TS client" task — one script: FastEndpoints --exportswaggerjson → openapi.json → openapi-typescript types, both committed (CI only gates drift; PRE-6)
     - A task introducing a feature flag also schedules the flag's removal

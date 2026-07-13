@@ -14,7 +14,7 @@ Scope:
 - Tooling baseline: CSharpier + `.editorconfig` + strict analyzers, ESLint + Prettier, TUnit + Shouldly + ArchUnitNET + Playwright scaffolds, module skeleton with first architecture tests
 - SharedKernel seed: `union`-based `Result`, Error model, ProblemDetails mapping
 - Entra External ID sign-in end-to-end: SPA login → API validates token → response proves identity and one database round-trip
-- OpenAPI → TS types generation wired (committed output + drift check)
+- Contract pipeline wired (PRE-6): FastEndpoints `--exportswaggerjson` → committed `openapi.json` → openapi-typescript types + openapi-fetch client, one regen script, CI drift check on both artifacts
 - GitHub Actions: all PR gates from [ADR-0004](../adr/0004-delivery-and-process.md); merge to main deploys the single prod environment on Azure Container Apps
 - FastEndpoints- and Wolverine-on-net11-preview compatibility spikes, incl. Wolverine on ASB Basic queue-only (fallbacks: pin the last working preview; EF Core 10 GA as the data-access pin; CloudAMQP if Basic can't carry Wolverine)
 
