@@ -12,7 +12,7 @@ Each resolved item lands somewhere durable — an ADR, a convention doc, a requi
 
 - [x] **PRE-1** — note the requirement of superb architectural quality
 - [x] **PRE-2** — cosmos db -> neon (postgres)
-- [ ] **PRE-3** — adr 1 - container apps jobs vs SB scheduled delivery
+- [x] **PRE-3** — adr 1 - container apps jobs vs SB scheduled delivery
 - [x] **PRE-4** — mediator (yes/no), wolverine, no anti-corruption layer by default, unit of work container
 - [ ] **PRE-5** — react, radix, zustand
 - [ ] **PRE-6** — TS client generation
@@ -34,7 +34,7 @@ Filled in as items are processed — link the ADR / convention / spec / change t
 | --- | --- |
 | PRE-1 | 2026-07-13 — first working rule in [CLAUDE.md](../../CLAUDE.md): architecture is the highest priority, Claude reasons as a very senior architect, Jakub is always the decision maker; deposited as [software-factory F-42](../software-factory.md) |
 | PRE-2 | 2026-07-13 — Neon serverless Postgres replaces Cosmos DB everywhere: [ADR-0001](../adr/0001-platform-and-stack.md) amended (+ ADR-0002 outbox, ADR-0003 test DB, ADR-0004 migrations), conventions, NFR-4/5/6, roadmap, vision, CLAUDE.md, openspec config; reversal + Neon-left-Azure finding recorded in [software-factory F-23](../software-factory.md) |
-| PRE-3 | |
+| PRE-3 | 2026-07-13 — reminder triggers = Storage Queue visibility-timeout alarms + KEDA `visibleonly` wake (ACA cron rejected at this scale; ASB Standard scheduled messages = the recorded paid upgrade path behind the `IReminderAlarm` port); transport consolidated CloudAMQP → ASB Basic (managed identity; M0 spike gates it); cost outlook ≈ €0/month — landed in [ADR-0001](../adr/0001-platform-and-stack.md)/[ADR-0002](../adr/0002-architecture-style.md), CLAUDE.md, openspec config, NFR-6, roadmap; deposited as [software-factory F-47](../software-factory.md) (+ F-44 revised) |
 | PRE-4 | 2026-07-13 — no mediator (endpoint = handler); Wolverine (MIT) + CloudAMQP at the async seam only (MassTransit rejected: v9 commercial); EF Core 11 previews, `DbContext` = UoW, domain events sync in-UoW, integration events via Wolverine outbox in the same transaction; one-DTO payload rule, no ACL by default; scheduled messages rejected as reminder primitive — landed in [ADR-0001](../adr/0001-platform-and-stack.md) + [ADR-0002](../adr/0002-architecture-style.md), conventions, CLAUDE.md, openspec config; deposited as [software-factory F-43–F-46](../software-factory.md) |
 | PRE-5 | |
 | PRE-6 | |

@@ -45,7 +45,7 @@ A use case = one folder in `Features/`. The handler *is* the application service
 ### Events — two kinds, two rules
 
 - **Domain events:** raised by aggregates, handled **synchronously within the same module and unit of work** (e.g. `DoseLogged` → update adherence projection).
-- **Integration events:** the only asynchronous cross-module channel, published **after commit** via **Wolverine's transactional outbox** (PRE-4 — supersedes the hand-rolled candidate design): the envelope is written in the **same EF Core transaction** as the aggregate change; the sending agent dispatches **immediately post-commit** (no polling latency); startup recovery plus a relaxed periodic sweep backstop crashes and transient broker outages; delivery is at-least-once, so consumers (Wolverine handlers) are idempotent via the inbox. Transport: CloudAMQP RabbitMQ (local queues suffice until a second consumer or node needs the broker).
+- **Integration events:** the only asynchronous cross-module channel, published **after commit** via **Wolverine's transactional outbox** (PRE-4 — supersedes the hand-rolled candidate design): the envelope is written in the **same EF Core transaction** as the aggregate change; the sending agent dispatches **immediately post-commit** (no polling latency); startup recovery plus a relaxed periodic sweep backstop crashes and transient broker outages; delivery is at-least-once, so consumers (Wolverine handlers) are idempotent via the inbox. Transport: Azure Service Bus Basic queues via managed identity (PRE-3; local queues suffice until a second consumer or node needs the broker).
 
 ### Unit of work & side effects (PRE-4)
 

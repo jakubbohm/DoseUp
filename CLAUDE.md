@@ -18,7 +18,7 @@ Division of labor: product docs say **why**, specs say **precisely what**, conve
 
 ## Stack
 
-.NET 11 previews for service/domain/test projects (`net11.0` + `LangVersion preview`); **AppHost stays net10** · Aspire 13.4 · FastEndpoints · React + Vite + TypeScript PWA · Neon serverless Postgres (Aspire Postgres container locally) · EF Core 11 previews + Npgsql · Wolverine + CloudAMQP RabbitMQ (async seam) · Entra External ID · Azure Container Apps · GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
+.NET 11 previews for service/domain/test projects (`net11.0` + `LangVersion preview`); **AppHost stays net10** · Aspire 13.4 · FastEndpoints · React + Vite + TypeScript PWA · Neon serverless Postgres (Aspire Postgres container locally) · EF Core 11 previews + Npgsql · Wolverine + Azure Service Bus Basic (async seam) · Storage Queue visibility alarms (reminders) · Entra External ID · Azure Container Apps · GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
 
 ## Working rules (non-negotiable)
 

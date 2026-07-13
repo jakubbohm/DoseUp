@@ -16,7 +16,7 @@ Scope:
 - Entra External ID sign-in end-to-end: SPA login → API validates token → response proves identity and one database round-trip
 - OpenAPI → TS types generation wired (committed output + drift check)
 - GitHub Actions: all PR gates from [ADR-0004](../adr/0004-delivery-and-process.md); merge to main deploys the single prod environment on Azure Container Apps
-- FastEndpoints- and Wolverine-on-net11-preview compatibility spikes (fallback plan if broken: pin the last working preview; EF Core 10 GA is the data-access pin)
+- FastEndpoints- and Wolverine-on-net11-preview compatibility spikes, incl. Wolverine on ASB Basic queue-only (fallbacks: pin the last working preview; EF Core 10 GA as the data-access pin; CloudAMQP if Basic can't carry Wolverine)
 
 **Done when:** Jakub signs in on his phone against the live prod URL and sees his identity echoed through the full stack; a deliberately broken PR is demonstrably blocked by each gate class.
 
@@ -44,7 +44,7 @@ Candidate changes: `add-profiles`, `add-substances`, `add-dose-logging`, `add-hi
 
 **Goal:** G1 — DoseUp replaces memory.
 
-Scope: schedule model + DST-safe recurrence engine (FR-10, FR-11 — heavy domain unit-testing), server-side due computation that works while the app is scaled down (NFR-3 — likely a scheduled job; decided in design), web push subscribe/delivery with taken/skip/snooze (FR-12), due/overdue view (FR-13). Adherence (FR-14) if it fits.
+Scope: schedule model + DST-safe recurrence engine (FR-10, FR-11 — heavy domain unit-testing), server-side reminder triggers that work while the app is scaled down (NFR-3 — storage-queue visibility alarms per PRE-3; fine-grained design in the change), web push subscribe/delivery with taken/skip/snooze (FR-12), due/overdue view (FR-13). Adherence (FR-14) if it fits.
 
 **Done when:** four consecutive weeks of G1 behavior (reminder-triggered logging).
 
