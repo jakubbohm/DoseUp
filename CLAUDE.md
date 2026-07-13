@@ -2,7 +2,7 @@
 
 ## What this is
 
-DoseUp — a medication & supplement dose tracker for an invite-only circle (family/friends), hosted by Jakub on Azure. Mobile-first React PWA + FastEndpoints API + Cosmos DB, orchestrated by .NET Aspire. The repo deliberately doubles as a **showcase of spec-driven, AI-assisted development** — process and documentation quality are first-class goals, not overhead.
+DoseUp — a medication & supplement dose tracker for an invite-only circle (family/friends), hosted by Jakub on Azure. Mobile-first React PWA + FastEndpoints API + Neon Postgres, orchestrated by .NET Aspire. The repo deliberately doubles as a **showcase of spec-driven, AI-assisted development** — process and documentation quality are first-class goals, not overhead.
 
 ## Read before deciding anything product- or architecture-shaped
 
@@ -18,7 +18,7 @@ Division of labor: product docs say **why**, specs say **precisely what**, conve
 
 ## Stack
 
-.NET 11 previews for service/domain/test projects (`net11.0` + `LangVersion preview`); **AppHost stays net10** · Aspire 13.4 · FastEndpoints · React + Vite + TypeScript PWA · Azure Cosmos DB serverless (vNext emulator locally) · Entra External ID · Azure Container Apps · GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
+.NET 11 previews for service/domain/test projects (`net11.0` + `LangVersion preview`); **AppHost stays net10** · Aspire 13.4 · FastEndpoints · React + Vite + TypeScript PWA · Neon serverless Postgres (Aspire Postgres container locally) · Entra External ID · Azure Container Apps · GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
 
 ## Working rules (non-negotiable)
 

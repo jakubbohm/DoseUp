@@ -34,9 +34,9 @@ Modular monolith in one project; dependency rules 1–5 of ADR-0002 are enforced
 
 Naming semantics (endpoints, handlers, ports, events) · file organization within a slice · when to extract a method/type · comment policy (constraints only) · `.claude/rules/` mirrors for path-scoped guidance.
 
-## Persistence — Cosmos (skeleton — ground rules in M1 design)
+## Persistence — Postgres (skeleton — ground rules in M1 design)
 
-Partition-key strategy · document versioning discipline (no relational migrations; expand/contract) · id strategy · repository/port shape · what never goes in a document (secrets, oversized blobs).
+Schema & migration discipline (forward-safe expand/contract — ADR-0004) · data-access choice (EF Core vs. lighter mapper — settled with PRE-4/M1) · id strategy · repository/port shape · what never goes in the database (secrets, oversized blobs).
 
 ## Events (decided — see ADR-0002)
 

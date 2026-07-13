@@ -23,7 +23,7 @@ DoseUp is a **mobile-first, installable web app (PWA)** for logging doses and ge
 | G1 | **Daily driver** — DoseUp replaces memory and notes for Jakub's own regimen: every regular dose is logged or consciously skipped, reminders are trusted | end of M2 |
 | G2 | **Circle adoption** — invited users onboard without hand-holding and keep using it | M3 onward |
 | G3 | **Engineering showcase** — the repo demonstrates exemplary AI-assisted, spec-driven development: OpenSpec workflow, modular-monolith discipline, full test pyramid, trunk-based CD. Presentable as a reference | continuous |
-| G4 | **Learning** — hands-on depth in .NET 11 previews (C# 15 unions), Aspire, Cosmos DB, Entra External ID, Web Push, TUnit, and the Claude Design workflow | continuous |
+| G4 | **Learning** — hands-on depth in .NET 11 previews (C# 15 unions), Aspire, Neon Postgres, Entra External ID, Web Push, TUnit, and the Claude Design workflow | continuous |
 
 ## Non-goals
 

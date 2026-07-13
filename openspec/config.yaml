@@ -12,8 +12,8 @@ context: |
   - docs/conventions/ (source of truth for conventions)
 
   Stack: .NET 11 previews for services (AppHost stays net10) · Aspire 13.4 ·
-  FastEndpoints · React + Vite + TypeScript PWA · Azure Cosmos DB serverless
-  (vNext emulator locally) · Entra External ID · Azure Container Apps ·
+  FastEndpoints · React + Vite + TypeScript PWA · Neon serverless Postgres
+  (Aspire Postgres container locally) · Entra External ID · Azure Container Apps ·
   GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
 
   Architecture (ADR-0002): modular monolith in the single API project — modules =

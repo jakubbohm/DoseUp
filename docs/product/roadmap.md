@@ -10,10 +10,10 @@ A milestone is a coherent, shippable slice delivered through OpenSpec changes. W
 
 Scope:
 
-- Aspire AppHost wires the real stack: FastEndpoints API (`net11.0` preview) + React/Vite PWA shell + Cosmos DB (vNext emulator locally), ServiceDefaults/OTel on everything
+- Aspire AppHost wires the real stack: FastEndpoints API (`net11.0` preview) + React/Vite PWA shell + Neon Postgres (Aspire Postgres container locally), ServiceDefaults/OTel on everything
 - Tooling baseline: CSharpier + `.editorconfig` + strict analyzers, ESLint + Prettier, TUnit + Shouldly + ArchUnitNET + Playwright scaffolds, module skeleton with first architecture tests
 - SharedKernel seed: `union`-based `Result`, Error model, ProblemDetails mapping
-- Entra External ID sign-in end-to-end: SPA login → API validates token → response proves identity and one Cosmos round-trip
+- Entra External ID sign-in end-to-end: SPA login → API validates token → response proves identity and one database round-trip
 - OpenAPI → TS types generation wired (committed output + drift check)
 - GitHub Actions: all PR gates from [ADR-0004](../adr/0004-delivery-and-process.md); merge to main deploys the single prod environment on Azure Container Apps
 - FastEndpoints-on-net11-preview compatibility spike (fallback plan if broken: pin the last working preview)
@@ -31,7 +31,7 @@ Candidate changes: `add-app-skeleton`, `add-entra-auth`, `add-ci-cd-gates` (or o
 
 **Goal:** DoseUp becomes Jakub's daily dose logger.
 
-Scope: profiles (FR-3), substances CRUD with archive semantics (FR-4, FR-5), ≤ 2-interaction logging (FR-6, FR-7, FR-8), history timeline (FR-9). First real module(s) and Cosmos partition design land here; first Claude Design mockup + handoff for the logging UI.
+Scope: profiles (FR-3), substances CRUD with archive semantics (FR-4, FR-5), ≤ 2-interaction logging (FR-6, FR-7, FR-8), history timeline (FR-9). First real module(s) and the Postgres schema/migration baseline land here; first Claude Design mockup + handoff for the logging UI.
 
 **Done when:** Jakub logs every real dose through the app for a week without friction notes.
 

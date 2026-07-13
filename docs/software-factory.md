@@ -97,7 +97,7 @@ DoseUp: **sliding scale, declared** — rich modules get full DDD treatment; tri
 *Generalizes:* the declaration is the trick — it converts inconsistency from drift into decision.
 
 **F-18 · Eventing maturity: none · domain events · + integration events?**
-DoseUp: **both kinds from day one** — domain events sync in-module/in-UoW; integration events async post-commit via outbox (Cosmos change feed as pump; in-process transport first, broker-shaped seam).
+DoseUp: **both kinds from day one** — domain events sync in-module/in-UoW; integration events async post-commit via outbox (outbox row in the same DB transaction + background dispatcher — mechanism revised by the PRE-2 reversal, originally Cosmos change feed; in-process transport first, broker-shaped seam).
 *Generalizes:* the two-kind vocabulary is reusable everywhere; the outbox mechanism is per-database (change feed on Cosmos, outbox table + poller on SQL). Skip integration events entirely while there's only one module — unless establishing the pattern is itself a goal.
 
 **F-19 · Validation layering?**
@@ -122,8 +122,8 @@ DoseUp: **OpenAPI → generated TS types (openapi-typescript candidate), committ
 ## E. Data & auth
 
 **F-23 · Database selection?**
-DoseUp: **Azure Cosmos DB serverless** — Azure-native, ~free at circle scale, document shape fits per-profile freeform data, change feed powers the outbox; accepted lock-in as showcase.
-*Generalizes:* default relational (Postgres) unless: document-shaped data + cloud-native goals + serverless economics + a feature like change feed pulls the other way. No relational migrations on document DBs — demand versioning/expand-contract discipline instead. Partition-key design is an early, hard-to-reverse decision.
+DoseUp: **Neon serverless Postgres** — *a recorded reversal:* the founding interview chose **Azure Cosmos DB serverless** (Azure-native, document shape, change-feed outbox, ~free), and Jakub reversed it one day later at PRE-2, before any code. What won: relational modeling with real migrations, Neon branching for dev/CI, standard-Postgres portability — still serverless/~free at circle scale. Fact-check during the reversal (2026-07): Neon's Azure Native Integration is **retired** and its Azure regions deprecated (new projects AWS-only) — so the DB is a deliberate cross-cloud exception to the all-Azure stance.
+*Generalizes:* the default ("relational Postgres unless something strong pulls away") reasserted itself — treat exotic-DB picks made mid-interview as provisional until a cooling-off re-check; recording the reversal is the factory's best training data. If a document DB does win: no relational migrations — demand versioning/expand-contract discipline; partition-key design is early and hard to reverse. And third-party "Azure-native" claims rot fast (F-39) — re-verify the integration exists at setup time.
 
 **F-24 · Identity: external IdP · self-hosted · third-party?**
 DoseUp: **Microsoft Entra External ID** (cloud-native CIAM, free tier, invite-only friendly).
@@ -137,7 +137,7 @@ DoseUp (2026-07): **TUnit** (MTP-native, source-generated; accepted weekly churn
 
 **F-26 · Integration-test harness altitude?**
 Options: in-proc factory (WebApplicationFactory) · containers per dependency (Testcontainers) · full-orchestrator harness (Aspire testing).
-DoseUp: **Aspire harness only** (`DistributedApplicationTestingBuilder` + Cosmos vNext emulator) — one harness, real graph; accepted cost: full startup even for persistence-level tests (revisit if painful).
+DoseUp: **Aspire harness only** (`DistributedApplicationTestingBuilder` + Postgres container) — one harness, real graph; accepted cost: full startup even for persistence-level tests (revisit if painful).
 *Generalizes:* the trade is fidelity vs loop speed; most teams layer two altitudes — going single-altitude is valid if declared and revisited.
 
 **F-27 · E2E runner & placement?**
@@ -197,7 +197,7 @@ DoseUp: **the human, explicitly.** The AI proposes, summarizes state after each 
 *Generalizes:* encode this in the project's AI instructions (CLAUDE.md); it's the single highest-leverage trust rule for AI-assisted work — and the factory interview itself must obey it.
 
 **F-39 · Research-before-recommend.**
-DoseUp practice: every ecosystem-sensitive recommendation (runtime features, formatter, testing stack, licensing, product capabilities) was **verified against current sources during the interview**, not answered from model memory — which is how the FluentAssertions license, NetArchTest abandonment, Stryker×xUnit-v3 breakage, Cosmos vNext GA-but-experimental-in-Aspire, and Claude Design's June-2026 integration were caught.
+DoseUp practice: every ecosystem-sensitive recommendation (runtime features, formatter, testing stack, licensing, product capabilities) was **verified against current sources during the interview**, not answered from model memory — which is how the FluentAssertions license, NetArchTest abandonment, Stryker×xUnit-v3 breakage, Cosmos vNext GA-but-experimental-in-Aspire, and Claude Design's June-2026 integration were caught. (PRE-2 added another catch: Neon's Azure Native Integration retirement + Azure-region deprecation, found while recording the database reversal.)
 *Generalizes:* the factory must treat its own catalog (this file) as hypotheses to re-verify at setup time, with dates on every claim.
 
 **F-40 · AI workspace setup?**
@@ -214,4 +214,4 @@ DoseUp (PRE-1): **architectural quality is the project's highest priority**; the
 
 ---
 
-*Next deposits:* endpoint implementation micro-conventions (after M0/M1 set them), Cosmos partition/versioning rules (M1), outbox-via-change-feed design (first integration event), reminder-scheduling topology (M2), and any decision this catalog's recommendations get *wrong* — recording reversals is the factory's best training data.
+*Next deposits:* endpoint implementation micro-conventions (after M0/M1 set them), Postgres schema/migration rules (M1), outbox-dispatcher design (first integration event), reminder-scheduling topology (M2), and any decision this catalog's recommendations get *wrong* — recording reversals is the factory's best training data (first one landed: F-23).

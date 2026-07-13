@@ -50,4 +50,4 @@ Full CI/CD from the walking skeleton onward; solo developer + Claude; trunk-to-p
 
 - The PR gate suite is the **only** thing between a merge and production — gates are never skipped or made optional "just this once"; a red gate blocks, full stop.
 - E2E smoke on every PR + Aspire integration tests make CI minutes the main cost — worth watching, tune the smoke subset if PRs get slow.
-- No staging means schema/data migrations must be forward-safe from day one (expand/contract discipline with Cosmos document versioning).
+- No staging means schema/data migrations must be forward-safe from day one (expand/contract discipline with relational migrations on Postgres — PRE-2).
