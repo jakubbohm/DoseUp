@@ -16,7 +16,7 @@ Scope:
 - Entra External ID sign-in end-to-end: SPA login → API validates token → response proves identity and one database round-trip
 - OpenAPI → TS types generation wired (committed output + drift check)
 - GitHub Actions: all PR gates from [ADR-0004](../adr/0004-delivery-and-process.md); merge to main deploys the single prod environment on Azure Container Apps
-- FastEndpoints-on-net11-preview compatibility spike (fallback plan if broken: pin the last working preview)
+- FastEndpoints- and Wolverine-on-net11-preview compatibility spikes (fallback plan if broken: pin the last working preview; EF Core 10 GA is the data-access pin)
 
 **Done when:** Jakub signs in on his phone against the live prod URL and sees his identity echoed through the full stack; a deliberately broken PR is demonstrably blocked by each gate class.
 

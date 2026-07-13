@@ -68,7 +68,7 @@ Priorities: MoSCoW (**M**ust / **S**hould / **C**ould / **W**on't-for-now). Stat
 | NFR-3 | **Reliability:** best-effort availability (hobby operations, no SLO) — but reminder computation and delivery are server-side, so an idle client or scaled-down app never loses them |
 | NFR-4 | **Security:** HTTPS only; every API call authenticated (Entra External ID); per-account authorization enforced server-side and covered by tests; secrets never in the repo — managed identity where available, the Neon connection string via ACA secrets/Key Vault |
 | NFR-5 | **Privacy:** encryption at rest (Azure + Neon); automated backups with point-in-time restore (Neon); dose contents never appear in logs/telemetry (ids only); in-app "not medical advice" note |
-| NFR-6 | **Cost:** fits a hobby budget at circle scale — working target ≤ €20/month (OQ-1): Neon serverless Postgres (free plan covers circle scale, 2026-07), minimal compute footprint |
+| NFR-6 | **Cost:** fits a hobby budget at circle scale — working target ≤ €20/month (OQ-1): Neon serverless Postgres + CloudAMQP free tiers (2026-07), minimal compute footprint |
 | NFR-7 | **Quality & process:** behavior changes flow through OpenSpec; test pyramid and gates per [ADR-0003](../adr/0003-testing-stack.md) and [ADR-0004](../adr/0004-delivery-and-process.md) |
 | NFR-8 | **Observability:** OpenTelemetry end-to-end via ServiceDefaults — traces, metrics, logs usable in the Aspire dashboard (dev) and Azure (prod) |
 | NFR-9 | **i18n readiness:** UI strings externalized; English first, Czech possible later (OQ-2) |

@@ -104,6 +104,14 @@ DoseUp: **both kinds from day one** — domain events sync in-module/in-UoW; int
 DoseUp: **two layers, two channels** — request shape at the edge (FluentValidation → 400 ProblemDetails), business invariants in the domain (→ Result → ProblemDetails).
 *Generalizes:* near-universally correct; the alternatives (all-at-edge, all-in-domain) each leak one concern into the other's home.
 
+**F-43 · In-process dispatch: mediator or direct calls?**
+DoseUp (PRE-4): **direct** — the REPR endpoint *is* the handler; no mediator of any kind. Pipeline concerns live in the endpoint framework (validation, processors) and middleware (OTel); dispatch indirection would blind architecture tests and IDE/AI navigation. Context: MediatR v13 went commercial (2025, RPL/commercial dual license).
+*Generalizes:* AI-assisted coding flips the old trade — the boilerplate a mediator amortized is now free, while its opacity still costs at review, navigation, and architecture-test time. With vertical slices + a REPR framework there is nothing left for `IMediator.Send()` to do. License-check messaging libraries like test libraries (F-25).
+
+**F-44 · Asynchronous messaging: hand-roll, or which framework?**
+DoseUp (PRE-4): **Wolverine** (MIT, open-core JasperFx), confined to the async seam; CloudAMQP RabbitMQ (free shared plan) as transport; KEDA queue-depth scaler wakes ACA from zero. Rejected: hand-rolling (distributed reliability — retries, poison handling, idempotency, crash recovery — is bought, not built), MassTransit (v9 commercial Q1 2026, $400/month floor; v8 security-only through 2026), NServiceBus (always commercial). HTTP stays with the dedicated endpoint framework: Wolverine.HTTP's OpenAPI/versioning gaps (2026-07) lose to FastEndpoints where the contract pipeline is load-bearing.
+*Generalizes:* the outbox semantics to demand from any candidate: envelope written in the business transaction, immediate post-commit dispatch (no polling latency), startup recovery + relaxed sweep as backstop, at-least-once ⇒ idempotent consumers. Confine framework conventions to the async seam; keep the sync path explicit. And scheduled *messages* are not a scheduler for editable domain state — they can't be recalled when the state changes (the RabbitMQ delayed-exchange plugin says so itself: "not a longer-term scheduling solution"); compute from state at wake time.
+
 ## D. API & contract
 
 **F-20 · Endpoint framework style?**
@@ -119,6 +127,10 @@ Options: OpenAPI → generated client (committed) · TypeSpec contract-first · 
 DoseUp: **OpenAPI → generated TS types (openapi-typescript candidate), committed.** Regeneration is a mandatory task inside any spec change that touches the API; **CI only verifies** (regen + diff = drift gate). PR diffs thus show contract evolution.
 *Generalizes:* "change process triggers regen, CI gates drift" beats watcher-magic and beats CI-side generation — the artifact stays reviewable and the duty stays visible in the task list.
 
+**F-45 · Endpoint payload vs. handler payload — one type or two?**
+DoseUp (PRE-4): **one** — the slice's request/response DTO is simultaneously the wire contract and the handler input; a second, internal type appears only when the public contract must stay stable across an internal change. DTOs stop at the domain boundary (aggregates take values through methods). No anti-corruption layer until a foreign model is consumed.
+*Generalizes:* anticipatory mapping layers are the most common ceremony in layered codebases — split on divergence, not on principle. What makes one-type safe is that the contract is gated elsewhere (generated client + CI drift gate, F-22).
+
 ## E. Data & auth
 
 **F-23 · Database selection?**
@@ -128,6 +140,10 @@ DoseUp: **Neon serverless Postgres** — *a recorded reversal:* the founding int
 **F-24 · Identity: external IdP · self-hosted · third-party?**
 DoseUp: **Microsoft Entra External ID** (cloud-native CIAM, free tier, invite-only friendly).
 *Generalizes:* never self-host credentials for hobby scale; pick the IdP native to the target cloud unless portability is a stated goal.
+
+**F-46 · ORM & unit-of-work shape?**
+DoseUp (PRE-4): **EF Core 11 previews + Npgsql previews** (fallback pin: EF Core 10 GA) — the `DbContext` *is* the unit of work: a `SaveChanges` interceptor drains aggregates' domain events and dispatches them synchronously inside the transaction; integration events become outbox envelopes in the same transaction; no `IUnitOfWork` wrapper.
+*Generalizes:* don't wrap the framework's UoW in a homegrown one. The change tracker is what makes aggregate + event + outbox atomicity cheap — a micro-ORM reintroduces that bookkeeping by hand; choose one only where you aren't doing aggregate-style domain modeling (or for hot read paths beside the ORM).
 
 ## F. Testing
 
@@ -214,4 +230,4 @@ DoseUp (PRE-1): **architectural quality is the project's highest priority**; the
 
 ---
 
-*Next deposits:* endpoint implementation micro-conventions (after M0/M1 set them), Postgres schema/migration rules (M1), outbox-dispatcher design (first integration event), reminder-scheduling topology (M2), and any decision this catalog's recommendations get *wrong* — recording reversals is the factory's best training data (first one landed: F-23).
+*Next deposits:* endpoint implementation micro-conventions (after M0/M1 set them), Postgres schema/migration rules (M1), Wolverine adoption conventions (first integration event), reminder-scheduling topology (M2), and any decision this catalog's recommendations get *wrong* — recording reversals is the factory's best training data (first one landed: F-23).

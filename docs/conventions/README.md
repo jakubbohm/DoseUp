@@ -24,7 +24,8 @@ Modular monolith in one project; dependency rules 1–5 of ADR-0002 are enforced
 
 ## API conventions (decided at policy level; matrix finalized in the first API change)
 
-- FastEndpoints REPR; one endpoint per use-case slice.
+- FastEndpoints REPR; one endpoint per use-case slice. No mediator — the endpoint *is* the handler (PRE-4).
+- Request/response DTOs are simultaneously the API contract and the handler payload — no anticipatory mapping layer; a separate internal type appears only when the public contract must stay stable across an internal change; DTOs never cross the domain boundary (PRE-4).
 - **Every non-2xx response is ProblemDetails** (RFC 9457) — including FluentValidation 400s and Result-mapped domain errors.
 - Result-case → status-code matrix (seed, to finalize): `NotFound → 404`, `Validation → 400`, `Conflict → 409`, `Forbidden → 403`, `Unexpected → 500` (never leaks internals).
 - OpenAPI is the contract; TS types are generated, committed, and never hand-edited. API-touching changes regenerate them as an explicit task (CI drift gate verifies).
@@ -36,11 +37,11 @@ Naming semantics (endpoints, handlers, ports, events) · file organization withi
 
 ## Persistence — Postgres (skeleton — ground rules in M1 design)
 
-Schema & migration discipline (forward-safe expand/contract — ADR-0004) · data-access choice (EF Core vs. lighter mapper — settled with PRE-4/M1) · id strategy · repository/port shape · what never goes in the database (secrets, oversized blobs).
+Decided (PRE-4): EF Core 11 previews + Npgsql; `DbContext` is the unit of work (no wrapper). Still to fill in M1 design: EF Core migration discipline (forward-safe expand/contract — ADR-0004) · id strategy · repository/port shape · what never goes in the database (secrets, oversized blobs).
 
 ## Events (decided — see ADR-0002)
 
-Domain events: sync, in-module, in-UoW. Integration events: async, post-commit, outbox only. Naming: past tense (`DoseLogged`), payloads are contracts (versioned once cross-module).
+Domain events: sync, in-module, in-UoW — drained by a `SaveChanges` interceptor and dispatched by the explicit DI dispatcher (PRE-4). Integration events: async, post-commit, via Wolverine's transactional outbox in the same transaction only; consumers idempotent (at-least-once). Naming: past tense (`DoseLogged`), payloads are contracts (versioned once cross-module).
 
 ## Testing conventions (skeleton — fill in M0 with the first real tests)
 

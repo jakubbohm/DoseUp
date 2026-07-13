@@ -13,17 +13,23 @@ context: |
 
   Stack: .NET 11 previews for services (AppHost stays net10) · Aspire 13.4 ·
   FastEndpoints · React + Vite + TypeScript PWA · Neon serverless Postgres
-  (Aspire Postgres container locally) · Entra External ID · Azure Container Apps ·
-  GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
+  (Aspire Postgres container locally) · EF Core 11 previews + Npgsql ·
+  Wolverine + CloudAMQP RabbitMQ (async seam) · Entra External ID ·
+  Azure Container Apps · GitHub Actions · TUnit + Shouldly · ArchUnitNET ·
+  @playwright/test.
 
   Architecture (ADR-0002): modular monolith in the single API project — modules =
   bounded contexts, each with Domain (clean core: aggregates, ports, invariants
   returning Result, domain events), Features (vertical slices: endpoint + validator
   + handler per use case), Infrastructure (adapters), and a declared rigor grade;
   plus SharedKernel (union Result, Error model, typed IDs) and Platform (composition
-  root, auth, ProblemDetails mapping, outbox). Cross-module communication ONLY via
-  public contracts + integration events (async, post-commit, outbox); domain events
-  are sync, in-module, in-UoW. Expected failures flow as Result end-to-end and map
+  root, auth, ProblemDetails mapping, Wolverine outbox). Cross-module communication
+  ONLY via public contracts + integration events (async, post-commit, Wolverine
+  transactional outbox in the same EF Core transaction; consumers idempotent);
+  domain events are sync, in-module, in-UoW (DbContext = the unit of work). No
+  mediator: the FastEndpoints endpoint IS the handler; request/response DTOs double
+  as API contract and handler payload and stop at the domain boundary. Expected
+  failures flow as Result end-to-end and map
   to ProblemDetails at the edge; validation is two-layer (FluentValidation for
   request shape, domain invariants as Result). Boundaries are enforced by
   ArchUnitNET tests, not project references.

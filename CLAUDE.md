@@ -18,7 +18,7 @@ Division of labor: product docs say **why**, specs say **precisely what**, conve
 
 ## Stack
 
-.NET 11 previews for service/domain/test projects (`net11.0` + `LangVersion preview`); **AppHost stays net10** · Aspire 13.4 · FastEndpoints · React + Vite + TypeScript PWA · Neon serverless Postgres (Aspire Postgres container locally) · Entra External ID · Azure Container Apps · GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
+.NET 11 previews for service/domain/test projects (`net11.0` + `LangVersion preview`); **AppHost stays net10** · Aspire 13.4 · FastEndpoints · React + Vite + TypeScript PWA · Neon serverless Postgres (Aspire Postgres container locally) · EF Core 11 previews + Npgsql · Wolverine + CloudAMQP RabbitMQ (async seam) · Entra External ID · Azure Container Apps · GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
 
 ## Working rules (non-negotiable)
 
@@ -26,6 +26,7 @@ Division of labor: product docs say **why**, specs say **precisely what**, conve
 - **Jakub gates stage progression.** Propose, summarize state, wait for his explicit go. Never declare an interview, phase, or plan complete on your own.
 - Behavior changes go through **OpenSpec** (opsx skills). Trivial non-behavioral fixes may be direct.
 - **Result end-to-end:** expected failures return the SharedKernel `union Result`, mapped to ProblemDetails at the edge. Exceptions only for bugs/infrastructure.
+- **Sync path is framework-free; the async seam is Wolverine's.** No mediator — the FastEndpoints endpoint *is* the handler; domain events dispatch synchronously inside the unit of work (`DbContext` = UoW); integration events leave only via Wolverine's transactional outbox in the same transaction; consumers are idempotent (ADR-0002/PRE-4).
 - ADR-0002's module/dependency rules are enforced by ArchUnitNET tests — **never weaken a failing architecture test to make it pass**; raise the conflict instead.
 - Changes touching the API contract include an explicit "regenerate TS client" task; CI only gates drift.
 - UI-heavy changes get a **Claude Design mockup + handoff** before implementation.
