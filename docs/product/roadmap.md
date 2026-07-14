@@ -15,7 +15,7 @@ Scope:
 - SharedKernel seed: `union`-based `Result`, Error model, ProblemDetails mapping
 - Entra External ID sign-in end-to-end: SPA login → API validates token → response proves identity and one database round-trip — the round-trip *is* PRE-10's `ActiveAccount` resolution (Entra `oid` → account row → `CallerContext`); health probes stay DB-free so bot-triggered wakes never touch Neon
 - Contract pipeline wired (PRE-6): FastEndpoints `--exportswaggerjson` → committed `openapi.json` → openapi-typescript types + openapi-fetch client, one regen script, CI drift check on both artifacts
-- GitHub Actions: all PR gates from [ADR-0004](../adr/0004-delivery-and-process.md); merge to main deploys the single prod environment on Azure Container Apps
+- GitHub Actions (PRE-9): `ci.yml` = all PR gates from [ADR-0004](../adr/0004-delivery-and-process.md), publishing nothing; `release.yml` builds once from the merge commit and deploys prod — hand-authored `infra/` Bicep applied as a deployment stack (OIDC federated login) → pre-deploy Neon branch → EF migration bundle (maintenance-window recreate only when migrations are pending) → image rollout → smoke — plus the scheduled `pg_dump`-to-Blob DR job (restore drill lands M3/OQ-4)
 - FastEndpoints- and Wolverine-on-net11-preview compatibility spikes, incl. Wolverine on ASB Basic queue-only (fallbacks: pin the last working preview; EF Core 10 GA as the data-access pin; CloudAMQP if Basic can't carry Wolverine)
 
 **Done when:** Jakub signs in on his phone against the live prod URL and sees his identity echoed through the full stack; a deliberately broken PR is demonstrably blocked by each gate class.

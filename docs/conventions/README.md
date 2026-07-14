@@ -40,9 +40,16 @@ Three rings, engine-free (PRE-10): endpoints secure by default — `AllowAnonymo
 
 Naming semantics (endpoints, handlers, ports, events) · file organization within a slice · when to extract a method/type · comment policy (constraints only) · `.claude/rules/` mirrors for path-scoped guidance.
 
-## Persistence — Postgres (skeleton — ground rules in M1 design)
+## Persistence — Postgres (migrations/seeding decided; ground rules in M1 design)
 
-Decided (PRE-4): EF Core 11 previews + Npgsql; `DbContext` is the unit of work (no wrapper). Still to fill in M1 design: EF Core migration discipline (forward-safe expand/contract — ADR-0004) · id strategy · repository/port shape · what never goes in the database (secrets, oversized blobs).
+Decided (PRE-4): EF Core 11 previews + Npgsql; `DbContext` is the unit of work (no wrapper).
+
+Decided (PRE-9) — migrations & seeding:
+
+- **Migrations may be destructive** — no expand/contract requirement; a deploy carrying migrations takes a maintenance-window recreate (ADR-0004). Applied in CD via the self-contained **migration bundle**; never `Database.Migrate()` at startup in prod; local dev auto-applies on `aspire start` (mechanics land M1).
+- **Seeding, three tiers by post-insert ownership:** static catalogs → `HasData` (model managed data: versioned with migrations, identical everywhere per version, explicit PKs) · one-time global seed → manual data motion inside a migration (`migrationBuilder.InsertData`/`.Sql()` — runs once per database via the history table, later drift untouched) · dev/test data → `UseSeeding`/`UseAsyncSeeding`, registered **only** in the dev/test composition root (fires on `Migrate` even with nothing pending; implement both sync and async — tooling calls the sync one).
+
+Still to fill in M1 design: id strategy · repository/port shape · what never goes in the database (secrets, oversized blobs).
 
 ## Events (decided — see ADR-0002)
 
@@ -58,4 +65,8 @@ OTel via ServiceDefaults everywhere · span/metric naming · **never log dose co
 
 ## Git (decided — see [ADR-0004](../adr/0004-delivery-and-process.md))
 
-Trunk-based, PRs always, squash merge, Conventional-Commit PR titles, branch naming `<type>/<change-id-or-topic>`, feature flags with removal tasks.
+Trunk-based, PRs always, squash merge, Conventional-Commit PR titles, branch naming `<type>/<change-id-or-topic>`, feature flags with removal tasks. Every openspec change auto-branches off the freshest main at creation (openspec config rule, PRE-9).
+
+## Infrastructure & delivery (decided — see ADR-0004, PRE-9)
+
+Azure is defined **only** by hand-authored Bicep in `infra/` + per-environment `.bicepparam`, applied as an Azure Deployment Stack (removals in git delete in Azure) — no portal or ad-hoc CLI mutations, ever. GitHub Actions authenticates via OIDC federated credentials; services use managed identities with minimal RBAC roles assigned in Bicep. The Aspire AppHost models local orchestration only — a change touching its resource graph includes an explicit "update infra Bicep + `.bicepparam`" task (mirror of the PRE-6 contract rule). PR CI publishes nothing; `release.yml` builds once from the merge commit and promotes identical artifacts.

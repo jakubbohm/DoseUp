@@ -17,6 +17,7 @@ context: |
   (Aspire Postgres container locally) · EF Core 11 previews + Npgsql ·
   Wolverine + Azure Service Bus Basic (async seam) · Storage Queue visibility
   alarms (reminders) · Entra External ID · Azure Container Apps ·
+  Bicep + Azure Deployment Stacks (hand-authored IaC, PRE-9) ·
   GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
 
   Architecture (ADR-0002): modular monolith in the single API project — modules =
@@ -57,6 +58,7 @@ context: |
 rules:
   proposal:
     - Confirm the change id carries the next 3-digit sequential prefix (NNN-kebab-name; check openspec/changes/ and the archive for the highest NNN)
+    - Create the change's branch off the freshest main before drafting any artifact — `git fetch origin` then `git switch -c <type>/<change-id> origin/main`, where <type> is the Conventional-Commit type the eventual PR title will carry (ADR-0004, trunk-based short-lived branches); never draft a change on main
     - Cite the FR/NFR ids from docs/product/requirements.md and the roadmap milestone this change serves
     - Include a Non-goals section
   specs:
@@ -66,7 +68,9 @@ rules:
     - Record cross-cutting decisions as an ADR in docs/adr/ and reference it
     - UI-heavy changes reference a Claude Design mockup + handoff bundle
     - Changes touching the API contract plan the TS client regeneration explicitly
+    - Changes touching the AppHost resource graph or Azure topology plan the infra Bicep update explicitly (hand-authored IaC — PRE-9)
   tasks:
     - Slice tasks to complete in one sitting (~2h max), each ending with build and tests green
     - Changes touching the API contract include an explicit "regenerate TS client" task — one script: FastEndpoints --exportswaggerjson → openapi.json → openapi-typescript types, both committed (CI only gates drift; PRE-6)
+    - Changes touching the AppHost resource graph or Azure topology include an explicit "update infra Bicep + .bicepparam" task — infra is hand-authored IaC deployed as a deployment stack; the AppHost models local orchestration only (PRE-9)
     - A task introducing a feature flag also schedules the flag's removal

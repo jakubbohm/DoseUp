@@ -18,7 +18,7 @@ Division of labor: product docs say **why**, specs say **precisely what**, conve
 
 ## Stack
 
-.NET 11 previews for service/domain/test projects (`net11.0` + `LangVersion preview`); **AppHost stays net10** · Aspire 13.4 · FastEndpoints · React + Vite + TypeScript PWA · openapi-typescript + openapi-fetch (generated TS contract client, PRE-6) · Neon serverless Postgres (Aspire Postgres container locally) · EF Core 11 previews + Npgsql · Wolverine + Azure Service Bus Basic (async seam) · Storage Queue visibility alarms (reminders) · Entra External ID · Azure Container Apps · GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
+.NET 11 previews for service/domain/test projects (`net11.0` + `LangVersion preview`); **AppHost stays net10** · Aspire 13.4 · FastEndpoints · React + Vite + TypeScript PWA · openapi-typescript + openapi-fetch (generated TS contract client, PRE-6) · Neon serverless Postgres (Aspire Postgres container locally) · EF Core 11 previews + Npgsql · Wolverine + Azure Service Bus Basic (async seam) · Storage Queue visibility alarms (reminders) · Entra External ID · Azure Container Apps · Bicep + Azure Deployment Stacks (hand-authored IaC, PRE-9) · GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
 
 ## Working rules (non-negotiable)
 
@@ -30,6 +30,7 @@ Division of labor: product docs say **why**, specs say **precisely what**, conve
 - **Sync path is framework-free; the async seam is Wolverine's.** No mediator — the FastEndpoints endpoint *is* the handler; domain events dispatch synchronously inside the unit of work (`DbContext` = UoW); integration events leave only via Wolverine's transactional outbox in the same transaction; consumers are idempotent (ADR-0002/PRE-4).
 - ADR-0002's module/dependency rules are enforced by ArchUnitNET tests — **never weaken a failing architecture test to make it pass**; raise the conflict instead.
 - Changes touching the API contract include an explicit "regenerate TS client" task; CI only gates drift.
+- **Azure is defined only by hand-authored Bicep in `infra/`** (deployment stacks, PRE-9) — never the portal or ad-hoc CLI; the AppHost models local orchestration only, and changes touching its resource graph include an explicit "update infra Bicep" task. Migrations may be destructive (bundle in CD, maintenance-window recreate — never `Migrate()` at startup in prod).
 - UI-heavy changes get a **Claude Design mockup + handoff** before implementation.
 - **Never log dose contents** — ids only (NFR-5).
 - This project rides previews: **verify ecosystem facts against current sources** before recommending; model memory is stale by definition here.
