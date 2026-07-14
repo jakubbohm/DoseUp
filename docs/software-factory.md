@@ -232,10 +232,42 @@ DoseUp: **ArchUnitNET** (TUnit adapter) enforcing written dependency rules (ADR-
 DoseUp: **spike first** (Stryker × TUnit unverified; Stryker × xUnit v3 broken as of 2026-07); if viable → nightly with dashboard baseline, never a PR gate.
 *Generalizes:* mutation testing is a nightly telescope, not a PR microscope; its tooling always trails framework churn — verify before promising it.
 
+**F-66 · Where do tests go in a vertical-slice, no-repository architecture?**
+DoseUp (2026-07, PRE-8): the **slice is the unit** — feature handlers get slice tests over HTTP against a real Postgres (routing + validation + persistence + wire contract in one test); unit layer = pure domain + extracted logic only; "a slice with no interesting logic gets no unit tests." Banned: EF InMemory, SQLite-in-memory, mocked `DbContext` (the set-rule constraint backstop can't fire on fakes).
+*Generalizes:* the no-repository decision *determines* test placement — decide them together, never separately. Wherever DB constraints participate in the domain-rule model, the InMemory ban is absolute: a green test that can't exercise the backstop is worse than no test.
+
+**F-67 · Test isolation: cleanup or construction?**
+DoseUp: **isolation by construction** — every test mints its own account/profile; ownership-scoped queries (the production tenancy mechanism) isolate parallel tests too. No Respawn/reset; unique data for global-uniqueness rules; containment-not-equality asserts on global collections.
+*Generalizes:* if the architecture already scopes all data access by owner, test isolation is free and fully parallel — reach for cleanup libraries only where genuinely global state exists (and run those serialized, as the exception).
+
+**F-68 · Test identity when the IdP is external SaaS?**
+DoseUp: **real JWT pipeline, test-only trust anchor** — tests mint self-signed tokens; the harness injects a second accepted authority; middleware/claims/policies/revocation all run production code. Caller classes = (token, seeded-DB-state) pairs. Rejected: custom test auth scheme (fakes the middleware), real-IdP ROPC test users (secrets, throttling, external CI dependency); the E2E login journey covers the IdP itself.
+*Generalizes:* fake the trust anchor, never the middleware — it converts "auth is hard to test" into plain data setup and leaves only the IdP itself untested locally.
+
+**F-69 · How to make an endpoint×caller authorization matrix enforceable?**
+DoseUp: reflection census over the API assembly + per-endpoint **kind** classification (expected-status vector derived from the kind, never hand-written) + one arrange recipe per endpoint + a **completeness gate** that fails on any unclassified endpoint + one test case per cell.
+*Generalizes:* "every endpoint classified" only works when unclassified = red build; derive expectations from a small set of kinds so classification is one enum, not a status table nobody maintains.
+
+**F-70 · Architecture-test catalog governance?**
+DoseUp: a rule-by-rule catalog where every test quotes the doc line it enforces and every rule has a **single enforcement owner** (ArchUnitNET / analyzer / matrix / CI gate / convention+review); all rules ship vacuously green from day one. Single-assembly nuances: `internal`-visibility tests are theater (rejected); colocation rules need raw reflection (ArchUnitNET can't express relational-namespace rules); slice-independence became a written dependency rule *first*, test second.
+*Generalizes:* catalog-with-owners prevents both gaps and double enforcement; visibility tests only pay in multi-assembly layouts; and the classic "Application must not know EF" guard must not be imported into architectures where handlers are EF-aware by design.
+
+**F-71 · Assertion library under an async-first test framework?**
+DoseUp: TUnit's native `TUnit.Assertions` weighed and **rejected** — `await Assert.That(…)` puts await-ceremony and async signatures on every pure-sync domain test (the pyramid's base), pre-1.0 churn, welds assertions to the risky framework bet; **Shouldly confirmed** (sync where code is sync, framework-agnostic hedge, healthy).
+*Generalizes:* re-run the assertion-library decision whenever the framework ships a native async-first library — don't carry the old pick unexamined, and don't adopt the native one unexamined either; the deciding weight is where most assertion lines live (sync domain tests vs async slice tests).
+
+**F-72 · Message-broker emulators and provisioning across environments?**
+DoseUp: session-shared full-graph harness runs the ASB emulator + Azurite (real transports in tests); Wolverine `AutoProvision()` is dev/test-only; production topology is CD-owned IaC with a **data-plane-only** runtime identity, auto-provisioning off and `SystemQueuesAreEnabled(false)` (Wolverine otherwise creates per-node system queues at startup and fails against restricted identities).
+*Generalizes:* every messaging framework has runtime control-plane habits; a data-plane-only production identity makes them fail loudly — find the config switches (system/temp queues, auto-provision) *before* the first deploy, and verify emulator control-plane support before promising broker-in-the-test-harness.
+
+**F-73 · Flaky-test policy?**
+DoseUp: **zero auto-retry at every layer**; a flaky test gets `[Skip]` + a linked issue in the discovering PR.
+*Generalizes:* in a suite whose tests run parallel-by-construction, a flake is usually a real race — auto-retries convert the suite's strongest concurrency signal into noise. Retries are for infrastructure you don't own, never for your own code.
+
 ## G. Delivery
 
 **F-30 · PR gate composition?**
-DoseUp (all blocking): build + analyzers-as-errors · unit/integration/arch tests · formatter checks (both stacks) · typecheck · contract drift · E2E smoke · CodeQL + dependency review. Coverage/mutation deliberately *not* gates (nightly signal instead).
+DoseUp (all blocking): build + analyzers-as-errors · unit/integration/arch tests · formatter checks (both stacks) · typecheck · contract drift · E2E smoke · CodeQL + dependency review. Coverage/mutation deliberately *not* gates (nightly signal instead). *(Refined PRE-8: .NET suites split into a fast job — build + unit + arch, seconds, no Docker — and a harness job — integration with containers; both blocking, the split only buys fail-fast.)*
 *Generalizes:* gates must be fast enough to keep PRs sub-~15 min; anything slower moves to nightly. Every gate is either blocking or deleted — advisory gates rot.
 
 **F-31 · Environment topology + deployment gates?**

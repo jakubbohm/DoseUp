@@ -1,6 +1,6 @@
 # ADR-0002: Architecture style — hybrid modular monolith
 
-**Status:** Accepted · **Date:** 2026-07-13 · **Decided by:** Jakub (interview 2026-07-13) · **Amended:** 2026-07-13 — persistence/outbox mechanics: Cosmos → Postgres (PRE-2) · 2026-07-13 — dispatch, unit-of-work & messaging mechanics (PRE-4) · 2026-07-14 — authorization rings (PRE-10) · 2026-07-14 — feature-handler split (endpoints = thin adapters), validation placement, domain-rule model, integration-event production model (published-language translators) (PRE-7)
+**Status:** Accepted · **Date:** 2026-07-13 · **Decided by:** Jakub (interview 2026-07-13) · **Amended:** 2026-07-13 — persistence/outbox mechanics: Cosmos → Postgres (PRE-2) · 2026-07-13 — dispatch, unit-of-work & messaging mechanics (PRE-4) · 2026-07-14 — authorization rings (PRE-10) · 2026-07-14 — feature-handler split (endpoints = thin adapters), validation placement, domain-rule model, integration-event production model (published-language translators) (PRE-7) · 2026-07-15 — dependency rule 7 (slice independence); architecture-test catalog ownership in [conventions/testing.md](../conventions/testing.md) (PRE-8)
 
 ## Context
 
@@ -38,6 +38,7 @@ src/DoseUp.Api/
 4. `Infrastructure` implements its module's ports; concrete adapters are seen only by `Platform` (composition root).
 5. `SharedKernel` references nothing project-internal.
 6. Within `Features` (PRE-7): endpoint classes contain no use-case logic — they adapt HTTP to the slice's feature handler; feature handlers and validators reference no FastEndpoints/ASP.NET types.
+7. Use-case slice namespaces inside a module's `Features` never reference sibling slice namespaces (PRE-8) — shared behavior moves **down** into `Domain` or **up** into the module's shared space; the intra-module complement of rule 3, and the enforcement teeth behind the PRE-7 logic-placement rules.
 
 ### Slices are the application layer
 
@@ -93,7 +94,7 @@ The **module list is not fixed here** — bounded contexts (likely candidates: A
 
 ## Consequences
 
-- Architecture tests (ArchUnitNET) are **the** boundary mechanism → they must exist from M0 and run as a PR gate. They enforce dependency rules 1–6 plus PRE-10's structural authorization rules (anonymous-endpoint allowlist; admin endpoints confined to the admin group).
+- Architecture tests (ArchUnitNET) are **the** boundary mechanism → they must exist from M0 and run as a PR gate. They enforce dependency rules 1–7 plus PRE-10's structural authorization rules (anonymous-endpoint allowlist; admin endpoints confined to the admin group); the full rule-by-rule catalog with enforcement owners lives in [conventions/testing.md](../conventions/testing.md) (PRE-8).
 - Framework magic is confined to the async seam: the synchronous request path stays framework-free (thin FastEndpoints endpoints in front of framework-free feature handlers — rule 6 makes this arch-tested, not aspirational; explicit domain-event dispatcher); Wolverine conventions apply only from the outbox outward. Wolverine.HTTP is the named alternative if this seam chafes (ADR-0001).
 - The Wolverine adoption details (outbox configuration, inbox/idempotency conventions, KEDA queue-depth wake on ACA, `codegen write` for reviewable generated code) get their own design artifact when the first integration event ships.
 - Single project keeps builds/refactors fast; if the project ever splits, the namespace discipline maps 1:1 onto csproj boundaries.

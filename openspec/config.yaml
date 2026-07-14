@@ -83,6 +83,7 @@ rules:
     - Changes touching the AppHost resource graph or Azure topology plan the infra Bicep update explicitly (hand-authored IaC — PRE-9)
   tasks:
     - Slice tasks to complete in one sitting (~2h max), each ending with build and tests green
-    - Changes touching the API contract include an explicit "regenerate TS client" task — one script: FastEndpoints --exportswaggerjson → openapi.json → openapi-typescript types, both committed (CI only gates drift; PRE-6)
+    - Changes touching the API contract include an explicit "regenerate TS client" task — one script: FastEndpoints --exportswaggerjson → openapi.json → openapi-typescript types, both committed (CI only gates drift, never generates or commits fixes; PRE-6). A change modifying an existing contract (not a pure addition) also includes tasks to update every TS consumer — facade layer per PRE-5 if adopted, and all usages — in the same change
     - Changes touching the AppHost resource graph or Azure topology include an explicit "update infra Bicep + .bicepparam" task — infra is hand-authored IaC deployed as a deployment stack; the AppHost models local orchestration only (PRE-9)
+    - A task adding an endpoint also classifies it in the authorization matrix (kind + arrange recipe) and updates the anonymous allowlist when applicable — the arch/matrix completeness gates fail otherwise (PRE-8, docs/conventions/testing.md)
     - A task introducing a feature flag also schedules the flag's removal
