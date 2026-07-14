@@ -4,6 +4,8 @@
 
 A milestone is a coherent, shippable slice delivered through OpenSpec changes. When a change is archived: tick it here and update the `Status` column in [requirements.md](requirements.md). Candidate change names are just that — candidates; the actual slicing is decided when each change is proposed. Final change ids carry a 3-digit sequential prefix (PRE-12), e.g. `001-add-walking-skeleton`.
 
+**Sequencing note (2026-07-14):** the domain-layer foundations run ahead of the M0 walking skeleton: PRE-7/PRE-8 design interviews → a SharedKernel + test-infrastructure change (pulling those pieces forward from M0 scope) → the first domain module as its validation slice. The domain layer is framework-free (pure C# + TUnit), so nothing in M0 gates it; the consciously accepted trade-off is that this code lands on main before the pipe (CI gates, deploy) is proven end-to-end.
+
 ## M0 — Walking skeleton on Azure
 
 **Goal:** prove the entire pipe — code → gates → prod — before building features on it.
@@ -12,7 +14,7 @@ Scope:
 
 - Aspire AppHost wires the real stack: FastEndpoints API (`net11.0` preview) + React/Vite PWA shell + Neon Postgres (Aspire Postgres container locally), ServiceDefaults/OTel on everything
 - Tooling baseline: CSharpier + `.editorconfig` + strict analyzers, ESLint + Prettier, TUnit + Shouldly + ArchUnitNET + Playwright scaffolds, module skeleton with first architecture tests
-- SharedKernel seed: `union`-based `Result`, Error model, ProblemDetails mapping
+- SharedKernel seed: `union`-based `Result`, Error model, `RuleCheck`/`RuleSet` domain-rule primitives, domain-event + integration-publisher ports (PRE-7), ProblemDetails mapping
 - Entra External ID sign-in end-to-end: SPA login → API validates token → response proves identity and one database round-trip — the round-trip *is* PRE-10's `ActiveAccount` resolution (Entra `oid` → account row → `CallerContext`); health probes stay DB-free so bot-triggered wakes never touch Neon
 - Contract pipeline wired (PRE-6): FastEndpoints `--exportswaggerjson` → committed `openapi.json` → openapi-typescript types + openapi-fetch client, one regen script, CI drift check on both artifacts
 - GitHub Actions (PRE-9): `ci.yml` = all PR gates from [ADR-0004](../adr/0004-delivery-and-process.md), publishing nothing; `release.yml` builds once from the merge commit and deploys prod — hand-authored `infra/` Bicep applied as a deployment stack (OIDC federated login) → pre-deploy Neon branch → EF migration bundle (maintenance-window recreate only when migrations are pending) → image rollout → smoke — plus the scheduled `pg_dump`-to-Blob DR job (restore drill lands M3/OQ-4)
