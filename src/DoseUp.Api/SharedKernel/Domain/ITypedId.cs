@@ -16,8 +16,7 @@ namespace DoseUp.Api.SharedKernel.Domain;
 /// what the converter needs.
 /// </remarks>
 public interface ITypedId<TSelf>
-  where TSelf : struct, ITypedId<TSelf>
-{
+  where TSelf : struct, ITypedId<TSelf> {
   Guid Value { get; }
 
   /// <summary>Rehydrates an id from its stored uuid (the converter's read side).</summary>

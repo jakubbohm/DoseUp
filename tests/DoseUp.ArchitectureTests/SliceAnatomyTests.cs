@@ -6,14 +6,12 @@ using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace DoseUp.ArchitectureTests;
 
-public sealed partial class SliceAnatomyTests
-{
+public sealed partial class SliceAnatomyTests {
   [GeneratedRegex(@"^DoseUp\.Api\.Modules\.(?<module>[^.]+)\.Features\.")]
   private static partial Regex FeatureNamespace();
 
   [Test]
-  public void Rule_11_a_slices_endpoint_and_its_collaborators_share_one_namespace()
-  {
+  public void Rule_11_a_slices_endpoint_and_its_collaborators_share_one_namespace() {
     // ADR-0002 § Slices / catalog rule 11: "one use case's endpoint + handler + validator +
     // DTOs share one namespace" — checked as: everything a Features endpoint constructor
     // injects from its own module lives in the endpoint's namespace.
@@ -47,8 +45,7 @@ public sealed partial class SliceAnatomyTests
   }
 
   [Test]
-  public void Rule_14_endpoint_classes_end_with_endpoint()
-  {
+  public void Rule_14_endpoint_classes_end_with_endpoint() {
     // testing.md §5 rule 14: "endpoints end `Endpoint`" — non-vacuous from day one
     // (the identity-echo diagnostic already matches).
     IArchRule rule = Classes()
@@ -65,8 +62,7 @@ public sealed partial class SliceAnatomyTests
   }
 
   [Test]
-  public void Rule_14_validator_named_classes_reside_in_features_namespaces()
-  {
+  public void Rule_14_validator_named_classes_reside_in_features_namespaces() {
     // testing.md §5 rule 14 (the reverse direction): "*Validator-named classes reside in
     // Features namespaces — catches misplacement". The forward rule (FluentValidation
     // subclasses end `Validator`) activates when the first validator lands (M0/M1).

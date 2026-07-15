@@ -1,4 +1,5 @@
-# Normalize text; force CRLF where .editorconfig demands it (end_of_line = crlf) so the
-# CSharpier check on Linux CI checkouts sees the same endings as Windows working trees.
+# Normalize text; force CRLF where .editorconfig demands it (end_of_line = crlf) so Linux CI
+# checkouts match Windows working trees for every tool that reads .editorconfig
+# (dotnet format, IDE format-on-save).
 * text=auto
 *.cs text eol=crlf

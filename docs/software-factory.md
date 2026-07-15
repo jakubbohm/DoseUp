@@ -298,8 +298,8 @@ DoseUp (PRE-9, superseding the founding expand/contract mandate): **conditional 
 ## H. Formatting & static quality
 
 **F-34 · Formatter: opinionated printer vs rule-based?**
-DoseUp: **CSharpier** owns C# layout (config via .editorconfig; also formats csproj/XML) + **Prettier/ESLint** for TS; enforcement on-save + on-build + CI (no pre-commit hooks).
-*Generalizes:* layout questions ("when do params wrap?") should be *removed* by an opinionated printer, not documented as prose or AI-rules — rule-based formatters can't express them, and prose drifts. Semantic style (naming, var, patterns) stays with analyzers/lint.
+DoseUp: founding pick **CSharpier**; **reversed 2026-07-15** — `.editorconfig` is the single C# layout authority (owner's style: end-of-line braces, 2-space indent), enforced as IDE0055 **build errors** (`EnforceCodeStyleInBuild` + warnings-as-errors), fixed by `dotnet format whitespace`; width = soft 200-char guideline, unenforced. **Prettier/ESLint stays for TS.** Why reversed: CSharpier reads only indent/width/EOL from `.editorconfig` and hard-codes the rest — the owner's brace style was inexpressible, and coexistence had forced `IDE0055 = none`, i.e. the tool silenced the owner's own rules to survive.
+*Generalizes:* an opinionated printer is correct **only when the owner adopts its style wholesale** — Prettier/TS passed that test, CSharpier/C# failed it. Verify which keys a formatter *actually reads* before recording "config lives in .editorconfig". The rule-based alternative (editorconfig + IDE0055-as-error + `dotnet format`) enforces everything except line wrapping — width degrades to a soft rule; that's the price. And never resolve a printer-vs-owner-style conflict by muting the owner's rules as an implementation footnote — that's a decision, surface it to the owner.
 
 **F-35 · Analyzer strictness?**
 DoseUp: **warnings-as-errors, latest-all, curated third-party packs**, every suppression justified in-place.

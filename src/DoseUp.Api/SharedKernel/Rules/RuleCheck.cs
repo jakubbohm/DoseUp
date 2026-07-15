@@ -6,8 +6,7 @@ namespace DoseUp.Api.SharedKernel.Rules;
 /// The outcome of checking one domain rule (domain-rules.md §2). A single failed rule is a
 /// one-element <see cref="Fail"/>; <see cref="RuleSet"/> aggregates multiple checks.
 /// </summary>
-public readonly union RuleCheck(RuleCheck.Pass, RuleCheck.Fail) : IEquatable<RuleCheck>
-{
+public readonly union RuleCheck(RuleCheck.Pass, RuleCheck.Fail) : IEquatable<RuleCheck> {
   public static bool operator ==(RuleCheck left, RuleCheck right) => left.Equals(right);
 
   public static bool operator !=(RuleCheck left, RuleCheck right) => !left.Equals(right);
@@ -22,10 +21,8 @@ public readonly union RuleCheck(RuleCheck.Pass, RuleCheck.Fail) : IEquatable<Rul
   public readonly record struct Pass;
 
   /// <summary>One or more violations, in the order they were determined.</summary>
-  public sealed record Fail
-  {
-    public Fail(IReadOnlyList<RuleViolation> violations)
-    {
+  public sealed record Fail {
+    public Fail(IReadOnlyList<RuleViolation> violations) {
       ArgumentNullException.ThrowIfNull(violations);
       ArgumentOutOfRangeException.ThrowIfZero(violations.Count, nameof(violations));
       Violations = violations;

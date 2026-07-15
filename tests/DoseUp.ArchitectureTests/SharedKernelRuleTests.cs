@@ -3,11 +3,9 @@ using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace DoseUp.ArchitectureTests;
 
-public sealed class SharedKernelRuleTests
-{
+public sealed class SharedKernelRuleTests {
   [Test]
-  public void Rule_05_shared_kernel_references_nothing_project_internal()
-  {
+  public void Rule_05_shared_kernel_references_nothing_project_internal() {
     // ADR-0002 dependency rule 5: "SharedKernel references nothing project-internal."
     IArchRule rule = Types()
       .That()

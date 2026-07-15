@@ -3,8 +3,7 @@ using Shouldly;
 
 namespace DoseUp.IntegrationTests;
 
-public sealed class IdentityEchoTests
-{
+public sealed class IdentityEchoTests {
   [ClassDataSource<AspireAppFixture>(Shared = SharedType.PerTestSession)]
   public required AspireAppFixture Harness { get; init; }
 
@@ -13,8 +12,7 @@ public sealed class IdentityEchoTests
   private sealed record ProblemBody(string? Type, string? Title, int? Status);
 
   [Test]
-  public async Task A_valid_token_gets_its_oid_echoed()
-  {
+  public async Task A_valid_token_gets_its_oid_echoed() {
     // api-shell R3: the whole token pipeline — bearer middleware, test trust anchor,
     // MapInboundClaims off — proven over the wire.
     Guid oid = Guid.CreateVersion7();
@@ -30,8 +28,7 @@ public sealed class IdentityEchoTests
   }
 
   [Test]
-  public async Task A_missing_token_is_denied_with_a_problem_details_body()
-  {
+  public async Task A_missing_token_is_denied_with_a_problem_details_body() {
     // api-shell R1 scenario 1 + error-contract R1 — the §9.2 401-half verification:
     // the bare middleware denial carries an RFC 9457 body.
     using HttpClient client = Harness.CreateAnonymousClient();
@@ -49,8 +46,7 @@ public sealed class IdentityEchoTests
   }
 
   [Test]
-  public async Task A_token_signed_by_an_untrusted_key_is_denied()
-  {
+  public async Task A_token_signed_by_an_untrusted_key_is_denied() {
     // api-shell R1 scenario 2: local validation, no trust anchor match → 401.
     using HttpClient client = Harness.CreateUntrustedKeyClient(Guid.CreateVersion7());
 

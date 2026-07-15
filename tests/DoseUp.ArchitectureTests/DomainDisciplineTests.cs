@@ -7,11 +7,9 @@ using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace DoseUp.ArchitectureTests;
 
-public sealed class DomainDisciplineTests
-{
+public sealed class DomainDisciplineTests {
   [Test]
-  public void Rule_08_no_csharp_enum_in_domain_namespaces()
-  {
+  public void Rule_08_no_csharp_enum_in_domain_namespaces() {
     // conventions § Domain enumerations: "Every closed value set in the domain layer is an
     // Ardalis.SmartEnum; C# enum is banned in domain assemblies." (DTO carve-out lives in Features.)
     IArchRule rule = Types()
@@ -25,8 +23,7 @@ public sealed class DomainDisciplineTests
   }
 
   [Test]
-  public void Rule_09_only_published_language_translators_and_platform_touch_the_publisher_port()
-  {
+  public void Rule_09_only_published_language_translators_and_platform_touch_the_publisher_port() {
     // ADR-0002 § Events / catalog rule 9: "Only per-module published-language translators
     // call IIntegrationEventPublisher" — Platform implements it over the outbox.
     string portFullName = typeof(IIntegrationEventPublisher).FullName!;
@@ -52,8 +49,7 @@ public sealed class DomainDisciplineTests
   }
 
   [Test]
-  public void Rule_10_every_db_set_entity_is_an_aggregate_root()
-  {
+  public void Rule_10_every_db_set_entity_is_an_aggregate_root() {
     // conventions § Domain model base types: IAggregateRoot "is what ArchUnitNET rules and
     // generic constraints key on (e.g., only aggregate roots exposed as DbSet)".
     // Reflection over the offline-built EF model — no database (design.md D11).

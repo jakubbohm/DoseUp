@@ -8,8 +8,7 @@ namespace DoseUp.Api.Platform.Persistence;
 /// path requires an orchestrator-provided connection string, and <c>migrations add</c>
 /// never opens a connection — the placeholder exists only to satisfy the provider.
 /// </summary>
-public sealed class DoseUpDbContextFactory : IDesignTimeDbContextFactory<DoseUpDbContext>
-{
+public sealed class DoseUpDbContextFactory : IDesignTimeDbContextFactory<DoseUpDbContext> {
   public DoseUpDbContext CreateDbContext(string[] args) =>
     new(
       new DbContextOptionsBuilder<DoseUpDbContext>()

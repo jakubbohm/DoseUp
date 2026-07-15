@@ -15,6 +15,10 @@ tab_width = 2
 end_of_line = crlf
 insert_final_newline = false
 
+# Soft width guideline (~half a screen) — deliberately unenforced, no tool reads it
+# (docs/conventions/README.md § Formatting).
+max_line_length = 200
+
 #### .NET Code Actions ####
 
 # Type members
@@ -276,10 +280,6 @@ dotnet_naming_style.upper_case.word_separator = _
 dotnet_naming_style.upper_case.capitalization = all_upper
 
 #### DoseUp adjustments (deviations from the copied reference config) ####
-
-# CSharpier owns .cs layout (docs/conventions/README.md § Formatting); two layout gates cannot
-# coexist, so Roslyn's whitespace rule is off — CSharpier (check mode in CI) is the format gate.
-dotnet_diagnostic.IDE0055.severity = none
 
 # The reference config intends this as a suggestion (fluent builder chains discard return values
 # by design); AnalysisLevel latest-all would otherwise promote it to a build-breaking warning.

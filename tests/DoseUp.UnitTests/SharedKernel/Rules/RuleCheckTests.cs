@@ -4,11 +4,9 @@ using Shouldly;
 
 namespace DoseUp.UnitTests.SharedKernel.Rules;
 
-public sealed class RuleCheckTests
-{
+public sealed class RuleCheckTests {
   [Test]
-  public void A_failing_rule_names_itself_with_its_stable_code_and_static_message()
-  {
+  public void A_failing_rule_names_itself_with_its_stable_code_and_static_message() {
     RuleCheck check = new RuleCheck.Fail(
       "schedule.not-active",
       "Only an active schedule can be edited."
@@ -21,8 +19,7 @@ public sealed class RuleCheckTests
   }
 
   [Test]
-  public void A_passing_rule_exposes_no_violations()
-  {
+  public void A_passing_rule_exposes_no_violations() {
     RuleCheck check = new RuleCheck.Pass();
 
     check.ShouldBePass();
@@ -30,8 +27,7 @@ public sealed class RuleCheckTests
   }
 
   [Test]
-  public void A_fail_carries_multiple_violations_in_order()
-  {
+  public void A_fail_carries_multiple_violations_in_order() {
     RuleViolation first = new("a.one", "One.");
     RuleViolation second = new("a.two", "Two.");
 
@@ -49,8 +45,7 @@ public sealed class RuleCheckTests
     Should.Throw<ArgumentNullException>(static () => new RuleCheck.Fail(null!));
 
   [Test]
-  public void Conversion_to_result_is_lossless()
-  {
+  public void Conversion_to_result_is_lossless() {
     RuleViolation first = new("schedule.not-active", "Only an active schedule can be edited.");
     RuleViolation second = new("schedule.name-taken", "A schedule with this name already exists.");
     RuleCheck.Fail fail = new([first, second]);

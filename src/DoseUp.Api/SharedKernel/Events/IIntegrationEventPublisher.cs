@@ -6,8 +6,7 @@ namespace DoseUp.Api.SharedKernel.Events;
 /// translators and Platform reference it (arch-tested, catalog rule 9); Platform's
 /// implementation over the Wolverine outbox arrives with the first integration event (M0+).
 /// </summary>
-public interface IIntegrationEventPublisher
-{
+public interface IIntegrationEventPublisher {
   Task PublishAsync<TEvent>(TEvent integrationEvent, CancellationToken cancellationToken)
     where TEvent : class;
 }

@@ -10,18 +10,15 @@ namespace DoseUp.Api.Platform.Persistence;
 /// changes join the same transaction.
 /// </summary>
 public sealed class DomainEventDispatchInterceptor(DomainEventDispatcher dispatcher)
-  : SaveChangesInterceptor
-{
+  : SaveChangesInterceptor {
   public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
     DbContextEventData eventData,
     InterceptionResult<int> result,
     CancellationToken cancellationToken = default
-  )
-  {
+  ) {
     ArgumentNullException.ThrowIfNull(eventData);
 
-    if (eventData.Context is { } context)
-    {
+    if (eventData.Context is { } context) {
       IAggregateRoot[] aggregates =
       [
         .. context

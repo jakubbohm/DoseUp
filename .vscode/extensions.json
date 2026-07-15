@@ -1,6 +1,6 @@
 {
   "recommendations": [
     "microsoft-aspire.aspire-vscode",
-    "csharpier.csharpier-vscode"
+    "ms-dotnettools.csharp"
   ]
 }

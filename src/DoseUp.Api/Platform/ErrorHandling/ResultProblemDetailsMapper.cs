@@ -10,47 +10,39 @@ namespace DoseUp.Api.Platform.ErrorHandling;
 /// distinguishable by ProblemDetails <c>type</c>. Unset <c>Type</c>/<c>Detail</c> fields
 /// are filled with RFC-9457 defaults by the ProblemDetails service at write time.
 /// </summary>
-public static class ResultProblemDetailsMapper
-{
+public static class ResultProblemDetailsMapper {
   public const string RULE_VIOLATION_TYPE = "https://doseup.app/problems/rule-violation";
   public const string CONFLICT_TYPE = "https://doseup.app/problems/conflict";
 
   public static ProblemDetails ToProblemDetails(this Result result) =>
-    result switch
-    {
+    result switch {
       Result.Success => throw new ArgumentException(
         "Success carries no error to map — map failure results only.",
         nameof(result)
       ),
-      Result.Validation validation => new HttpValidationProblemDetails(validation.Errors)
-      {
+      Result.Validation validation => new HttpValidationProblemDetails(validation.Errors) {
         Status = StatusCodes.Status400BadRequest,
       },
-      Result.NotFound => new ProblemDetails
-      {
+      Result.NotFound => new ProblemDetails {
         Status = StatusCodes.Status404NotFound,
         Title = "Not found.",
       },
-      Result.RuleViolations ruleViolations => new ProblemDetails
-      {
+      Result.RuleViolations ruleViolations => new ProblemDetails {
         Status = StatusCodes.Status409Conflict,
         Type = RULE_VIOLATION_TYPE,
         Title = "One or more domain rules were violated.",
         Extensions = { ["violations"] = ruleViolations.Violations },
       },
-      Result.Conflict => new ProblemDetails
-      {
+      Result.Conflict => new ProblemDetails {
         Status = StatusCodes.Status409Conflict,
         Type = CONFLICT_TYPE,
         Title = "The request conflicts with the current state of the resource.",
       },
-      Result.Forbidden => new ProblemDetails
-      {
+      Result.Forbidden => new ProblemDetails {
         Status = StatusCodes.Status403Forbidden,
         Title = "Forbidden.",
       },
-      Result.Unexpected => new ProblemDetails
-      {
+      Result.Unexpected => new ProblemDetails {
         Status = StatusCodes.Status500InternalServerError,
         Title = "An unexpected error occurred.",
       },

@@ -7,8 +7,7 @@ namespace DoseUp.UnitTests.SharedKernel.Results;
 /// Domain-shaped Result assertions (testing.md §6.6) — union unwrapping centralized.
 /// Union <c>ToString()</c> returns only the type name, so messages format the case value.
 /// </summary>
-public static class ResultAssertions
-{
+public static class ResultAssertions {
   public static Result.Validation ShouldBeValidation(this Result result) =>
     result is Result.Validation validation
       ? validation

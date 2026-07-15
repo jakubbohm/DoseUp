@@ -13,14 +13,12 @@ namespace DoseUp.ServiceDefaults;
 // Adds common Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
 // This project should be referenced by each service project in your solution.
 // To learn more about using this project, see https://aka.ms/aspire/service-defaults
-public static class ServiceDefaultsExtensions
-{
+public static class ServiceDefaultsExtensions {
   private const string HEALTH_ENDPOINT_PATH = "/health";
   private const string ALIVENESS_ENDPOINT_PATH = "/alive";
 
   public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder)
-    where TBuilder : IHostApplicationBuilder
-  {
+    where TBuilder : IHostApplicationBuilder {
     ArgumentNullException.ThrowIfNull(builder);
 
     builder.ConfigureOpenTelemetry();
@@ -29,8 +27,7 @@ public static class ServiceDefaultsExtensions
 
     builder.Services.AddServiceDiscovery();
 
-    builder.Services.ConfigureHttpClientDefaults(static http =>
-    {
+    builder.Services.ConfigureHttpClientDefaults(static http => {
       // Turn on resilience by default
       http.AddStandardResilienceHandler();
 
@@ -48,27 +45,23 @@ public static class ServiceDefaultsExtensions
   }
 
   public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder)
-    where TBuilder : IHostApplicationBuilder
-  {
+    where TBuilder : IHostApplicationBuilder {
     ArgumentNullException.ThrowIfNull(builder);
 
-    builder.Logging.AddOpenTelemetry(static logging =>
-    {
+    builder.Logging.AddOpenTelemetry(static logging => {
       logging.IncludeFormattedMessage = true;
       logging.IncludeScopes = true;
     });
 
     builder
       .Services.AddOpenTelemetry()
-      .WithMetrics(static metrics =>
-      {
+      .WithMetrics(static metrics => {
         metrics
           .AddAspNetCoreInstrumentation()
           .AddHttpClientInstrumentation()
           .AddRuntimeInstrumentation();
       })
-      .WithTracing(tracing =>
-      {
+      .WithTracing(tracing => {
         tracing
           .AddSource(builder.Environment.ApplicationName)
           .AddAspNetCoreInstrumentation(static options =>
@@ -94,14 +87,12 @@ public static class ServiceDefaultsExtensions
   }
 
   private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder)
-    where TBuilder : IHostApplicationBuilder
-  {
+    where TBuilder : IHostApplicationBuilder {
     bool useOtlpExporter = !string.IsNullOrWhiteSpace(
       builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]
     );
 
-    if (useOtlpExporter)
-    {
+    if (useOtlpExporter) {
       builder.Services.AddOpenTelemetry().UseOtlpExporter();
     }
 
@@ -116,8 +107,7 @@ public static class ServiceDefaultsExtensions
   }
 
   public static TBuilder AddDefaultHealthChecks<TBuilder>(this TBuilder builder)
-    where TBuilder : IHostApplicationBuilder
-  {
+    where TBuilder : IHostApplicationBuilder {
     ArgumentNullException.ThrowIfNull(builder);
 
     builder
@@ -128,14 +118,12 @@ public static class ServiceDefaultsExtensions
     return builder;
   }
 
-  public static WebApplication MapDefaultEndpoints(this WebApplication app)
-  {
+  public static WebApplication MapDefaultEndpoints(this WebApplication app) {
     ArgumentNullException.ThrowIfNull(app);
 
     // Adding health checks endpoints to applications in non-development environments has security implications.
     // See https://aka.ms/aspire/healthchecks for details before enabling these endpoints in non-development environments.
-    if (app.Environment.IsDevelopment())
-    {
+    if (app.Environment.IsDevelopment()) {
       // Explicitly anonymous: the API's authorization FallbackPolicy would otherwise
       // require a token on probe traffic. These are the manual `AnonymousAllowed` rows of
       // the authorization matrix (testing.md §4 — non-FastEndpoints surface).

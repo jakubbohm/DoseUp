@@ -10,8 +10,7 @@ namespace DoseUp.ArchitectureTests;
 /// One shared architecture over the Api assembly (design.md D11) — loaded once, used by
 /// every catalog rule.
 /// </summary>
-public static class DoseUpArchitecture
-{
+public static class DoseUpArchitecture {
   public static Architecture Instance { get; } =
     new ArchLoader()
       .LoadAssemblies(typeof(Result).Assembly, typeof(FastEndpoints.BaseEndpoint).Assembly)
@@ -22,8 +21,7 @@ public static class DoseUpArchitecture
   /// violation descriptions. (Deliberately not the TngTech.ArchUnitNET.TUnit adapter —
   /// it would pull TUnit.Assertions transitively, which testing.md §6.6 keeps out.)
   /// </summary>
-  public static void ShouldHold(this IArchRule rule)
-  {
+  public static void ShouldHold(this IArchRule rule) {
     ArgumentNullException.ThrowIfNull(rule);
 
     List<string> violations =

@@ -12,8 +12,7 @@ namespace DoseUp.Api.Platform.Persistence;
 /// </summary>
 public sealed class TypedIdConverter<TId>()
   : ValueConverter<TId, Guid>(static id => ToProvider(id), static value => FromProvider(value))
-  where TId : struct, ITypedId<TId>
-{
+  where TId : struct, ITypedId<TId> {
   private static Guid ToProvider(TId id) => id.Value;
 
   private static TId FromProvider(Guid value) => TId.From(value);

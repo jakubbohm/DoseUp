@@ -15,8 +15,7 @@ public readonly union Result(
   Result.RuleViolations,
   Result.Conflict,
   Result.Forbidden,
-  Result.Unexpected) : IEquatable<Result>
-{
+  Result.Unexpected) : IEquatable<Result> {
   public static bool operator ==(Result left, Result right) => left.Equals(right);
 
   public static bool operator !=(Result left, Result right) => !left.Equals(right);

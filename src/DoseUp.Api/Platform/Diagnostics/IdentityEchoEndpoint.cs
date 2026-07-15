@@ -10,15 +10,13 @@ public sealed record IdentityEchoResponse(string Oid);
 /// M0 layers <c>ActiveAccount</c>/<c>CallerContext</c> on top. Authorization-matrix
 /// classification: FastEndpoints kind <c>Authenticated</c> (testing.md §4).
 /// </summary>
-public sealed class IdentityEchoEndpoint : EndpointWithoutRequest<IdentityEchoResponse>
-{
+public sealed class IdentityEchoEndpoint : EndpointWithoutRequest<IdentityEchoResponse> {
   public override void Configure() =>
     // Authenticated by default: FastEndpoints' secure-by-default plus the app-wide
     // authorization FallbackPolicy — no AllowAnonymous here, ever.
     Get("/diagnostics/identity");
 
-  public override async Task HandleAsync(CancellationToken ct)
-  {
+  public override async Task HandleAsync(CancellationToken ct) {
     // A validated token without `oid` is a trust-anchor misconfiguration — a bug (class 8),
     // not an expected failure.
     string oid =

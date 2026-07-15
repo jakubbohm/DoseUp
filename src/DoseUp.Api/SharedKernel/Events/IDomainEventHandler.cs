@@ -6,7 +6,6 @@ namespace DoseUp.Api.SharedKernel.Events;
 /// (conventions § Events &amp; side effects). Handlers never publish integration events.
 /// </summary>
 public interface IDomainEventHandler<in TEvent>
-  where TEvent : IDomainEvent
-{
+  where TEvent : IDomainEvent {
   Task HandleAsync(TEvent domainEvent, CancellationToken cancellationToken);
 }

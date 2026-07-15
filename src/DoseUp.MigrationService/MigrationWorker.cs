@@ -13,12 +13,9 @@ namespace DoseUp.MigrationService;
 public sealed class MigrationWorker(
   IServiceProvider serviceProvider,
   IHostApplicationLifetime lifetime
-) : BackgroundService
-{
-  protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-  {
-    using (IServiceScope scope = serviceProvider.CreateScope())
-    {
+) : BackgroundService {
+  protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
+    using (IServiceScope scope = serviceProvider.CreateScope()) {
       DoseUpDbContext context = scope.ServiceProvider.GetRequiredService<DoseUpDbContext>();
       IExecutionStrategy strategy = context.Database.CreateExecutionStrategy();
       await strategy

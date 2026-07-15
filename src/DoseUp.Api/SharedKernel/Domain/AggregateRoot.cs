@@ -9,20 +9,16 @@ namespace DoseUp.Api.SharedKernel.Domain;
 /// work (ADR-0002 § Events).
 /// </summary>
 public abstract class AggregateRoot<TId>(TId id) : Entity<TId>(id), IAggregateRoot
-  where TId : struct, IEquatable<TId>
-{
+  where TId : struct, IEquatable<TId> {
   private readonly List<IDomainEvent> _domainEvents = [];
 
-  protected void Raise(IDomainEvent domainEvent)
-  {
+  protected void Raise(IDomainEvent domainEvent) {
     ArgumentNullException.ThrowIfNull(domainEvent);
     _domainEvents.Add(domainEvent);
   }
 
-  IReadOnlyList<IDomainEvent> IAggregateRoot.DrainDomainEvents()
-  {
-    if (_domainEvents.Count == 0)
-    {
+  IReadOnlyList<IDomainEvent> IAggregateRoot.DrainDomainEvents() {
+    if (_domainEvents.Count == 0) {
       return [];
     }
 

@@ -13,19 +13,16 @@ public sealed record MatrixCell(string Name, string Route, string Caller, string
 /// (endpoint × caller class). M0 adds the ProfileScoped/AdminOnly kinds with the account
 /// table; M3 `harden-authz` completes the catalog.
 /// </summary>
-public sealed class AuthorizationMatrixTests
-{
+public sealed class AuthorizationMatrixTests {
   [ClassDataSource<AspireAppFixture>(Shared = SharedType.PerTestSession)]
   public required AspireAppFixture Harness { get; init; }
 
-  private enum EndpointKind
-  {
+  private enum EndpointKind {
     AnonymousAllowed,
     Authenticated,
   }
 
-  private enum CallerClass
-  {
+  private enum CallerClass {
     Anonymous,
     Authenticated,
     UntrustedKey,
@@ -33,8 +30,7 @@ public sealed class AuthorizationMatrixTests
 
   // ── The classification table: endpoint type → (kind, route). ──
   private static readonly IReadOnlyDictionary<Type, (EndpointKind Kind, string Route)> CLASSIFIED =
-    new Dictionary<Type, (EndpointKind, string)>
-    {
+    new Dictionary<Type, (EndpointKind, string)> {
       [typeof(DoseUp.Api.Platform.Diagnostics.IdentityEchoEndpoint)] = (
         EndpointKind.Authenticated,
         "/diagnostics/identity"
@@ -57,8 +53,7 @@ public sealed class AuthorizationMatrixTests
     ];
 
   [Test]
-  public void Every_endpoint_in_the_census_is_classified()
-  {
+  public void Every_endpoint_in_the_census_is_classified() {
     // ADR-0002 § Authorization: "new endpoints fail the matrix until classified" — made
     // mechanical: the reflection census and the classification table must match exactly.
     List<string> unclassified =
@@ -74,13 +69,10 @@ public sealed class AuthorizationMatrixTests
     stale.ShouldBeEmpty();
   }
 
-  public static IEnumerable<MatrixCell> Cells()
-  {
-    foreach (KeyValuePair<Type, (EndpointKind Kind, string Route)> entry in CLASSIFIED)
-    {
+  public static IEnumerable<MatrixCell> Cells() {
+    foreach (KeyValuePair<Type, (EndpointKind Kind, string Route)> entry in CLASSIFIED) {
       string name = entry.Key.Name;
-      switch (entry.Value.Kind)
-      {
+      switch (entry.Value.Kind) {
         case EndpointKind.Authenticated:
           yield return new MatrixCell(
             name,
@@ -114,20 +106,17 @@ public sealed class AuthorizationMatrixTests
       }
     }
 
-    foreach ((string name, string route) in MANUAL_ANONYMOUS_ROWS)
-    {
+    foreach ((string name, string route) in MANUAL_ANONYMOUS_ROWS) {
       yield return new MatrixCell(name, route, nameof(CallerClass.Anonymous), "2xx");
     }
   }
 
   [Test]
   [MethodDataSource(nameof(Cells))]
-  public async Task The_matrix_holds(MatrixCell cell)
-  {
+  public async Task The_matrix_holds(MatrixCell cell) {
     ArgumentNullException.ThrowIfNull(cell);
 
-    using HttpClient client = cell.Caller switch
-    {
+    using HttpClient client = cell.Caller switch {
       nameof(CallerClass.Anonymous) => Harness.CreateAnonymousClient(),
       nameof(CallerClass.Authenticated) => Harness.CreateAuthenticatedClient(Guid.CreateVersion7()),
       nameof(CallerClass.UntrustedKey) => Harness.CreateUntrustedKeyClient(Guid.CreateVersion7()),
@@ -136,12 +125,10 @@ public sealed class AuthorizationMatrixTests
 
     HttpResponseMessage response = await client.GetAsync(new Uri(cell.Route, UriKind.Relative));
 
-    if (cell.Expectation == "2xx")
-    {
+    if (cell.Expectation == "2xx") {
       ((int)response.StatusCode).ShouldBeInRange(200, 299);
     }
-    else
-    {
+    else {
       response.StatusCode.ShouldBe(
         (HttpStatusCode)
           int.Parse(cell.Expectation, System.Globalization.CultureInfo.InvariantCulture)

@@ -17,8 +17,7 @@ namespace DoseUp.IntegrationTests;
 /// resource before start; the bearer middleware, claim mapping, and 401 semantics stay
 /// production code — the only fakes are Entra's signature and nothing else.
 /// </summary>
-public sealed class AspireAppFixture : IAsyncInitializer, IAsyncDisposable
-{
+public sealed class AspireAppFixture : IAsyncInitializer, IAsyncDisposable {
   private readonly byte[] _signingKey = RandomNumberGenerator.GetBytes(32);
   private readonly byte[] _untrustedKey = RandomNumberGenerator.GetBytes(32);
   private DistributedApplication? _app;
@@ -29,8 +28,7 @@ public sealed class AspireAppFixture : IAsyncInitializer, IAsyncDisposable
   private DistributedApplication App =>
     _app ?? throw new InvalidOperationException("The fixture has not been initialized.");
 
-  public async Task InitializeAsync()
-  {
+  public async Task InitializeAsync() {
     // CI-stretched timeouts (design.md D9 — documented Aspire-in-CI hang mitigation).
     TimeSpan timeout = Environment.GetEnvironmentVariable("CI") is null
       ? TimeSpan.FromMinutes(2)
@@ -64,8 +62,7 @@ public sealed class AspireAppFixture : IAsyncInitializer, IAsyncDisposable
   public HttpClient CreateAnonymousClient() => App.CreateHttpClient("api");
 
   /// <summary>Caller class: authenticated — a valid token from the trusted test authority.</summary>
-  public HttpClient CreateAuthenticatedClient(Guid oid)
-  {
+  public HttpClient CreateAuthenticatedClient(Guid oid) {
     HttpClient client = App.CreateHttpClient("api");
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
       "Bearer",
@@ -75,8 +72,7 @@ public sealed class AspireAppFixture : IAsyncInitializer, IAsyncDisposable
   }
 
   /// <summary>Caller class: untrusted key — a well-formed token no configured authority signed.</summary>
-  public HttpClient CreateUntrustedKeyClient(Guid oid)
-  {
+  public HttpClient CreateUntrustedKeyClient(Guid oid) {
     HttpClient client = App.CreateHttpClient("api");
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
       "Bearer",
@@ -93,8 +89,7 @@ public sealed class AspireAppFixture : IAsyncInitializer, IAsyncDisposable
     // No explicit Expires/IssuedAt — the handler stamps defaults itself, keeping the
     // banned wall-clock APIs out of test code (testing.md §6.4).
     new JsonWebTokenHandler().CreateToken(
-      new SecurityTokenDescriptor
-      {
+      new SecurityTokenDescriptor {
         Issuer = ISSUER,
         Audience = AUDIENCE,
         Claims = new Dictionary<string, object> { ["oid"] = oid.ToString() },
@@ -105,10 +100,8 @@ public sealed class AspireAppFixture : IAsyncInitializer, IAsyncDisposable
       }
     );
 
-  public async ValueTask DisposeAsync()
-  {
-    if (_app is not null)
-    {
+  public async ValueTask DisposeAsync() {
+    if (_app is not null) {
       await _app.DisposeAsync();
     }
   }

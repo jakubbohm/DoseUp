@@ -8,8 +8,7 @@ namespace DoseUp.UnitTests.SharedKernel.Rules;
 /// unwrapping stays centralized. Union <c>ToString()</c> returns only the type name, so
 /// failure messages format the case value explicitly.
 /// </summary>
-public static class RuleCheckAssertions
-{
+public static class RuleCheckAssertions {
   public static void ShouldBePass(this RuleCheck check) =>
     (check is RuleCheck.Pass).ShouldBeTrue($"Expected Pass but got: {Describe(check)}");
 

@@ -4,11 +4,9 @@ using Shouldly;
 
 namespace DoseUp.UnitTests.Platform.Persistence;
 
-public sealed class TypedIdConverterTests
-{
+public sealed class TypedIdConverterTests {
   [Test]
-  public void The_provider_type_is_guid_never_a_string()
-  {
+  public void The_provider_type_is_guid_never_a_string() {
     TypedIdConverter<TestId> converter = new();
 
     converter.ModelClrType.ShouldBe(typeof(TestId));
@@ -16,8 +14,7 @@ public sealed class TypedIdConverterTests
   }
 
   [Test]
-  public void A_typed_id_round_trips_losslessly_through_the_converter()
-  {
+  public void A_typed_id_round_trips_losslessly_through_the_converter() {
     TypedIdConverter<TestId> converter = new();
     TestId original = TestId.Create();
 

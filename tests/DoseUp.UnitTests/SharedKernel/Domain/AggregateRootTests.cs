@@ -3,11 +3,9 @@ using Shouldly;
 
 namespace DoseUp.UnitTests.SharedKernel.Domain;
 
-public sealed class AggregateRootTests
-{
+public sealed class AggregateRootTests {
   [Test]
-  public void Raised_events_drain_exactly_once_in_raise_order()
-  {
+  public void Raised_events_drain_exactly_once_in_raise_order() {
     TestAggregate aggregate = new(TestId.Create());
     aggregate.RaiseFirst();
     aggregate.RaiseSecond();
@@ -20,8 +18,7 @@ public sealed class AggregateRootTests
   }
 
   [Test]
-  public void A_second_drain_with_no_new_raises_yields_nothing()
-  {
+  public void A_second_drain_with_no_new_raises_yields_nothing() {
     TestAggregate aggregate = new(TestId.Create());
     aggregate.RaiseFirst();
     IAggregateRoot root = aggregate;
@@ -31,8 +28,7 @@ public sealed class AggregateRootTests
   }
 
   [Test]
-  public void Raising_a_null_event_is_a_bug_and_throws()
-  {
+  public void Raising_a_null_event_is_a_bug_and_throws() {
     TestAggregate aggregate = new(TestId.Create());
 
     Should.Throw<ArgumentNullException>(aggregate.RaiseNull);

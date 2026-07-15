@@ -21,8 +21,9 @@ jobs:
             10.0.301
             11.0.100-preview.6.26359.118
 
-      # CSharpier check mode: the CI formatting gate (conventions § Formatting).
-      - run: dotnet build DoseUp.slnx -p:CSharpier_Check=true
+      # The build IS the formatting gate: .editorconfig layout violations are IDE0055 build
+      # errors via EnforceCodeStyleInBuild + TreatWarningsAsErrors (conventions § Formatting).
+      - run: dotnet build DoseUp.slnx
 
       # GitHub sets CI=true — the harness fixture stretches its timeouts on it (D9).
       - run: dotnet test --solution DoseUp.slnx

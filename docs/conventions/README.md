@@ -6,11 +6,12 @@ This directory is the **source of truth for conventions** (decided in the foundi
 
 Several sections below are deliberately skeletal — they get filled by the change that first makes them real (mostly M0/M1), never invented in advance.
 
-## Formatting (decided)
+## Formatting (decided; formatter reversed 2026-07-15)
 
-- **C# layout is owned by CSharpier** — nobody hand-formats; the one-line-vs-multi-line question is answered by `printWidth`, not by style debates. Config lives in `.editorconfig` (CSharpier reads it). Also formats `.csproj`/XML.
-- Enforcement: IDE format-on-save (committed `.vscode` settings) + `CSharpier.MsBuild` on build + CI check.
-- **TypeScript/React:** ESLint + Prettier, CI-checked.
+- **C# layout is owned by `.editorconfig`** — the file is the single formatting authority (Jakub's reference style: end-of-line braces, 2-space indent, CRLF). CSharpier, the founding pick, was **dropped 2026-07-15**: it reads only the indent/width/EOL basics from `.editorconfig` and hard-codes the rest — Allman braces, forced final newline — so the owner's layout was inexpressible, and coexistence had forced `IDE0055 = none`, silencing exactly the rules that do express it.
+- **Enforcement: the build is the format gate** — layout violations are IDE0055 **build errors** (`EnforceCodeStyleInBuild` + `TreatWarningsAsErrors`; probe-verified to fire). Fixer: `dotnet format whitespace DoseUp.slnx`. IDE format-on-save (committed `.vscode` settings, C# extension) applies the same rules.
+- **Line width: soft ~200-char guideline, deliberately unenforced** (`max_line_length` declares it; no tool reads it). The accepted trade of dropping CSharpier: no deterministic width-based wrapping, and `.csproj`/XML formatting is hand-kept.
+- **TypeScript/React:** ESLint + Prettier, CI-checked — unchanged: Prettier's opinions are adopted wholesale there, which is exactly the condition CSharpier failed on the C# side.
 - No pre-commit hooks (deliberate — on-save/on-build/CI cover it).
 
 ## Static analysis (decided; packs finalized in M0)

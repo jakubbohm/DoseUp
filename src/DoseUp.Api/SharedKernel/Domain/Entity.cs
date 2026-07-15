@@ -6,8 +6,7 @@ namespace DoseUp.Api.SharedKernel.Domain;
 /// Guid v7 in the aggregate factory), so there is no transient-id state.
 /// </summary>
 public abstract class Entity<TId>(TId id) : IEquatable<Entity<TId>>
-  where TId : struct, IEquatable<TId>
-{
+  where TId : struct, IEquatable<TId> {
   public TId Id { get; } = id;
 
   public bool Equals(Entity<TId>? other) =>
