@@ -42,9 +42,8 @@ builder.Services.AddProblemDetails();
 // ── Authentication: one bearer scheme, config-driven trust anchor (D5) ──
 
 IConfigurationSection testAuthority = builder.Configuration.GetSection("Auth:TestAuthority");
-if (testAuthority.Exists() && builder.Environment.IsProduction()) {
+if (testAuthority.Exists() && builder.Environment.IsProduction())
   throw new InvalidOperationException("Auth:TestAuthority must never be configured in Production.");
-}
 
 builder
   .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

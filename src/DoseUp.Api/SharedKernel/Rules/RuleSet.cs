@@ -21,9 +21,8 @@ public sealed class RuleSet {
   public static RuleSet Add(params RuleCheck[] checks) {
     ArgumentNullException.ThrowIfNull(checks);
     RuleSet set = new();
-    foreach (RuleCheck check in checks) {
+    foreach (RuleCheck check in checks)
       set.Add(check);
-    }
 
     return set;
   }
@@ -62,14 +61,12 @@ public sealed class RuleSet {
     foreach (List<Func<Task<RuleCheck>>> stage in _stages) {
       List<RuleViolation> violations = [];
       foreach (Func<Task<RuleCheck>> check in stage) {
-        if (await check().ConfigureAwait(false) is RuleCheck.Fail fail) {
+        if (await check().ConfigureAwait(false) is RuleCheck.Fail fail)
           violations.AddRange(fail.Violations);
-        }
       }
 
-      if (violations.Count > 0) {
+      if (violations.Count > 0)
         return new RuleCheck.Fail(violations);
-      }
     }
 
     return new RuleCheck.Pass();

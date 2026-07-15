@@ -25,6 +25,7 @@ Each resolved item lands somewhere durable — an ADR, a convention doc, a requi
 - [ ] **PRE-13** — setup codebase-memory-mcp
 - [ ] **PRE-14** — design personas
 - [ ] **PRE-15** — design code-review
+- [ ] **PRE-16** — Review roslynator config
 
 ## Outcomes
 
@@ -47,3 +48,4 @@ Filled in as items are processed — link the ADR / convention / spec / change t
 | PRE-13 | |
 | PRE-14 | |
 | PRE-15 | |
+| PRE-16 | |

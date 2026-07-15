@@ -20,9 +20,8 @@ public sealed class HygieneTests {
 
   private static string FindRepositoryRoot() {
     DirectoryInfo? directory = new(AppContext.BaseDirectory);
-    while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "DoseUp.slnx"))) {
+    while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "DoseUp.slnx")))
       directory = directory.Parent;
-    }
 
     return directory?.FullName
       ?? throw new InvalidOperationException(

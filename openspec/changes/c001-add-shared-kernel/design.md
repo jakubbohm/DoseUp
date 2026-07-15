@@ -52,6 +52,7 @@ c001 is greenfield, so it starts on the **freshest preview** rather than the ins
 | Shouldly | 4.3.0 (v5 still preview — not taken) | nuget.org |
 | TngTech.ArchUnitNET | 0.13.3 (2026-03-05; the TUnit adapter was dropped at implementation — it hard-depends on TUnit.Assertions 0.52.51, see D11) | nuget.org |
 | Microsoft.CodeAnalysis.BannedApiAnalyzers | 5.6.0 (2026-07-02) | nuget.org |
+| Roslynator.Analyzers | 4.15.0 (2025-12-14; adopted 2026-07-15 scoped to RCS1002 — task 7.6) | nuget.org |
 | CSharpier.MSBuild | 1.3.0 — **removed 2026-07-15**, formatting authority flipped to `.editorconfig`/IDE0055 (D12 amendment) | nuget.org |
 | Microsoft.IdentityModel.JsonWebTokens (tests, token minting) | current 8.x at restore | — |
 

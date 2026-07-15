@@ -18,9 +18,8 @@ public abstract class AggregateRoot<TId>(TId id) : Entity<TId>(id), IAggregateRo
   }
 
   IReadOnlyList<IDomainEvent> IAggregateRoot.DrainDomainEvents() {
-    if (_domainEvents.Count == 0) {
+    if (_domainEvents.Count == 0)
       return [];
-    }
 
     IDomainEvent[] drained = [.. _domainEvents];
     _domainEvents.Clear();

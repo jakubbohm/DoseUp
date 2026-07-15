@@ -21,9 +21,8 @@ public sealed class DomainEventDispatcher(IServiceProvider services) {
 
     for (int depth = 0; ; depth++) {
       IDomainEvent[] events = [.. aggregates.SelectMany(static a => a.DrainDomainEvents())];
-      if (events.Length == 0) {
+      if (events.Length == 0)
         return;
-      }
 
       if (depth >= MAX_DEPTH) {
         throw new InvalidOperationException(

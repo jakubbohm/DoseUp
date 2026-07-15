@@ -11,6 +11,7 @@ Several sections below are deliberately skeletal — they get filled by the chan
 - **C# layout is owned by `.editorconfig`** — the file is the single formatting authority (Jakub's reference style: end-of-line braces, 2-space indent, CRLF). CSharpier, the founding pick, was **dropped 2026-07-15**: it reads only the indent/width/EOL basics from `.editorconfig` and hard-codes the rest — Allman braces, forced final newline — so the owner's layout was inexpressible, and coexistence had forced `IDE0055 = none`, silencing exactly the rules that do express it.
 - **Enforcement: the build is the format gate** — layout violations are IDE0055 **build errors** (`EnforceCodeStyleInBuild` + `TreatWarningsAsErrors`; probe-verified to fire). Fixer: `dotnet format whitespace DoseUp.slnx`. IDE format-on-save (committed `.vscode` settings, C# extension) applies the same rules.
 - **Line width: soft ~200-char guideline, deliberately unenforced** (`max_line_length` declares it; no tool reads it). The accepted trade of dropping CSharpier: no deterministic width-based wrapping, and `.csproj`/XML formatting is hand-kept.
+- **One-line blocks carry no braces** (decided 2026-07-15); the statement sits on the next line, indented. Enforcement is bidirectional: Roslynator **RCS1002** owns the remove direction (build error; fires only when the single statement fits one line — the pack is otherwise off, see Static analysis) and IDE0011 (`when_multiline`) owns the add direction for multi-line bodies. The next-line *placement* itself is convention, not tooling (`allow_embedded_statements_on_same_line` stays permissive).
 - **TypeScript/React:** ESLint + Prettier, CI-checked — unchanged: Prettier's opinions are adopted wholesale there, which is exactly the condition CSharpier failed on the C# side.
 - No pre-commit hooks (deliberate — on-save/on-build/CI cover it).
 
@@ -18,6 +19,7 @@ Several sections below are deliberately skeletal — they get filled by the chan
 
 - `TreatWarningsAsErrors`, `AnalysisLevel latest-all`, `EnforceCodeStyleInBuild`.
 - Curated third-party packs (candidates: Meziantou.Analyzer, SonarAnalyzer) tuned via `.editorconfig`; every disabled rule carries a comment saying why.
+- **Roslynator.Analyzers is installed but scoped to a single rule** (RCS1002, one-line brace removal — see Formatting): the `category-Roslynator` kill-switch keeps its other 200+ rules off until **PRE-16 ("Review roslynator config")** decides how much of the pack to adopt.
 - **Microsoft.CodeAnalysis.BannedApiAnalyzers** enforces the PRE-7 time discipline: `BannedSymbols.txt` bans `DateTime.Now/UtcNow` and `DateTimeOffset.Now/UtcNow` (Platform's clock composition is the sole exemption) — lands with the shared-kernel change.
 
 ## Architecture (decided — see [ADR-0002](../adr/0002-architecture-style.md))

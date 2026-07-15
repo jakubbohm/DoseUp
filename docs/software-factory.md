@@ -305,6 +305,10 @@ DoseUp: founding pick **CSharpier**; **reversed 2026-07-15** — `.editorconfig`
 DoseUp: **warnings-as-errors, latest-all, curated third-party packs**, every suppression justified in-place.
 *Generalizes:* strictness is nearly free on greenfield and expensive to retrofit — start maximal, tune down with recorded reasons.
 
+**F-74 · Enforcing a style rule the built-in analyzers can't express?**
+DoseUp (one-line blocks must NOT have braces, 2026-07-15): the built-in IDE0011 only ever *adds* braces — the remove direction needs a third-party analyzer, and the survey found exactly one mainstream owner: **Roslynator RCS1002** (Sonar S121 and StyleCop SA1503 enforce the opposite; Meziantou has no layout rules). Adopted **scoped to the single rule**: `dotnet_analyzer_diagnostic.category-Roslynator.severity = none` (Roslynator 4.x puts all rules in one category) + `dotnet_diagnostic.RCS1002.severity = warning`; warnings-as-errors makes it a build gate. Pack-wide review parked as an explicit checklist item (PRE-16).
+*Generalizes:* check which analyzer owns each *direction* of a style rule — preference options like `csharp_prefer_braces` often flag only one direction, silently permitting the other. A 200-rule pack can be adopted for one rule when it has a category kill-switch: scoped adoption beats both waiting and wholesale enablement, but leave a dated review item so the scoping stays deliberate rather than forgotten. Verify packs against preview toolchains empirically — a scratch project answers in minutes what docs leave ambiguous.
+
 **F-36 · Where do conventions live?**
 Options: enforced-only ("not enforced = not a convention") · **docs-first + enforcement mirror** · AI-rules-first.
 DoseUp: **docs-first** — `docs/conventions/` is authoritative; tooling and `.claude/rules/` mirror it; convention changes touch doc + enforcement together.

@@ -21,7 +21,7 @@ Every module the roadmap plans (M1 profiles/substances/logging onward) builds on
 ## Scoping decisions (Jakub, 2026-07-15)
 
 1. Minimal `ci.yml` lands here (option: wait for M0 — rejected).
-2. Tooling split: `.editorconfig` + CSharpier + strict-analysis MSBuild props now; analyzer packs M0. *(Amended 2026-07-15: CSharpier dropped mid-change — `.editorconfig` is the sole formatting authority, enforced as IDE0055 build errors; design D12 amendment, tasks 7.5.)*
+2. Tooling split: `.editorconfig` + CSharpier + strict-analysis MSBuild props now; analyzer packs M0. *(Amended 2026-07-15: CSharpier dropped mid-change — `.editorconfig` is the sole formatting authority, enforced as IDE0055 build errors; design D12 amendment, tasks 7.5.)* *(Amended 2026-07-15 (2): Roslynator.Analyzers adopted scoped to RCS1002 only — one-line blocks lose braces; the analyzer-packs-M0 boundary otherwise stands, pack-wide review deferred to PRE-16; tasks 7.6.)*
 3. Empty `DbContext` + initial migration **in** (makes §9.5 verifiable).
 4. Auth depth: bearer + secure-by-default + identity-echo endpoint; no Entra, no `ActiveAccount` (needs M0's account table).
 5. FluentValidation→Result bridge + SmartEnum converters **deferred to first consumer** — their founding-seed membership (conventions § SharedKernel discipline) is unchanged; they enter with the first validator / first SmartEnum.

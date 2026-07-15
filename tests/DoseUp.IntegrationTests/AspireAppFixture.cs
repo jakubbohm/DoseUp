@@ -101,8 +101,7 @@ public sealed class AspireAppFixture : IAsyncInitializer, IAsyncDisposable {
     );
 
   public async ValueTask DisposeAsync() {
-    if (_app is not null) {
+    if (_app is not null)
       await _app.DisposeAsync();
-    }
   }
 }

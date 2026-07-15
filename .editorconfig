@@ -281,6 +281,14 @@ dotnet_naming_style.upper_case.capitalization = all_upper
 
 #### DoseUp adjustments (deviations from the copied reference config) ####
 
+# Roslynator ships 200+ rules; adoption is scoped to exactly one until the PRE-16 config
+# review — the category kill-switch turns the pack off, single rules re-enable below it.
+dotnet_analyzer_diagnostic.category-Roslynator.severity = none
+# One-line blocks carry no braces (conventions § Formatting). The built-in IDE0011 only ever
+# ADDS braces, so the remove direction needs RCS1002; it fires solely on single-line
+# single-statement bodies, composing with csharp_prefer_braces = when_multiline.
+dotnet_diagnostic.RCS1002.severity = warning
+
 # The reference config intends this as a suggestion (fluent builder chains discard return values
 # by design); AnalysisLevel latest-all would otherwise promote it to a build-breaking warning.
 dotnet_diagnostic.IDE0058.severity = suggestion

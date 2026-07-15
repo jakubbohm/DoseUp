@@ -106,9 +106,8 @@ public sealed class AuthorizationMatrixTests {
       }
     }
 
-    foreach ((string name, string route) in MANUAL_ANONYMOUS_ROWS) {
+    foreach ((string name, string route) in MANUAL_ANONYMOUS_ROWS)
       yield return new MatrixCell(name, route, nameof(CallerClass.Anonymous), "2xx");
-    }
   }
 
   [Test]
