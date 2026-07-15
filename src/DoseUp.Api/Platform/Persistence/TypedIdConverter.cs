@@ -10,9 +10,7 @@ namespace DoseUp.Api.Platform.Persistence;
 /// model-builder convention. (The static-abstract call is wrapped in plain methods —
 /// expression trees cannot reference static abstract interface members.)
 /// </summary>
-public sealed class TypedIdConverter<TId>()
-  : ValueConverter<TId, Guid>(static id => ToProvider(id), static value => FromProvider(value))
-  where TId : struct, ITypedId<TId> {
+public sealed class TypedIdConverter<TId>() : ValueConverter<TId, Guid>(static id => ToProvider(id), static value => FromProvider(value)) where TId : struct, ITypedId<TId> {
   private static Guid ToProvider(TId id) => id.Value;
 
   private static TId FromProvider(Guid value) => TId.From(value);

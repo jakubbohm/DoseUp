@@ -7,19 +7,12 @@ HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-string doseupDbConnectionString =
-  builder.Configuration.GetConnectionString("doseupdb")
-  ?? throw new InvalidOperationException(
-    "Connection string 'doseupdb' is missing — run via the AppHost (aspire start) or the test harness."
-  );
+string doseupDbConnectionString = builder.Configuration.GetConnectionString("doseupdb")
+  ?? throw new InvalidOperationException("Connection string 'doseupdb' is missing — run via the AppHost (aspire start) or the test harness.");
 
-builder.Services.AddDbContext<DoseUpDbContext>(options =>
-  options.UseNpgsql(doseupDbConnectionString)
-);
+builder.Services.AddDbContext<DoseUpDbContext>(options => options.UseNpgsql(doseupDbConnectionString));
 
-builder.EnrichNpgsqlDbContext<DoseUpDbContext>(static settings =>
-  settings.DisableHealthChecks = true
-);
+builder.EnrichNpgsqlDbContext<DoseUpDbContext>(static settings => settings.DisableHealthChecks = true);
 
 builder.Services.AddHostedService<MigrationWorker>();
 

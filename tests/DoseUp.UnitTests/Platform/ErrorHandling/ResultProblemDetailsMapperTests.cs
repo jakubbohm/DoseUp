@@ -17,18 +17,15 @@ public sealed class ResultProblemDetailsMapperTests {
 
   [Test]
   public void Validation_maps_to_400_reporting_every_invalid_field() {
-    Result result = new Result.Validation(
-      new Dictionary<string, string[]> {
-        ["name"] = ["Name is required."],
-        ["timing"] = ["Timing is out of range."],
-      }
-    );
+    Result result = new Result.Validation(new Dictionary<string, string[]> {
+      ["name"] = ["Name is required."],
+      ["timing"] = ["Timing is out of range."],
+    });
 
     ProblemDetails problem = result.ToProblemDetails();
 
     problem.Status.ShouldBe(400);
-    HttpValidationProblemDetails validation =
-      problem.ShouldBeOfType<HttpValidationProblemDetails>();
+    HttpValidationProblemDetails validation = problem.ShouldBeOfType<HttpValidationProblemDetails>();
     validation.Errors["name"].ShouldBe(["Name is required."]);
     validation.Errors["timing"].ShouldBe(["Timing is out of range."]);
   }
@@ -43,10 +40,7 @@ public sealed class ResultProblemDetailsMapperTests {
 
     problem.Status.ShouldBe(409);
     problem.Type.ShouldBe("https://doseup.app/problems/rule-violation");
-    problem
-      .Extensions["violations"]
-      .ShouldBeAssignableTo<IReadOnlyList<RuleViolation>>()
-      .ShouldBe([first, second]);
+    problem.Extensions["violations"].ShouldBeAssignableTo<IReadOnlyList<RuleViolation>>().ShouldBe([first, second]);
   }
 
   [Test]

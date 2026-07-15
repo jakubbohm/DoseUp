@@ -13,10 +13,7 @@ namespace DoseUp.Api.SharedKernel.Events;
 public sealed class DomainEventDispatcher(IServiceProvider services) {
   private const int MAX_DEPTH = 10;
 
-  public async Task DispatchAsync(
-    IReadOnlyCollection<IAggregateRoot> aggregates,
-    CancellationToken cancellationToken
-  ) {
+  public async Task DispatchAsync(IReadOnlyCollection<IAggregateRoot> aggregates, CancellationToken cancellationToken) {
     ArgumentNullException.ThrowIfNull(aggregates);
 
     for (int depth = 0; ; depth++) {
@@ -24,20 +21,14 @@ public sealed class DomainEventDispatcher(IServiceProvider services) {
       if (events.Length == 0)
         return;
 
-      if (depth >= MAX_DEPTH) {
-        throw new InvalidOperationException(
-          $"Domain-event cascade exceeded {MAX_DEPTH} dispatch passes — handlers keep raising new events; this is a bug."
-        );
-      }
+      if (depth >= MAX_DEPTH)
+        throw new InvalidOperationException($"Domain-event cascade exceeded {MAX_DEPTH} dispatch passes — handlers keep raising new events; this is a bug.");
 
       foreach (IDomainEvent domainEvent in events) {
         Type handlerType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
         MethodInfo handleMethod = handlerType.GetMethod(nameof(IDomainEventHandler<>.HandleAsync))!;
-        foreach (object? handler in services.GetServices(handlerType)) {
-          await (
-            (Task)handleMethod.Invoke(handler, [domainEvent, cancellationToken])!
-          ).ConfigureAwait(false);
-        }
+        foreach (object? handler in services.GetServices(handlerType))
+          await ((Task)handleMethod.Invoke(handler, [domainEvent, cancellationToken])!).ConfigureAwait(false);
       }
     }
   }

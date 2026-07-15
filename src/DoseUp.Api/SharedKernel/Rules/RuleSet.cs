@@ -12,10 +12,7 @@ namespace DoseUp.Api.SharedKernel.Rules;
 public sealed class RuleSet {
   private readonly List<List<Func<Task<RuleCheck>>>> _stages;
 
-  private RuleSet() =>
-    _stages = [
-      [],
-    ];
+  private RuleSet() => _stages = [[]];
 
   /// <summary>Starts a set with the first stage's pure, already-evaluated checks.</summary>
   public static RuleSet Add(params RuleCheck[] checks) {

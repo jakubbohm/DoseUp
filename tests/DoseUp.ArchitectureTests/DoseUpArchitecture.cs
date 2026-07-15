@@ -11,10 +11,7 @@ namespace DoseUp.ArchitectureTests;
 /// every catalog rule.
 /// </summary>
 public static class DoseUpArchitecture {
-  public static Architecture Instance { get; } =
-    new ArchLoader()
-      .LoadAssemblies(typeof(Result).Assembly, typeof(FastEndpoints.BaseEndpoint).Assembly)
-      .Build();
+  public static Architecture Instance { get; } = new ArchLoader().LoadAssemblies(typeof(Result).Assembly, typeof(FastEndpoints.BaseEndpoint).Assembly).Build();
 
   /// <summary>
   /// Evaluates the rule against the shared architecture and fails with the rule's own
@@ -24,12 +21,7 @@ public static class DoseUpArchitecture {
   public static void ShouldHold(this IArchRule rule) {
     ArgumentNullException.ThrowIfNull(rule);
 
-    List<string> violations =
-    [
-      .. rule.Evaluate(Instance)
-        .Where(static result => !result.Passed)
-        .Select(static result => result.Description),
-    ];
+    List<string> violations = [.. rule.Evaluate(Instance).Where(static result => !result.Passed).Select(static result => result.Description)];
 
     violations.ShouldBeEmpty();
   }

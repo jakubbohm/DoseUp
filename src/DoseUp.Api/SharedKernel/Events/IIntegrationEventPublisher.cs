@@ -7,6 +7,5 @@ namespace DoseUp.Api.SharedKernel.Events;
 /// implementation over the Wolverine outbox arrives with the first integration event (M0+).
 /// </summary>
 public interface IIntegrationEventPublisher {
-  Task PublishAsync<TEvent>(TEvent integrationEvent, CancellationToken cancellationToken)
-    where TEvent : class;
+  Task PublishAsync<TEvent>(TEvent integrationEvent, CancellationToken cancellationToken) where TEvent : class;
 }

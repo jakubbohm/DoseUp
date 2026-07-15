@@ -5,12 +5,10 @@ namespace DoseUp.Api.SharedKernel.Domain;
 /// § Domain model base types). Entities are born with their identity (client-generated
 /// Guid v7 in the aggregate factory), so there is no transient-id state.
 /// </summary>
-public abstract class Entity<TId>(TId id) : IEquatable<Entity<TId>>
-  where TId : struct, IEquatable<TId> {
+public abstract class Entity<TId>(TId id) : IEquatable<Entity<TId>> where TId : struct, IEquatable<TId> {
   public TId Id { get; } = id;
 
-  public bool Equals(Entity<TId>? other) =>
-    other is not null && GetType() == other.GetType() && Id.Equals(other.Id);
+  public bool Equals(Entity<TId>? other) => other is not null && GetType() == other.GetType() && Id.Equals(other.Id);
 
   public override bool Equals(object? obj) => Equals(obj as Entity<TId>);
 

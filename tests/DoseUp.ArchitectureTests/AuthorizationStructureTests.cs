@@ -13,19 +13,9 @@ public sealed class AuthorizationStructureTests {
   public void Rule_12_allow_anonymous_is_an_explicit_allowlist() {
     // PRE-10 ring 0 / catalog rule 12: "endpoints are secure by default, AllowAnonymous is
     // an explicit, architecture-tested allowlist."
-    List<string> undeclared =
-    [
-      .. DoseUpArchitecture
-        .Instance.Types.Where(static type =>
-          type.FullName.StartsWith("DoseUp.Api", StringComparison.Ordinal)
-          && type.Name.EndsWith("Endpoint", StringComparison.Ordinal)
-        )
-        .Where(static type =>
-          type.Dependencies.OfType<MethodCallDependency>()
-            .Any(static call =>
-              call.TargetMember.FullName.Contains("AllowAnonymous", StringComparison.Ordinal)
-            )
-        )
+    List<string> undeclared = [
+      .. DoseUpArchitecture.Instance.Types.Where(static type => type.FullName.StartsWith("DoseUp.Api", StringComparison.Ordinal) && type.Name.EndsWith("Endpoint", StringComparison.Ordinal))
+        .Where(static type => type.Dependencies.OfType<MethodCallDependency>().Any(static call => call.TargetMember.FullName.Contains("AllowAnonymous", StringComparison.Ordinal)))
         .Select(static type => type.FullName)
         .Except(ANONYMOUS_ENDPOINT_ALLOWLIST, StringComparer.Ordinal),
     ];
@@ -38,21 +28,13 @@ public sealed class AuthorizationStructureTests {
     // PRE-10 ring 1 / catalog rule 13: "Admin endpoints live in one FastEndpoints group
     // carrying the AdminOnly policy." Directional until M0 lands the group type: any
     // endpoint class named Admin* must configure itself into a group.
-    List<string> ungrouped =
-    [
-      .. DoseUpArchitecture
-        .Instance.Types.Where(static type =>
+    List<string> ungrouped = [
+      .. DoseUpArchitecture.Instance.Types.Where(static type =>
           type.FullName.StartsWith("DoseUp.Api", StringComparison.Ordinal)
           && type.Name.EndsWith("Endpoint", StringComparison.Ordinal)
           && type.Name.StartsWith("Admin", StringComparison.Ordinal)
         )
-        .Where(static type =>
-          !type
-            .Dependencies.OfType<MethodCallDependency>()
-            .Any(static call =>
-              call.TargetMember.Name.StartsWith("Group", StringComparison.Ordinal)
-            )
-        )
+        .Where(static type => !type.Dependencies.OfType<MethodCallDependency>().Any(static call => call.TargetMember.Name.StartsWith("Group", StringComparison.Ordinal)))
         .Select(static type => type.FullName),
     ];
 

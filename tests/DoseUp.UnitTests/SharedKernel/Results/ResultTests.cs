@@ -22,20 +22,18 @@ public sealed class ResultTests {
   public void Every_case_is_distinguishable_by_pattern_matching() {
     // The switch has no default arm — this compiling at all is the closed-union
     // exhaustiveness guarantee (a missing case is a build error under TreatWarningsAsErrors).
-    static string Label(Result result) =>
-      result switch {
-        Result.Success => "success",
-        Result.Validation => "validation",
-        Result.NotFound => "not-found",
-        Result.RuleViolations => "rule-violations",
-        Result.Conflict => "conflict",
-        Result.Forbidden => "forbidden",
-        Result.Unexpected => "unexpected",
-      };
+    static string Label(Result result) => result switch {
+      Result.Success => "success",
+      Result.Validation => "validation",
+      Result.NotFound => "not-found",
+      Result.RuleViolations => "rule-violations",
+      Result.Conflict => "conflict",
+      Result.Forbidden => "forbidden",
+      Result.Unexpected => "unexpected",
+    };
 
     Label(new Result.Success()).ShouldBe("success");
-    Label(new Result.Validation(new Dictionary<string, string[]> { ["f"] = ["e"] }))
-      .ShouldBe("validation");
+    Label(new Result.Validation(new Dictionary<string, string[]> { ["f"] = ["e"] })).ShouldBe("validation");
     Label(new Result.NotFound()).ShouldBe("not-found");
     Label(new Result.RuleViolations([new RuleViolation("x.y", "z")])).ShouldBe("rule-violations");
     Label(new Result.Conflict()).ShouldBe("conflict");
@@ -64,9 +62,7 @@ public sealed class ResultTests {
 
     Result.Validation validation = result.ShouldBeValidation();
     validation.Errors["name"].ShouldBe(["Name is required."]);
-    validation
-      .Errors["timing"]
-      .ShouldBe(["Timing is out of range.", "Timing must be in the future."]);
+    validation.Errors["timing"].ShouldBe(["Timing is out of range.", "Timing must be in the future."]);
   }
 
   [Test]

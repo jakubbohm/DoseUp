@@ -40,10 +40,7 @@ public sealed class HealthEndpointTests {
 
     await using NpgsqlConnection connection = new(await Harness.GetDatabaseConnectionStringAsync());
     await connection.OpenAsync();
-    await using NpgsqlCommand command = new(
-      "SELECT count(*) FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid()",
-      connection
-    );
+    await using NpgsqlCommand command = new("SELECT count(*) FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid()", connection);
     long backends = (long)(await command.ExecuteScalarAsync() ?? -1L);
 
     backends.ShouldBe(0);

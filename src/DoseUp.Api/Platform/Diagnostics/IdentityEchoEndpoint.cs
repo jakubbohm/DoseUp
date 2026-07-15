@@ -19,9 +19,7 @@ public sealed class IdentityEchoEndpoint : EndpointWithoutRequest<IdentityEchoRe
   public override async Task HandleAsync(CancellationToken ct) {
     // A validated token without `oid` is a trust-anchor misconfiguration — a bug (class 8),
     // not an expected failure.
-    string oid =
-      User.FindFirst("oid")?.Value
-      ?? throw new InvalidOperationException("The validated token carries no 'oid' claim.");
+    string oid = User.FindFirst("oid")?.Value ?? throw new InvalidOperationException("The validated token carries no 'oid' claim.");
 
     await Send.OkAsync(new IdentityEchoResponse(oid), ct);
   }

@@ -8,8 +8,7 @@ namespace DoseUp.Api.SharedKernel.Domain;
 /// via <see cref="IAggregateRoot.DrainDomainEvents"/> and dispatches inside the unit of
 /// work (ADR-0002 § Events).
 /// </summary>
-public abstract class AggregateRoot<TId>(TId id) : Entity<TId>(id), IAggregateRoot
-  where TId : struct, IEquatable<TId> {
+public abstract class AggregateRoot<TId>(TId id) : Entity<TId>(id), IAggregateRoot where TId : struct, IEquatable<TId> {
   private readonly List<IDomainEvent> _domainEvents = [];
 
   protected void Raise(IDomainEvent domainEvent) {

@@ -24,11 +24,7 @@ public sealed class RuleSetTests {
 
   [Test]
   public async Task An_all_passing_set_passes() {
-    RuleCheck outcome = await RuleSet
-      .Add(Pass())
-      .Then(Pass())
-      .Then(static () => Task.FromResult<RuleCheck>(new RuleCheck.Pass()))
-      .CheckAsync();
+    RuleCheck outcome = await RuleSet.Add(Pass()).Then(Pass()).Then(static () => Task.FromResult<RuleCheck>(new RuleCheck.Pass())).CheckAsync();
 
     outcome.ShouldBePass();
   }
@@ -44,8 +40,7 @@ public sealed class RuleSetTests {
   public async Task A_failed_stage_stops_the_pipeline_and_reports_only_its_own_violations() {
     bool laterStageExecuted = false;
 
-    RuleCheck outcome = await RuleSet
-      .Add(Fail("a.one"))
+    RuleCheck outcome = await RuleSet.Add(Fail("a.one"))
       .Then(() => {
         laterStageExecuted = true;
         return Task.FromResult<RuleCheck>(new RuleCheck.Fail("b.never", "Never seen."));
@@ -60,8 +55,7 @@ public sealed class RuleSetTests {
   public async Task A_later_stage_runs_once_all_earlier_stages_pass() {
     bool laterStageExecuted = false;
 
-    RuleCheck outcome = await RuleSet
-      .Add(Pass())
+    RuleCheck outcome = await RuleSet.Add(Pass())
       .Then(() => {
         laterStageExecuted = true;
         return Task.FromResult<RuleCheck>(new RuleCheck.Pass());
@@ -76,8 +70,7 @@ public sealed class RuleSetTests {
   public void Nothing_runs_before_check_time() {
     bool executed = false;
 
-    _ = RuleSet
-      .Add(Pass())
+    _ = RuleSet.Add(Pass())
       .Add(() => {
         executed = true;
         return Task.FromResult<RuleCheck>(new RuleCheck.Pass());
@@ -92,8 +85,7 @@ public sealed class RuleSetTests {
 
   [Test]
   public async Task Async_checks_in_one_stage_all_run_and_aggregate_even_when_earlier_ones_fail() {
-    RuleCheck outcome = await RuleSet
-      .Add()
+    RuleCheck outcome = await RuleSet.Add()
       .Add(static () => Task.FromResult<RuleCheck>(new RuleCheck.Fail("a.one", "One.")))
       .Add(static () => Task.FromResult<RuleCheck>(new RuleCheck.Fail("a.two", "Two.")))
       .CheckAsync();
@@ -105,8 +97,7 @@ public sealed class RuleSetTests {
   public async Task Async_checks_are_awaited_strictly_sequentially_in_registration_order() {
     List<string> log = [];
 
-    RuleCheck outcome = await RuleSet
-      .Add()
+    RuleCheck outcome = await RuleSet.Add()
       .Add(async () => {
         log.Add("first:start");
         await Task.Delay(20);

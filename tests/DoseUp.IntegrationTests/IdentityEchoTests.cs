@@ -18,9 +18,7 @@ public sealed class IdentityEchoTests {
     Guid oid = Guid.CreateVersion7();
     using HttpClient client = Harness.CreateAuthenticatedClient(oid);
 
-    HttpResponseMessage response = await client.GetAsync(
-      new Uri("/diagnostics/identity", UriKind.Relative)
-    );
+    HttpResponseMessage response = await client.GetAsync(new Uri("/diagnostics/identity", UriKind.Relative));
 
     response.StatusCode.ShouldBe(HttpStatusCode.OK);
     IdentityEchoBody? body = await response.Content.ReadFromJsonAsync<IdentityEchoBody>();
@@ -33,14 +31,10 @@ public sealed class IdentityEchoTests {
     // the bare middleware denial carries an RFC 9457 body.
     using HttpClient client = Harness.CreateAnonymousClient();
 
-    HttpResponseMessage response = await client.GetAsync(
-      new Uri("/diagnostics/identity", UriKind.Relative)
-    );
+    HttpResponseMessage response = await client.GetAsync(new Uri("/diagnostics/identity", UriKind.Relative));
 
     response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
-    response
-      .Content.Headers.ContentType.ShouldNotBeNull()
-      .MediaType.ShouldBe("application/problem+json");
+    response.Content.Headers.ContentType.ShouldNotBeNull().MediaType.ShouldBe("application/problem+json");
     ProblemBody? problem = await response.Content.ReadFromJsonAsync<ProblemBody>();
     problem.ShouldNotBeNull().Status.ShouldBe(401);
   }
@@ -50,9 +44,7 @@ public sealed class IdentityEchoTests {
     // api-shell R1 scenario 2: local validation, no trust anchor match → 401.
     using HttpClient client = Harness.CreateUntrustedKeyClient(Guid.CreateVersion7());
 
-    HttpResponseMessage response = await client.GetAsync(
-      new Uri("/diagnostics/identity", UriKind.Relative)
-    );
+    HttpResponseMessage response = await client.GetAsync(new Uri("/diagnostics/identity", UriKind.Relative));
 
     response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
   }

@@ -23,9 +23,6 @@ public sealed class HygieneTests {
     while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "DoseUp.slnx")))
       directory = directory.Parent;
 
-    return directory?.FullName
-      ?? throw new InvalidOperationException(
-        "Repository root (DoseUp.slnx) not found above the test output directory."
-      );
+    return directory?.FullName ?? throw new InvalidOperationException("Repository root (DoseUp.slnx) not found above the test output directory.");
   }
 }

@@ -29,9 +29,7 @@ public sealed class DomainEventDispatcherTests {
     TestAggregate aggregate = new(TestId.Create());
     RecordingHandler<SecondThingHappened> followUpHandler = new();
     ServiceCollection services = new();
-    services.AddSingleton<IDomainEventHandler<FirstThingHappened>>(
-      new ChainReactionHandler(aggregate)
-    );
+    services.AddSingleton<IDomainEventHandler<FirstThingHappened>>(new ChainReactionHandler(aggregate));
     services.AddSingleton<IDomainEventHandler<SecondThingHappened>>(followUpHandler);
     DomainEventDispatcher dispatcher = new(services.BuildServiceProvider());
     aggregate.RaiseFirst();
@@ -49,9 +47,7 @@ public sealed class DomainEventDispatcherTests {
     DomainEventDispatcher dispatcher = new(services.BuildServiceProvider());
     aggregate.RaiseFirst();
 
-    await Should.ThrowAsync<InvalidOperationException>(() =>
-      dispatcher.DispatchAsync([aggregate], CancellationToken.None)
-    );
+    await Should.ThrowAsync<InvalidOperationException>(() => dispatcher.DispatchAsync([aggregate], CancellationToken.None));
   }
 
   [Test]
@@ -66,8 +62,7 @@ public sealed class DomainEventDispatcherTests {
     ((IAggregateRoot)aggregate).DrainDomainEvents().ShouldBeEmpty();
   }
 
-  private sealed class RecordingHandler<TEvent> : IDomainEventHandler<TEvent>
-    where TEvent : IDomainEvent {
+  private sealed class RecordingHandler<TEvent> : IDomainEventHandler<TEvent> where TEvent : IDomainEvent {
     public List<TEvent> Seen { get; } = [];
 
     public Task HandleAsync(TEvent domainEvent, CancellationToken cancellationToken) {
@@ -76,16 +71,14 @@ public sealed class DomainEventDispatcherTests {
     }
   }
 
-  private sealed class ChainReactionHandler(TestAggregate aggregate)
-    : IDomainEventHandler<FirstThingHappened> {
+  private sealed class ChainReactionHandler(TestAggregate aggregate) : IDomainEventHandler<FirstThingHappened> {
     public Task HandleAsync(FirstThingHappened domainEvent, CancellationToken cancellationToken) {
       aggregate.RaiseSecond();
       return Task.CompletedTask;
     }
   }
 
-  private sealed class RunawayHandler(TestAggregate aggregate)
-    : IDomainEventHandler<FirstThingHappened> {
+  private sealed class RunawayHandler(TestAggregate aggregate) : IDomainEventHandler<FirstThingHappened> {
     public Task HandleAsync(FirstThingHappened domainEvent, CancellationToken cancellationToken) {
       aggregate.RaiseFirst();
       return Task.CompletedTask;

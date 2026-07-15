@@ -28,20 +28,13 @@ public sealed class DomainDisciplineTests {
     // call IIntegrationEventPublisher" — Platform implements it over the outbox.
     string portFullName = typeof(IIntegrationEventPublisher).FullName!;
 
-    List<string> offenders =
-    [
-      .. DoseUpArchitecture
-        .Instance.Types.Where(static type =>
+    List<string> offenders = [
+      .. DoseUpArchitecture.Instance.Types.Where(static type =>
           type.FullName.StartsWith("DoseUp.Api", StringComparison.Ordinal)
           && !type.FullName.StartsWith("DoseUp.Api.SharedKernel", StringComparison.Ordinal)
         )
-        .Where(type =>
-          type.Dependencies.Any(dependency => dependency.Target.FullName == portFullName)
-        )
-        .Where(static type =>
-          !type.FullName.StartsWith("DoseUp.Api.Platform", StringComparison.Ordinal)
-          && !type.Name.EndsWith("PublishedLanguage", StringComparison.Ordinal)
-        )
+        .Where(type => type.Dependencies.Any(dependency => dependency.Target.FullName == portFullName))
+        .Where(static type => !type.FullName.StartsWith("DoseUp.Api.Platform", StringComparison.Ordinal) && !type.Name.EndsWith("PublishedLanguage", StringComparison.Ordinal))
         .Select(static type => type.FullName),
     ];
 
@@ -55,10 +48,8 @@ public sealed class DomainDisciplineTests {
     // Reflection over the offline-built EF model — no database (design.md D11).
     using DoseUpDbContext context = new DoseUpDbContextFactory().CreateDbContext([]);
 
-    List<string> offenders =
-    [
-      .. context
-        .Model.GetEntityTypes()
+    List<string> offenders = [
+      .. context.Model.GetEntityTypes()
         .Select(static entityType => entityType.ClrType)
         .Where(static clrType => !typeof(IAggregateRoot).IsAssignableFrom(clrType))
         .Select(static clrType => clrType.FullName!),

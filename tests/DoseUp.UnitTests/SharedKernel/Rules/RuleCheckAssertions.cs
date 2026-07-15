@@ -13,13 +13,10 @@ public static class RuleCheckAssertions {
     (check is RuleCheck.Pass).ShouldBeTrue($"Expected Pass but got: {Describe(check)}");
 
   public static RuleCheck.Fail ShouldBeFail(this RuleCheck check) =>
-    check is RuleCheck.Fail fail
-      ? fail
-      : throw new ShouldAssertException($"Expected Fail but got: {Describe(check)}");
+    check is RuleCheck.Fail fail ? fail : throw new ShouldAssertException($"Expected Fail but got: {Describe(check)}");
 
   public static void ShouldBeFailWith(this RuleCheck check, params string[] codes) =>
     check.ShouldBeFail().Violations.Select(static v => v.Code).ShouldBe(codes);
 
-  private static string Describe(RuleCheck check) =>
-    check.Value?.ToString() ?? "default(RuleCheck)";
+  private static string Describe(RuleCheck check) => check.Value?.ToString() ?? "default(RuleCheck)";
 }

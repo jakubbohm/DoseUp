@@ -26,9 +26,7 @@ public sealed partial class DependencyRuleTests {
       .ResideInNamespaceMatching(@"DoseUp\.Api\.Modules\..+\.Domain")
       .Should()
       .NotDependOnAnyTypesThat()
-      .ResideInNamespaceMatching(
-        @"DoseUp\.Api\.Modules\..+\.(Features|Infrastructure)|DoseUp\.Api\.Platform|FastEndpoints|Wolverine|Microsoft\.EntityFrameworkCore|Npgsql"
-      )
+      .ResideInNamespaceMatching(@"DoseUp\.Api\.Modules\..+\.(Features|Infrastructure)|DoseUp\.Api\.Platform|FastEndpoints|Wolverine|Microsoft\.EntityFrameworkCore|Npgsql")
       .WithoutRequiringPositiveResults();
 
     rule.ShouldHold();
@@ -38,19 +36,13 @@ public sealed partial class DependencyRuleTests {
   public void Rule_02_features_orchestrate_only_their_own_modules_domain() {
     // ADR-0002 rule 2: "Features orchestrate their own module's Domain through its ports;
     // they never touch another module's internals."
-    List<string> violations =
-    [
-      .. DoseUpArchitecture
-        .Instance.Types.Where(static type =>
-          ModuleArea().Match(type.FullName) is { Success: true } match
-          && match.Groups["area"].Value == "Features"
-        )
+    List<string> violations = [
+      .. DoseUpArchitecture.Instance.Types.Where(static type => ModuleArea().Match(type.FullName) is { Success: true } match && match.Groups["area"].Value == "Features")
         .SelectMany(static type =>
           type.Dependencies.Select(dependency => (Origin: type, dependency.Target))
             .Where(static edge =>
               ModuleArea().Match(edge.Target.FullName) is { Success: true } targetMatch
-              && targetMatch.Groups["module"].Value
-                != ModuleArea().Match(edge.Origin.FullName).Groups["module"].Value
+              && targetMatch.Groups["module"].Value != ModuleArea().Match(edge.Origin.FullName).Groups["module"].Value
               && targetMatch.Groups["area"].Value != "Contracts"
             )
             .Select(static edge => $"{edge.Origin.FullName} -> {edge.Target.FullName}")
@@ -64,16 +56,13 @@ public sealed partial class DependencyRuleTests {
   public void Rule_03_cross_module_communication_is_contracts_and_events_only() {
     // ADR-0002 rule 3: "Cross-module communication happens only via public contracts and
     // integration events — never direct calls into another module's Domain/Features/Infrastructure."
-    List<string> violations =
-    [
-      .. DoseUpArchitecture
-        .Instance.Types.Where(static type => ModuleArea().IsMatch(type.FullName))
+    List<string> violations = [
+      .. DoseUpArchitecture.Instance.Types.Where(static type => ModuleArea().IsMatch(type.FullName))
         .SelectMany(static type =>
           type.Dependencies.Select(dependency => (Origin: type, dependency.Target))
             .Where(static edge =>
               ModuleArea().Match(edge.Target.FullName) is { Success: true } targetMatch
-              && targetMatch.Groups["module"].Value
-                != ModuleArea().Match(edge.Origin.FullName).Groups["module"].Value
+              && targetMatch.Groups["module"].Value != ModuleArea().Match(edge.Origin.FullName).Groups["module"].Value
               && targetMatch.Groups["area"].Value != "Contracts"
             )
             .Select(static edge => $"{edge.Origin.FullName} -> {edge.Target.FullName}")
@@ -87,22 +76,15 @@ public sealed partial class DependencyRuleTests {
   public void Rule_04_infrastructure_adapters_are_seen_only_by_platform() {
     // ADR-0002 rule 4: "Infrastructure implements its module's ports; concrete adapters are
     // seen only by Platform (composition root)."
-    List<string> violations =
-    [
-      .. DoseUpArchitecture
-        .Instance.Types.Where(static type =>
-          type.FullName.StartsWith("DoseUp.Api", StringComparison.Ordinal)
-        )
+    List<string> violations = [
+      .. DoseUpArchitecture.Instance.Types.Where(static type => type.FullName.StartsWith("DoseUp.Api", StringComparison.Ordinal))
         .SelectMany(static type =>
           type.Dependencies.Select(dependency => (Origin: type, dependency.Target))
             .Where(static edge =>
               ModuleArea().Match(edge.Target.FullName) is { Success: true } targetMatch
               && targetMatch.Groups["area"].Value == "Infrastructure"
               && !edge.Origin.FullName.StartsWith("DoseUp.Api.Platform", StringComparison.Ordinal)
-              && !edge.Origin.FullName.StartsWith(
-                $"DoseUp.Api.Modules.{targetMatch.Groups["module"].Value}.Infrastructure",
-                StringComparison.Ordinal
-              )
+              && !edge.Origin.FullName.StartsWith($"DoseUp.Api.Modules.{targetMatch.Groups["module"].Value}.Infrastructure", StringComparison.Ordinal)
             )
             .Select(static edge => $"{edge.Origin.FullName} -> {edge.Target.FullName}")
         ),
@@ -133,10 +115,8 @@ public sealed partial class DependencyRuleTests {
     // ADR-0002 rule 7: "Use-case slice namespaces inside a module's Features never reference
     // sibling slice namespaces — shared behavior moves down into Domain or up into the
     // module's shared space."
-    List<string> violations =
-    [
-      .. DoseUpArchitecture
-        .Instance.Types.Where(static type => FeatureSlice().IsMatch(type.FullName))
+    List<string> violations = [
+      .. DoseUpArchitecture.Instance.Types.Where(static type => FeatureSlice().IsMatch(type.FullName))
         .SelectMany(static type =>
           type.Dependencies.Select(dependency => (Origin: type, dependency.Target))
             .Where(static edge =>

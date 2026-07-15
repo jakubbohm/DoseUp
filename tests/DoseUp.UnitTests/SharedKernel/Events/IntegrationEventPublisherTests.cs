@@ -20,8 +20,7 @@ public sealed class IntegrationEventPublisherTests {
   private sealed class RecordingPublisher : IIntegrationEventPublisher {
     public List<object> Published { get; } = [];
 
-    public Task PublishAsync<TEvent>(TEvent integrationEvent, CancellationToken cancellationToken)
-      where TEvent : class {
+    public Task PublishAsync<TEvent>(TEvent integrationEvent, CancellationToken cancellationToken) where TEvent : class {
       Published.Add(integrationEvent);
       return Task.CompletedTask;
     }

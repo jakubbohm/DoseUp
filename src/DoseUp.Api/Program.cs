@@ -16,24 +16,14 @@ builder.AddServiceDefaults();
 builder.Services.AddScoped<DomainEventDispatcher>();
 builder.Services.AddScoped<DomainEventDispatchInterceptor>();
 
-string doseupDbConnectionString =
-  builder.Configuration.GetConnectionString("doseupdb")
-  ?? throw new InvalidOperationException(
-    "Connection string 'doseupdb' is missing — run via the AppHost (aspire start) or the test harness."
-  );
+string doseupDbConnectionString = builder.Configuration.GetConnectionString("doseupdb")
+  ?? throw new InvalidOperationException("Connection string 'doseupdb' is missing — run via the AppHost (aspire start) or the test harness.");
 
-builder.Services.AddDbContext<DoseUpDbContext>(
-  (services, options) =>
-    options
-      .UseNpgsql(doseupDbConnectionString)
-      .AddInterceptors(services.GetRequiredService<DomainEventDispatchInterceptor>())
-);
+builder.Services.AddDbContext<DoseUpDbContext>((services, options) => options.UseNpgsql(doseupDbConnectionString).AddInterceptors(services.GetRequiredService<DomainEventDispatchInterceptor>()));
 
 // Aspire client integration: OTel + connection retries; the DB health check stays off —
 // the probe path never touches the database (ADR-0001, api-shell spec).
-builder.EnrichNpgsqlDbContext<DoseUpDbContext>(static settings =>
-  settings.DisableHealthChecks = true
-);
+builder.EnrichNpgsqlDbContext<DoseUpDbContext>(static settings => settings.DisableHealthChecks = true);
 
 // ── ProblemDetails: every non-2xx carries an RFC 9457 body (D7) ──
 
@@ -45,31 +35,25 @@ IConfigurationSection testAuthority = builder.Configuration.GetSection("Auth:Tes
 if (testAuthority.Exists() && builder.Environment.IsProduction())
   throw new InvalidOperationException("Auth:TestAuthority must never be configured in Production.");
 
-builder
-  .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-  .AddJwtBearer(options => {
-    // `oid` must arrive as `oid` — no legacy inbound claim-type mapping.
-    options.MapInboundClaims = false;
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
+  // `oid` must arrive as `oid` — no legacy inbound claim-type mapping.
+  options.MapInboundClaims = false;
 
-    if (testAuthority.Exists()) {
-      options.TokenValidationParameters = new TokenValidationParameters {
-        ValidIssuer = Required(testAuthority, "Issuer"),
-        ValidAudience = Required(testAuthority, "Audience"),
-        IssuerSigningKey = new SymmetricSecurityKey(
-          Convert.FromBase64String(Required(testAuthority, "SigningKey"))
-        ),
-      };
-    }
+  if (testAuthority.Exists()) {
+    options.TokenValidationParameters = new TokenValidationParameters {
+      ValidIssuer = Required(testAuthority, "Issuer"),
+      ValidAudience = Required(testAuthority, "Audience"),
+      IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(Required(testAuthority, "SigningKey"))),
+    };
+  }
 
-    // With no authority configured, validation has no trust anchor and every token is
-    // rejected — secure by default. M0 wires Entra External ID as the primary authority.
-  });
+  // With no authority configured, validation has no trust anchor and every token is
+  // rejected — secure by default. M0 wires Entra External ID as the primary authority.
+});
 
 // Secure by default (PRE-10 ring 0): every endpoint without explicit auth metadata
 // requires an authenticated caller; anonymous endpoints opt out explicitly.
-builder.Services.AddAuthorization(static options =>
-  options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()
-);
+builder.Services.AddAuthorization(static options => options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
 builder.Services.AddFastEndpoints();
 
@@ -90,8 +74,4 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
-static string Required(IConfigurationSection section, string key) =>
-  section[key]
-  ?? throw new InvalidOperationException(
-    $"Auth:TestAuthority:{key} is required when the section is present."
-  );
+static string Required(IConfigurationSection section, string key) => section[key] ?? throw new InvalidOperationException($"Auth:TestAuthority:{key} is required when the section is present.");
