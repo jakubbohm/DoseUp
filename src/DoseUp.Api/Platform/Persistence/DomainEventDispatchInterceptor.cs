@@ -9,8 +9,7 @@ namespace DoseUp.Api.Platform.Persistence;
 /// the save, inside the same unit of work (ADR-0002 § Unit of work) — handler-made
 /// changes join the same transaction.
 /// </summary>
-public sealed class DomainEventDispatchInterceptor(DomainEventDispatcher dispatcher)
-  : SaveChangesInterceptor {
+public sealed class DomainEventDispatchInterceptor(DomainEventDispatcher dispatcher) : SaveChangesInterceptor {
   public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default) {
     ArgumentNullException.ThrowIfNull(eventData);
 

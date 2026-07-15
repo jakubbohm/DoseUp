@@ -19,7 +19,9 @@ builder.Services.AddScoped<DomainEventDispatchInterceptor>();
 string doseupDbConnectionString = builder.Configuration.GetConnectionString("doseupdb")
   ?? throw new InvalidOperationException("Connection string 'doseupdb' is missing — run via the AppHost (aspire start) or the test harness.");
 
-builder.Services.AddDbContext<DoseUpDbContext>((services, options) => options.UseNpgsql(doseupDbConnectionString).AddInterceptors(services.GetRequiredService<DomainEventDispatchInterceptor>()));
+builder.Services.AddDbContext<DoseUpDbContext>((services, options) => options
+    .UseNpgsql(doseupDbConnectionString)
+    .AddInterceptors(services.GetRequiredService<DomainEventDispatchInterceptor>()));
 
 // Aspire client integration: OTel + connection retries; the DB health check stays off —
 // the probe path never touches the database (ADR-0001, api-shell spec).

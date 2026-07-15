@@ -1,7 +1,8 @@
 {
   "editor.formatOnSave": true,
   "[csharp]": {
-    "editor.defaultFormatter": "ms-dotnettools.csharp"
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
+    "editor.formatOnType": true
   },
   "[markdown]": {
     "editor.formatOnSave": false
