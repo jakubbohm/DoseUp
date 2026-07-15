@@ -1,0 +1,3 @@
+# Hand-maintained doc with intentionally wide outcome tables — Prettier's
+# column-alignment reflow makes the diffs unreadable. Keep it out of Prettier.
+docs/product/pre-implementation-checklist.md
