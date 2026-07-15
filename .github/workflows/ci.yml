@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest # Docker preinstalled — the harness needs it for postgres
     timeout-minutes: 30 # Aspire-in-CI hang backstop (design.md D9/D13)
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           # Exact preview pin (deterministic; the standing preview-upgrade PR bumps it).
           # SDK 10 rides along for the net10 AppHost runtime.
