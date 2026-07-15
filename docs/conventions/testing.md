@@ -19,7 +19,7 @@ DoseUp.slnx
 
 - **Per-layer projects, not per-module.** The API is one project, so tests mirror modules as **folders/namespaces**, never as projects — per-module test projects would multiply projects for zero isolation benefit. Growth rule (same spirit as the SharedKernel one): split a test project only when build/run time actually forces it, and record the split here.
 - **Project names say the layer, not the target.** `DoseUp.UnitTests`, not `DoseUp.Domain.Tests` — the unit project also covers SharedKernel primitives (`RuleSet` semantics get exhaustive unit tests), so layer-naming is the honest one.
-- **Mirroring is mechanical in both directions.** A test file sits at the same folder path as its target with the project root swapped: `DoseUp.Api/Tracking/Domain/Schedule.cs` ↔ `DoseUp.UnitTests/Tracking/Domain/ScheduleTests.cs`; namespaces follow folders. Finding the tests for a type — or the type for a test — is path substitution, no search required.
+- **Mirroring is mechanical in both directions.** A test file sits at the same folder path as its target with the project root swapped: `DoseUp.Api/Modules/Scheduling/Domain/Schedule.cs` ↔ `DoseUp.UnitTests/Modules/Scheduling/Domain/ScheduleTests.cs`; namespaces follow folders. Finding the tests for a type — or the type for a test — is path substitution, no search required.
 - **One entry point; layers selected by project.** `dotnet test DoseUp.slnx` runs everything. CI selects layers by *project*, never by category attributes — there is no `[Category("Integration")]` bookkeeping to forget. (The smoke-vs-full split for E2E is a Playwright concern in `web/e2e`, outside the .NET solution.)
 - Test projects ride `net11.0` + `LangVersion preview` like the service projects (CLAUDE.md). Package/version mechanics (`Directory.Packages.props`, TUnit/Shouldly/ArchUnitNET references) land with the shared-kernel change.
 
@@ -29,7 +29,7 @@ Three principles decide placement; the table is their lookup form. When the prin
 
 **P1 — Test behavior at the outermost boundary that owns it; go lower only under combinatorial pressure.** The unit layer absorbs combinatorial explosion (domain rules, edge cases, DST math — hundreds of cheap cases). The integration layer proves each slice's wiring, persistence semantics, and wire contract — once per path, not per permutation. E2E proves user journeys — a handful. The pyramid is a decision rule here, not a shape metaphor. Corollary: **a slice with no interesting domain logic gets no unit tests** — its slice test is the complete story; unit-testing a thin handler only restates the implementation.
 
-**P2 — Feature handlers are tested against a real Postgres or not at all.** The `DbContext` is the data-access API by design (PRE-7, no repositories), so there is no honest seam to fake. Named bans:
+**P2 — Feature handlers are tested against a real Postgres or not at all.** The module's `DbContext` is the data-access API by design (PRE-7, no repositories), so there is no honest seam to fake. Named bans:
 
 - **EF InMemory provider — banned.** No relational semantics: the set-rule **constraint backstop can never fire** on it, so a green handler test would be lying about the very mechanism the domain-rules model relies on.
 - **SQLite-in-memory — banned.** Same lie in milder form (constraint, `uuid`, and concurrency behavior diverge from Npgsql).
@@ -50,7 +50,7 @@ This is precisely why ADR-0003 accepted the Aspire harness's full-graph startup 
 | Wolverine consumer | IntegrationTests | deliver the message, assert effect **and** idempotency (deliver twice → once-effect) |
 | Published-language translator | mapping = UnitTests (pure); outbox enrollment = IntegrationTests | |
 | Domain-event dispatcher, PD mapper | UnitTests (loop/depth-guard, mapping table); in-UoW dispatch semantics + wire shape = one integration test each | |
-| EF configuration / migration | implicit via harness startup + one `HasPendingModelChanges` guard test | |
+| EF configuration / migration | implicit via harness startup + one `HasPendingModelChanges` guard test per module context | |
 | Endpoint auth/status wiring | the authZ matrix (§4) + slice tests | |
 | UI journey | `web/e2e` (Playwright) | few, journey-level; never API permutations |
 
@@ -129,25 +129,28 @@ Two framing conventions govern the whole catalog:
 | 1 | Domain references only SharedKernel — never Features/Infrastructure/Platform/FastEndpoints/Wolverine/EF/Npgsql (ADR-0002 rule 1) | ArchUnitNET |
 | 2 | Features orchestrate only their own module's Domain through its ports (rule 2) | ArchUnitNET |
 | 3 | Cross-module = public contracts + integration events only (rule 3) | ArchUnitNET |
-| 4 | Infrastructure adapters visible only to Platform (rule 4) | ArchUnitNET |
+| 4 | The module's `DbContext` is consumed only by its own Features (the repository-free carve-out); every other Infrastructure type is seen only by the composition root, or by nothing (rule 4, revised 2026-07-15) | ArchUnitNET |
 | 5 | SharedKernel references nothing project-internal (rule 5) | ArchUnitNET |
 | 6 | Feature handlers + validators reference no FastEndpoints/ASP.NET types (rule 6 — the mechanically testable proxy for "endpoints carry no use-case logic") | ArchUnitNET |
 | 7 | Slice independence: use-case slice namespaces never reference sibling slices; sharing moves down (Domain) or up (module shared) (rule 7, PRE-8) | ArchUnitNET |
 | 8 | No C# `enum` in Domain namespaces — SmartEnum only; the plain-enum DTO carve-out lives in Features (PRE-7) | ArchUnitNET |
 | 9 | Only per-module published-language translators call `IIntegrationEventPublisher` (PRE-7) | ArchUnitNET |
-| 10 | Every `DbSet<T>` entity type implements `IAggregateRoot` (PRE-7 base types) | reflection over the offline-built EF model (no DB), in ArchitectureTests |
+| 10 | For every `DbContext` discovered in the API assembly, every mapped entity type implements `IAggregateRoot` (PRE-7 base types) | reflection over the offline-built EF models (no DB), in ArchitectureTests |
 | 11 | Colocation: one use case's endpoint + handler + validator + DTOs share one namespace (ADR-0002 slice anatomy) | reflection + TUnit data source — ArchUnitNET cannot express relational-namespace rules |
 | 12 | `AllowAnonymous` = explicit allowlist (PRE-10) — **the allowlist is the test's data**: adding an anonymous endpoint means editing the list in the same PR | ArchUnitNET |
 | 13 | Admin endpoints ∈ the `AdminOnly` group (PRE-10) | ArchUnitNET |
 | 14 | Naming: feature handlers end `Handler`, validators end `Validator` (+ the reverse: `*Validator`-named classes reside in Features namespaces — catches misplacement), endpoints end `Endpoint` | ArchUnitNET — **activates when §6 fixes the naming conventions** |
 | 15 | Time APIs (`DateTime(Offset).Now/UtcNow`) banned outside Platform (PRE-7) | **BannedApiAnalyzers** — owner of record; ArchUnitNET never duplicates it |
 | 16 | EF InMemory/SQLite providers never referenced (§2 P2) | **Convention + review** (absent from `Directory.Packages.props`); an arch test only if it ever actually slips — honest owner, not fake mechanization |
+| 17 | A module's context maps only its own module's Domain types (ADR-0002 § Persistence is module property, 2026-07-15) | reflection over the offline-built EF models (no DB), in ArchitectureTests |
+| 18 | A module's context is consumed only by its own module and the composition root (ADR-0002 § Persistence is module property) | ArchUnitNET |
+| 19 | Every mapped entity sits in the module's schema (ADR-0002 § Persistence is module property) | reflection over the offline-built EF models (no DB), in ArchitectureTests |
 
 All ArchUnitNET rules **ship with the shared-kernel change and pass vacuously** until their targets exist — no phased introduction to forget.
 
 **Rejected: visibility tests (`internal` handlers/configurations).** In a single-assembly modular monolith `internal` is powerless between modules — every module sees every other's internals. The boundary work is done by namespace rules 2/3/7; blanket-`internal` would add `InternalsVisibleTo` ceremony for test projects with zero enforcement gain. (Real rule in multi-project layouts; theater here.)
 
-**Deliberate deviation from the classic guard set:** there is **no** "Features must not reference EF" rule — feature handlers are EF-aware *by design* (PRE-7: no repositories, the `DbContext` is the data-access API). The dependency guard is Domain-only (rule 1). Do not import the classic Clean-Architecture guard reflexively.
+**Deliberate deviation from the classic guard set:** there is **no** "Features must not reference EF" rule — feature handlers are EF-aware *by design* (PRE-7: no repositories, the module's `DbContext` is the data-access API). The dependency guard is Domain-only (rule 1). Do not import the classic Clean-Architecture guard reflexively.
 
 Deliberately *not* arch-tested (behavioral, owned elsewhere): ownership scoping → the §4 matrix; consumer idempotency and domain-events-dispatch-before-save → integration tests.
 

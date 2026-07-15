@@ -24,7 +24,7 @@ Several sections below are deliberately skeletal — they get filled by the chan
 
 ## Architecture (decided — see [ADR-0002](../adr/0002-architecture-style.md))
 
-Modular monolith in one project; dependency rules 1–5 of ADR-0002 are enforced by ArchUnitNET tests. Module grades are declared. Cross-module = contracts + integration events only.
+Modular monolith in one project; dependency rules 1–7 and the persistence boundary rules (catalog 17–19) of ADR-0002 are enforced by ArchUnitNET tests. Module grades are declared. Cross-module = contracts + integration events only.
 
 ## Authorization (decided — see ADR-0002 § Authorization)
 
@@ -71,11 +71,13 @@ The full design lives in **[domain-rules.md](domain-rules.md)**: the error taxon
 - **Contract edge: DTOs use plain C# enums** so `openapi.json` emits real enum schemas → openapi-typescript literal unions (PRE-6). The endpoint maps DTO enum ↔ SmartEnum; unmappable values surface as `Result` validation failures, never exceptions.
 - **SmartEnum vs C# union:** SmartEnum for closed *value sets* (named instances, lookup, per-instance data/behavior); unions for closed *shape alternatives* (`Result`). SmartEnum has no exhaustive-switch checking — prefer polymorphic behavior *on* the instances over switching *over* them.
 
-## Persistence — Postgres (migrations/seeding decided; ground rules in M1 design)
+## Persistence — Postgres (module ownership, migrations & seeding decided; rest in M1 design)
 
-Decided (PRE-4): EF Core 11 previews + Npgsql; `DbContext` is the unit of work (no wrapper).
+Decided (PRE-4): EF Core 11 previews + Npgsql; the `DbContext` is the unit of work (no wrapper) — since 2026-07-15 that means the **module's** context (next bullet).
 
-Decided (PRE-7): **no repository layer** — the `DbContext` is the data-access API as well as the UoW; endpoints and domain services query it directly (account-scoped by construction, PRE-10). An abstraction over data access appears only when a genuine second implementation exists — never anticipatory.
+Decided (2026-07-15, caught in the c001 review) — **persistence is module property**: each module owns its `DbContext`, its `IEntityTypeConfiguration<T>` mappings, its design-time factory, and its `Migrations/` under `Modules/<Module>/Infrastructure/Persistence/`; one schema per module, each with its own `__EFMigrationsHistory`. The boundary rules and the full rationale live in [ADR-0002 § Persistence is module property](../adr/0002-architecture-style.md#persistence-is-module-property-2026-07-15). The `DoseUpDbContext` under `Platform/Persistence` is a bootstrap placeholder, removed when the first module context lands (M1).
+
+Decided (PRE-7): **no repository layer** — the module's `DbContext` is the data-access API as well as the UoW; feature handlers query it directly (account-scoped by construction, PRE-10). An abstraction over data access appears only when a genuine second implementation exists — never anticipatory.
 
 Decided (PRE-9) — migrations & seeding:
 
@@ -96,7 +98,7 @@ Still to fill in M1 design: what never goes in the database (secrets, oversized 
 
 ## Testing conventions (decided — PRE-8)
 
-Everything lives in **[testing.md](testing.md)**: layout (three per-layer test projects, path-mirrored) · the placement decision tree ("I wrote X, where does its test go?" — feature handlers = slice tests over HTTP, no repositories ⇒ no honest seam to fake) · Aspire harness mechanics (one session-shared AppHost; isolation **by construction** — each test its own account, no cleanup; real JWT pipeline with a test trust anchor; ASB emulator + Azurite) · authZ-matrix mechanics (reflection census × kind classification, completeness gate) · the architecture-test catalog (16 rules, single enforcement owner each, incl. ADR-0002 rule 7 slice independence) · style (behavior-sentence names, AAA, hand-rolled builders, Shouldly confirmed against TUnit.Assertions) · CI cadence (fast job / harness job split; zero auto-retry, quarantine with paper trail). Headline bans: EF InMemory · SQLite-in-memory · mocked `DbContext` · mocking frameworks by default — **fake only what you don't own** (Entra's signature, the wall clock).
+Everything lives in **[testing.md](testing.md)**: layout (three per-layer test projects, path-mirrored) · the placement decision tree ("I wrote X, where does its test go?" — feature handlers = slice tests over HTTP, no repositories ⇒ no honest seam to fake) · Aspire harness mechanics (one session-shared AppHost; isolation **by construction** — each test its own account, no cleanup; real JWT pipeline with a test trust anchor; ASB emulator + Azurite) · authZ-matrix mechanics (reflection census × kind classification, completeness gate) · the architecture-test catalog (19 rules, single enforcement owner each, incl. ADR-0002 rule 7 slice independence and the persistence boundary rules 17–19) · style (behavior-sentence names, AAA, hand-rolled builders, Shouldly confirmed against TUnit.Assertions) · CI cadence (fast job / harness job split; zero auto-retry, quarantine with paper trail). Headline bans: EF InMemory · SQLite-in-memory · mocked `DbContext` · mocking frameworks by default — **fake only what you don't own** (Entra's signature, the wall clock).
 
 ## Observability (skeleton — wire in M0)
 

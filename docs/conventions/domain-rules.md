@@ -119,7 +119,7 @@ Endpoints declare the 409 response in their OpenAPI spec so `violations` and its
 
 ## 8. The write path, end to end
 
-The endpoint in front of this is a thin adapter — route + OpenAPI spec + auth policies + `Result` → ProblemDetails via the Platform mapper (ADR-0002 § Slices). A Wolverine consumer invoking the same use case is the same shape: inbox/idempotency concerns + the handler call. The handler is transport-independent and framework-free.
+The endpoint in front of this is a thin adapter — route + OpenAPI spec + auth policies + `Result` → ProblemDetails via the Platform mapper (ADR-0002 § Slices). A Wolverine consumer invoking the same use case is the same shape: inbox/idempotency concerns + the handler call. The handler is transport-independent and framework-free. The `db` it commits is the **module's** `DbContext` — the transactional boundary is the bounded context, not the single aggregate, a conscious DDD divergence recorded in [ADR-0002 § Unit of work & side effects](../adr/0002-architecture-style.md#unit-of-work--side-effects-pre-4).
 
 ```csharp
 // Feature handler — plain class, no FastEndpoints/HTTP references

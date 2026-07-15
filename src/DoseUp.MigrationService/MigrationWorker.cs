@@ -13,6 +13,8 @@ namespace DoseUp.MigrationService;
 public sealed class MigrationWorker(IServiceProvider serviceProvider, IHostApplicationLifetime lifetime) : BackgroundService {
   protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
     using (IServiceScope scope = serviceProvider.CreateScope()) {
+      // Applies the bootstrap-placeholder DoseUpDbContext today; generalizes to iterate
+      // every module context in M1 (registration shape gated on PRE-18).
       DoseUpDbContext context = scope.ServiceProvider.GetRequiredService<DoseUpDbContext>();
       IExecutionStrategy strategy = context.Database.CreateExecutionStrategy();
       await strategy.ExecuteAsync(() => context.Database.MigrateAsync(stoppingToken)).ConfigureAwait(false);

@@ -1,7 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
 using ArchUnitNET.Fluent;
-using DoseUp.Api.Platform.Persistence;
 using DoseUp.Api.SharedKernel.Domain;
 using DoseUp.Api.SharedKernel.Events;
+using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
@@ -42,18 +43,67 @@ public sealed class DomainDisciplineTests {
   }
 
   [Test]
-  public void Rule_10_every_db_set_entity_is_an_aggregate_root() {
-    // conventions § Domain model base types: IAggregateRoot "is what ArchUnitNET rules and
-    // generic constraints key on (e.g., only aggregate roots exposed as DbSet)".
-    // Reflection over the offline-built EF model — no database (design.md D11).
-    using DoseUpDbContext context = new DoseUpDbContextFactory().CreateDbContext([]);
+  public void Rule_10_every_mapped_entity_of_every_discovered_db_context_is_an_aggregate_root() {
+    // testing.md §5 catalog row 10: "For every DbContext discovered in the API assembly,
+    // every mapped entity type implements IAggregateRoot (PRE-7 base types)" — reflection
+    // over the offline-built EF models, no database (design.md D11). Discovery itself must
+    // be non-vacuous: today it finds the bootstrap DoseUpDbContext, whose empty model keeps
+    // the entity assertion vacuous.
+    DbContextDiscovery.AllContexts.ShouldNotBeEmpty();
 
-    List<string> offenders = [
-      .. context.Model.GetEntityTypes()
+    List<string> offenders = DbContextDiscovery.CollectOffendersAcrossAllModels(static context =>
+      context.Model.GetEntityTypes()
         .Select(static entityType => entityType.ClrType)
         .Where(static clrType => !typeof(IAggregateRoot).IsAssignableFrom(clrType))
-        .Select(static clrType => clrType.FullName!),
+        .Select(clrType => $"{context.GetType().FullName} maps {clrType.FullName}"));
+
+    offenders.ShouldBeEmpty();
+  }
+
+  [Test]
+  public void Rule_17_a_modules_context_maps_only_its_own_modules_domain_types() {
+    // ADR-0002 § Persistence is module property / catalog rule 17: "a module's context maps
+    // only its own module's Domain types" — reflection over the offline-built EF models,
+    // no database. Vacuously green until the first module context lands (roadmap M1).
+    List<string> offenders = DbContextDiscovery.CollectOffendersAcrossModuleModels(static (module, context) =>
+      context.Model.GetEntityTypes()
+        .Select(static entityType => entityType.ClrType)
+        .Where(clrType => !clrType.FullName!.StartsWith($"DoseUp.Api.Modules.{module}.Domain.", StringComparison.Ordinal))
+        .Select(clrType => $"{context.GetType().FullName} maps {clrType.FullName}"));
+
+    offenders.ShouldBeEmpty();
+  }
+
+  [Test]
+  public void The_bootstrap_placeholder_is_the_only_context_outside_modules() {
+    // ADR-0002 § Persistence is module property (transitional note): the empty DoseUpDbContext
+    // under Platform/Persistence is a bootstrap placeholder, removed with the first module
+    // context (roadmap M1). Rules 17–19 quantify over module contexts only, so a context
+    // outside Modules/ escapes them — this tripwire keeps that escape exactly one context
+    // wide. When M1 deletes the placeholder, shrink the expected list to empty.
+    List<string> nonModuleContexts = [
+      .. DbContextDiscovery.AllContexts
+        .Except(DbContextDiscovery.ModuleContexts.Select(static pair => pair.ContextType))
+        .Select(static type => type.FullName!),
     ];
+
+    nonModuleContexts.ShouldBe(["DoseUp.Api.Platform.Persistence.DoseUpDbContext"]);
+  }
+
+  [Test]
+  [SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "Lowercase is the spec, not normalization: ADR-0002 fixes each module's schema to the lowercase module name.")]
+  public void Rule_19_every_mapped_entity_sits_in_the_modules_schema() {
+    // ADR-0002 § Persistence is module property / catalog rule 19: "every mapped entity sits
+    // in the module's schema" — "one schema per module (HasDefaultSchema, lowercase module
+    // name)"; entityType.GetSchema() falls back to the model's default schema. Reflection
+    // over the offline-built EF models, no database. Vacuously green until roadmap M1.
+    List<string> offenders = DbContextDiscovery.CollectOffendersAcrossModuleModels(static (module, context) => {
+      string expectedSchema = module.ToLowerInvariant();
+
+      return context.Model.GetEntityTypes()
+        .Where(entityType => (entityType.GetSchema() ?? context.Model.GetDefaultSchema()) != expectedSchema)
+        .Select(entityType => $"{context.GetType().FullName} puts {entityType.Name} in schema '{entityType.GetSchema() ?? context.Model.GetDefaultSchema()}'");
+    });
 
     offenders.ShouldBeEmpty();
   }

@@ -22,16 +22,21 @@ context: |
   GitHub Actions · TUnit + Shouldly · ArchUnitNET · @playwright/test.
 
   Architecture (ADR-0002): modular monolith in the single API project — modules =
-  bounded contexts, each with Domain (clean core: aggregates, ports, rules
-  returning Result, domain events), Features (vertical slices: thin endpoint +
-  feature handler + validator per use case), Infrastructure (adapters), and a
-  declared rigor grade; plus SharedKernel (union Result, Error model,
-  RuleCheck/RuleSet, typed ids, domain-event + publisher ports) and Platform
-  (composition root, auth, the single ProblemDetails mapper, Wolverine outbox).
+  capability-named bounded contexts (initial set: Membership — accounts and their
+  profiles; Scheduling — dose plans and reminders), each with Domain (clean core:
+  aggregates, ports, rules returning Result, domain events), Features (vertical
+  slices: thin endpoint + feature handler + validator per use case),
+  Infrastructure (Persistence/ — the module's own DbContext, one schema per
+  module, its migrations — plus port adapters), and a declared rigor grade; plus
+  SharedKernel (union Result, Error model, RuleCheck/RuleSet, typed ids,
+  domain-event + publisher ports) and Platform (composition root, auth, the
+  single ProblemDetails mapper, persistence mechanism, Wolverine outbox).
   Cross-module communication ONLY via public contracts + integration events
   (async, post-commit, Wolverine transactional outbox in the same EF Core
   transaction; consumers idempotent); domain events are sync, in-module, in-UoW
-  (DbContext = the unit of work). No mediator (PRE-7): thin FastEndpoints
+  (the module's DbContext = the unit of work — the transactional boundary is the
+  bounded context, a conscious DDD divergence; a request writing two modules is
+  two transactions, no atomicity across). No mediator (PRE-7): thin FastEndpoints
   endpoints (route/spec/auth/ProblemDetails mapping) directly inject
   framework-free feature handlers — they own the DTOs, run FluentValidation as
   their first step, and orchestrate the domain; Wolverine consumers call the
@@ -39,8 +44,8 @@ context: |
   the domain boundary. Integration events are translated domain facts:
   aggregates raise events, one per-module translator publishes thin id-only
   Contracts.* payloads — never from handlers. Entity identity: client-generated
-  Guid v7 wrapped in per-aggregate typed ids; no repository layer (DbContext is
-  the data-access API). Expected failures flow as Result end-to-end and map to
+  Guid v7 wrapped in per-aggregate typed ids; no repository layer (the module's
+  DbContext is the data-access API). Expected failures flow as Result end-to-end and map to
   ProblemDetails at the edge; validation is two-layer (FluentValidation for
   request shape as handler step 1; domain rules via RuleCheck/RuleSet →
   RuleViolations → 409 with aggregated violations —

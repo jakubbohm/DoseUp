@@ -1,6 +1,6 @@
 # ADR-0002: Architecture style — hybrid modular monolith
 
-**Status:** Accepted · **Date:** 2026-07-13 · **Decided by:** Jakub (interview 2026-07-13) · **Amended:** 2026-07-13 — persistence/outbox mechanics: Cosmos → Postgres (PRE-2) · 2026-07-13 — dispatch, unit-of-work & messaging mechanics (PRE-4) · 2026-07-14 — authorization rings (PRE-10) · 2026-07-14 — feature-handler split (endpoints = thin adapters), validation placement, domain-rule model, integration-event production model (published-language translators) (PRE-7) · 2026-07-15 — dependency rule 7 (slice independence); architecture-test catalog ownership in [conventions/testing.md](../conventions/testing.md) (PRE-8)
+**Status:** Accepted · **Date:** 2026-07-13 · **Decided by:** Jakub (interview 2026-07-13) · **Amended:** 2026-07-13 — persistence/outbox mechanics: Cosmos → Postgres (PRE-2) · 2026-07-13 — dispatch, unit-of-work & messaging mechanics (PRE-4) · 2026-07-14 — authorization rings (PRE-10) · 2026-07-14 — feature-handler split (endpoints = thin adapters), validation placement, domain-rule model, integration-event production model (published-language translators) (PRE-7) · 2026-07-15 — dependency rule 7 (slice independence); architecture-test catalog ownership in [conventions/testing.md](../conventions/testing.md) (PRE-8) · 2026-07-15 — persistence is module property: module-owned DbContext/schema/migrations, module-scoped unit of work (conscious DDD divergence), rule-4 carve-out, persistence boundary rules (catalog 17–19), initial module set Accounts + Schedules, Wolverine per-module-store precondition (caught in the c001 review) · 2026-07-16 — module naming convention (capability names, a gerund where the capability is an activity, never forced): initial set renamed **Membership** + **Scheduling**; the cared-for entity named `Profile`
 
 ## Context
 
@@ -22,23 +22,44 @@ src/DoseUp.Api/
 │       ├── Features/        # vertical slices: 1 folder = 1 use case
 │       │                    # (thin FastEndpoints endpoint + feature handler
 │       │                    #  + validator + DTOs)
-│       ├── Infrastructure/  # adapters implementing this module's ports:
-│       │                    # Postgres persistence, push sender, clock, …
+│       ├── Infrastructure/  # the module's technical underlay — Persistence/
+│       │                    # (DbContext, entity configurations, design-time
+│       │                    #  factory, Migrations; schema = module name),
+│       │                    # port adapters, the published-language translator
 │       └── <Module>Module.cs  # DI registration + endpoint grouping + declared grade
 └── Platform/                # composition root and cross-cutting infrastructure:
-                             # database bootstrap, auth pipeline, ProblemDetails
-                             # mapping, outbox dispatch, feature flags, OTel
+                             # persistence mechanism (event-dispatch interceptor,
+                             # typed-id converter, migration runner), auth pipeline,
+                             # ProblemDetails mapping, outbox dispatch, feature
+                             # flags, OTel
 ```
+
+**A module is a DDD bounded context** — `Modules/<Module>/Domain` *is* that context's domain model; module boundaries are context boundaries. Modules carry **capability names** — a gerund where the capability is an activity, never forced (2026-07-16). The initial module set (fixed 2026-07-15, capability-renamed 2026-07-16; a floor, not a ceiling — further bounded contexts are decided in each change's design artifact): **Membership** — the circle: accounts and their **profiles**, the cared-for people and animals (an `Account` owns one or more `Profile`s; the entity behind ring 2's profile-scoped language and the openspec domain terms) — and **Scheduling** — dose plans, recurrence, reminders. The **extraction razor** governs what lives inside a module folder: everything that would move if the module became a microservice — which is why persistence is module property (§ below).
 
 ### Dependency rules (the architecture-test contract)
 
 1. `Domain` references only `SharedKernel` (never Features, Infrastructure, Platform, FastEndpoints, Wolverine, or data-access libraries — Npgsql, EF Core, …).
 2. `Features` orchestrate their own module's `Domain` through its ports; they never touch another module's internals.
 3. Cross-module communication happens **only** via public contracts and integration events — never direct calls into another module's Domain/Features/Infrastructure.
-4. `Infrastructure` implements its module's ports; concrete adapters are seen only by `Platform` (composition root).
+4. `Infrastructure` holds the module's technical underlay *(revised 2026-07-15)*. The module's `DbContext` is the module's data-access API — consumed directly by its **own** `Features`, and only them (repository-free, PRE-7); every **other** `Infrastructure` type — port adapters, the published-language translator — is seen only by the composition root (its DI registration; the registration locus is PRE-18's question), or by nothing at all (entity configurations, design-time factories, and migrations are Infrastructure-internal or reflection-found).
 5. `SharedKernel` references nothing project-internal.
 6. Within `Features` (PRE-7): endpoint classes contain no use-case logic — they adapt HTTP to the slice's feature handler; feature handlers and validators reference no FastEndpoints/ASP.NET types.
 7. Use-case slice namespaces inside a module's `Features` never reference sibling slice namespaces (PRE-8) — shared behavior moves **down** into `Domain` or **up** into the module's shared space; the intra-module complement of rule 3, and the enforcement teeth behind the PRE-7 logic-placement rules.
+
+### Persistence is module property *(2026-07-15)*
+
+Persistence lives **inside the module**: `Modules/<Module>/Infrastructure/Persistence/` holds the module's `DbContext` (the unit of work — § below), its `IEntityTypeConfiguration<T>` mappings, its design-time factory, and its `Migrations/` — the extraction razor demands it, because a bounded context that cannot take its schema with it was never separable. One physical Postgres; **one schema per module** (`HasDefaultSchema`, lowercase module name); each context keeps its **own `__EFMigrationsHistory` in its own schema**, so module migration histories are independent.
+
+Boundary rules (arch-tested — catalog rules 17–19 in [conventions/testing.md](../conventions/testing.md)):
+
+- a module's context maps **only its own module's Domain types**;
+- a module's context is consumed **only by its own module and the composition root** — cross-module context injection fails the build;
+- every mapped entity sits in **the module's schema**;
+- **no cross-schema foreign keys, ever** — cross-module references stay id-only (rule 3's persistence face). Once contexts map only their own types the EF model cannot even express a cross-context relationship; hand-written FKs in raw migration SQL are the remaining hole, owned by review.
+
+Consequence, stated plainly: **cross-module SQL joins are impossible by design** — future cross-module reads are edge composition or event-fed read models. The join you can't write is exactly the coupling extraction would otherwise have to sever.
+
+Platform keeps persistence **mechanism**, never module meaning: the domain-event `SaveChanges` interceptor (registered on every module context), the typed-id converter, the migration runner (applies every module context's migrations), and the Wolverine wiring. *(c001 transitional note: the empty `DoseUpDbContext` + `Initial` migration in `Platform/Persistence` is a bootstrap placeholder that proved the schema pipeline before any module existed; it is removed when the first module context lands — roadmap M1. c001's design D8 had concretized "one app-level DbContext", contradicting this ADR's module-owned persistence tree comment; caught in the c001 review, corrected in favor of module ownership.)*
 
 ### Slices are the application layer
 
@@ -53,12 +74,12 @@ A use case = one folder in `Features/`. The **feature handler** — a plain clas
 ### Events — two kinds, two rules
 
 - **Domain events:** raised by aggregates, handled **synchronously within the same module and unit of work** (e.g. `DoseLogged` → update adherence projection).
-- **Integration events:** the only asynchronous cross-module channel, published **after commit** via **Wolverine's transactional outbox** (PRE-4 — supersedes the hand-rolled candidate design): the envelope is written in the **same EF Core transaction** as the aggregate change; the sending agent dispatches **immediately post-commit** (no polling latency); startup recovery plus a relaxed periodic sweep backstop crashes and transient broker outages; delivery is at-least-once, so consumers (Wolverine handlers) are idempotent via the inbox. Transport: Azure Service Bus Basic queues via managed identity (PRE-3; local queues suffice until a second consumer or node needs the broker).
+- **Integration events:** the only asynchronous cross-module channel, published **after commit** via **Wolverine's transactional outbox** (PRE-4 — supersedes the hand-rolled candidate design): the envelope is written in the **same EF Core transaction** as the aggregate change; the sending agent dispatches **immediately post-commit** (no polling latency); startup recovery plus a relaxed periodic sweep backstop crashes and transient broker outages; delivery is at-least-once, so consumers (Wolverine handlers) are idempotent via the inbox. Transport: Azure Service Bus Basic queues via managed identity (PRE-3; local queues suffice until a second consumer or node needs the broker). **Per-module store precondition (Jakub, 2026-07-15 — hard go/no-go for the M0 spike):** Wolverine must persist its transactional artifacts — outbox envelopes, inbox/idempotency records, sagas, scheduled messages — **per module, in the module's schema**, with envelope writes joining the module context's transaction; if the spike cannot demonstrate this, Wolverine is rejected and the async seam is re-decided.
 - **Production model (PRE-7): integration events are translations of domain facts — feature handlers never publish.** The aggregate raises the domain event at the point of state change; one **translator per module** (its published language) maps selected facts to `<Module>.Contracts` types (past tense, no suffix — the namespace is the marker) and publishes via the SharedKernel `IIntegrationEventPublisher` port, implemented in Platform over the outbox — the translator runs in the interceptor drain, so the envelope joins the same transaction. Announcement is thereby correct-by-construction for every producer of the fact, and each module has one choke point enforcing **thin, id-only payloads** (consumers re-query; NFR-5 extends to messages — dead-letter queues are browsable storage). Only translators and Platform reference the port (arch-tested). Same-module side effects default to explicit handler orchestration; a domain event is reserved for reactions that must hold for every producer.
 
 ### Unit of work & side effects (PRE-4)
 
-One request = one scoped `DbContext` = one transaction — **the `DbContext` is the unit of work**; no `IUnitOfWork` wrapper on top. Aggregates raise domain events; a `SaveChanges` interceptor drains and dispatches them **synchronously before the save** through an explicit ~30-line DI dispatcher (loop until no new events, depth-guarded), so handler changes join the same transaction. *(Hand-rolled reconfirmed at PRE-7 against martinothamar/Mediator — healthy, source-generated, but a MediatR-shaped framework we'd use a sliver of — Wolverine's local bus — confined to outbox-outward by this ADR — and FastEndpoints' event bus — FE types would enter module signatures. The no-mediator rule bans caller→use-case indirection, not event fan-out, which is inherently one-to-many.)* Integration events become Wolverine outbox envelopes **in that same transaction**; commit is explicit in the handler. Boundary rule: same-module + must-be-consistent → domain event inside the UoW; cross-module or eventually-consistent → integration event via the outbox. Accepted cost: synchronous side effects ride the request path and a failing handler fails the operation — correct at this scale; anything that must not block belongs in the outbox.
+One request = one scoped **module** `DbContext` = one transaction — **the module's `DbContext` is the unit of work**; no `IUnitOfWork` wrapper on top. **Conscious DDD divergence (2026-07-15):** strict DDD makes the *aggregate* the transactional consistency boundary; DoseUp widens the unit of work to the whole **bounded context** — multi-aggregate transactions are allowed within a module, never across. Rules 2/3 confine a handler to its own module, so the transaction boundary physically coincides with the bounded context; a request that writes two modules is **two transactions with no atomicity across them** — cross-module consistency is eventual via integration events, by design. Aggregates raise domain events; a `SaveChanges` interceptor drains and dispatches them **synchronously before the save** through an explicit ~30-line DI dispatcher (loop until no new events, depth-guarded), so handler changes join the same transaction. *(Hand-rolled reconfirmed at PRE-7 against martinothamar/Mediator — healthy, source-generated, but a MediatR-shaped framework we'd use a sliver of — Wolverine's local bus — confined to outbox-outward by this ADR — and FastEndpoints' event bus — FE types would enter module signatures. The no-mediator rule bans caller→use-case indirection, not event fan-out, which is inherently one-to-many.)* Integration events become Wolverine outbox envelopes **in that same transaction**; commit is explicit in the handler. Boundary rule: same-module + must-be-consistent → domain event inside the UoW; cross-module or eventually-consistent → integration event via the outbox. Accepted cost: synchronous side effects ride the request path and a failing handler fails the operation — correct at this scale; anything that must not block belongs in the outbox.
 
 ### Per-module rigor: sliding scale, declared
 
@@ -84,8 +105,6 @@ No policy engine — the dominant check (ownership) is domain data, not policy (
 
 **Testing (M3 `harden-authz`, first rows in M0):** a behavioral matrix — endpoint catalog × caller classes {anonymous, member-owner, member-other, admin, revoked} → expected status; cross-account probes assert 404 (not 403, not 2xx); revocation asserts 403 with a still-valid token; new endpoints fail the matrix until classified. ArchUnitNET owns the structural rules (anonymous allowlist; admin endpoints ∈ admin group); ownership is enforced behaviorally by the matrix. Matrix mechanics slot into PRE-8's test organisation.
 
-The **module list is not fixed here** — bounded contexts (likely candidates: Access, Tracking, Scheduling) are decided in each change's design artifact.
-
 ## Alternatives considered
 
 - **Plain vertical slices** — fastest to ship; rejected: nothing for architecture tests to police, bounded contexts stay implicit.
@@ -94,7 +113,7 @@ The **module list is not fixed here** — bounded contexts (likely candidates: A
 
 ## Consequences
 
-- Architecture tests (ArchUnitNET) are **the** boundary mechanism → they must exist from M0 and run as a PR gate. They enforce dependency rules 1–7 plus PRE-10's structural authorization rules (anonymous-endpoint allowlist; admin endpoints confined to the admin group); the full rule-by-rule catalog with enforcement owners lives in [conventions/testing.md](../conventions/testing.md) (PRE-8).
+- Architecture tests (ArchUnitNET) are **the** boundary mechanism → they must exist from M0 and run as a PR gate. They enforce dependency rules 1–7, the persistence boundary rules (catalog 17–19), plus PRE-10's structural authorization rules (anonymous-endpoint allowlist; admin endpoints confined to the admin group); the full rule-by-rule catalog with enforcement owners lives in [conventions/testing.md](../conventions/testing.md) (PRE-8).
 - Framework magic is confined to the async seam: the synchronous request path stays framework-free (thin FastEndpoints endpoints in front of framework-free feature handlers — rule 6 makes this arch-tested, not aspirational; explicit domain-event dispatcher); Wolverine conventions apply only from the outbox outward. Wolverine.HTTP is the named alternative if this seam chafes (ADR-0001).
 - The Wolverine adoption details (outbox configuration, inbox/idempotency conventions, KEDA queue-depth wake on ACA, `codegen write` for reviewable generated code) get their own design artifact when the first integration event ships.
 - Single project keeps builds/refactors fast; if the project ever splits, the namespace discipline maps 1:1 onto csproj boundaries.
