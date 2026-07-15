@@ -102,7 +102,7 @@ Caveat carried by the M0 spike: Wolverine provisions via control-plane calls, an
 
 ## 4. The authorization matrix (mechanics — behavior specced in ADR-0002 § Authorization)
 
-- **Catalog by reflection over the API assembly**: every FastEndpoints endpoint class is enumerated — code cannot hide from reflection. (`openapi.json` rejected as the census: a swagger-excluded endpoint would silently escape the matrix. It remains the contract artifact only.)
+- **Catalog by reflection over the API assembly**: every FastEndpoints endpoint class is enumerated — code cannot hide from reflection. (`openapi.json` rejected as the census: a swagger-excluded endpoint would silently escape the matrix. It remains the contract artifact only.) The ASP.NET health probes (`/health`, `/alive`) are not FastEndpoints endpoints — they enter the matrix as **manual `AnonymousAllowed` rows** outside the reflection census, and the completeness gate diffs the FE census only (confirmed at c001).
 - **Classification = the endpoint's *kind* + one arrange recipe.** The expected-status vector is derived from the kind per PRE-10's rings — never hand-written per endpoint:
 
   | Kind | anonymous | revoked | member-other | non-admin | member-owner |
@@ -209,11 +209,11 @@ Cadence fixed by ADR-0003/0004 + PRE-9 (`ci.yml` gates only · E2E smoke-PR / fu
 
 Mechanics this document asserts directionally — each verified (and this doc corrected if wrong) by the shared-kernel/M0 changes:
 
-1. FastEndpoints does **not** auto-bind plain `AbstractValidator<T>` (handler-step-1 validation stays the only channel — conventions § API).
-2. ProblemDetails wiring covers auth-middleware 401/403 responses.
-3. Harness excludes the web resource in test mode (mechanism: args/env via the testing builder).
-4. Second accepted JWT authority injectable through `DistributedApplicationTestingBuilder` config mutation (§3c).
-5. Migrations apply in the harness via the same path local dev uses (§3a — never `EnsureCreated`).
-6. TUnit `ClassDataSource(Shared = PerTestSession)` fixture behavior under `dotnet test`/MTP matches §3a's assumptions (TUnit churns weekly — re-verify at implementation).
-7. Wolverine × ASB emulator inside the harness (extended PRE-3 spike — §3d fallback stands ready).
-8. MTP test reporter / TRX annotation choice (§7).
+1. FastEndpoints does **not** auto-bind plain `AbstractValidator<T>` (handler-step-1 validation stays the only channel — conventions § API). — **c001:** deferred with the FV bridge; no validator ships yet.
+2. ProblemDetails wiring covers auth-middleware 401/403 responses. — **c001:** 401 half **verified** (the bare middleware denial carries `application/problem+json` via `AddProblemDetails` + status-code pages); the 403 half lands with M0's `ActiveAccount`.
+3. Harness excludes the web resource in test mode (mechanism: args/env via the testing builder). — **c001:** deferred — no web resource exists; the AppHost adopts the config-conditional exclusion when the scaffold lands.
+4. Second accepted JWT authority injectable through `DistributedApplicationTestingBuilder` config mutation (§3c). — **c001:** **verified** — `CreateResourceBuilder<ProjectResource>("api").WithEnvironment("Auth__TestAuthority__…")` before build; the harness's minted tokens are trusted end-to-end.
+5. Migrations apply in the harness via the same path local dev uses (§3a — never `EnsureCreated`). — **c001:** **verified** — the `DoseUp.MigrationService` runner executes in the harness session exactly as under `aspire start`; the api resource is gated on its completion.
+6. TUnit `ClassDataSource(Shared = PerTestSession)` fixture behavior under `dotnet test`/MTP matches §3a's assumptions (TUnit churns weekly — re-verify at implementation). — **c001:** **verified** on TUnit 1.60.0 — one AppHost start served the whole session across test classes.
+7. Wolverine × ASB emulator inside the harness (extended PRE-3 spike — §3d fallback stands ready). — M0.
+8. MTP test reporter / TRX annotation choice (§7). — M0.

@@ -27,7 +27,7 @@ Exceptions belong to class 8 only: a violated `Guard` (null argument, impossible
 - **Affordance rule** — a rule the UI needs in advance to enable/disable actions (`CanEdit`, `CanArchive`). **Affordance rules are pure** — functions of already-loaded aggregate state only (hard rule, §4).
 - **Set rule** — a rule about membership in a set ("name unique within profile", "max N schedules per profile"). Needs the database, therefore **write-time only** — a set rule is never an affordance (you cannot precompute `CanRenameTo(x)` for every x; the client learns by trying).
 - `RuleViolation(Code, Message)` — one broken rule.
-- `RuleCheck` — the outcome of checking: `union RuleCheck { Pass, Fail(violations) }` (C# 15 union; a single failed rule is a one-element `Fail`).
+- `RuleCheck` — the outcome of checking: `union RuleCheck(RuleCheck.Pass, RuleCheck.Fail)`, the case types nested in the union body (a single failed rule is a one-element `Fail`). Construction is `new RuleCheck.Pass()` / `new RuleCheck.Fail(code, message)` — C# forbids a static member sharing a nested case type's name, so this document's value shorthand (`RuleCheck.Pass`, `Result.NotFound`) compiles with `new` (c001).
 - `RuleSet` — the handler-side composer that evaluates checks and aggregates violations (§5).
 - `Result.RuleViolations` — the union case carrying violations to the edge → 409.
 

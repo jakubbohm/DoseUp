@@ -1,0 +1,4 @@
+P:System.DateTime.Now;Inject TimeProvider (PRE-7)
+P:System.DateTime.UtcNow;Inject TimeProvider (PRE-7)
+P:System.DateTimeOffset.Now;Inject TimeProvider (PRE-7)
+P:System.DateTimeOffset.UtcNow;Inject TimeProvider (PRE-7)

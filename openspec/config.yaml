@@ -62,13 +62,15 @@ context: |
   schedule, and dose log entry belongs to exactly one profile. Schedule times are
   profile-local and DST-safe. Never log dose contents (ids only — NFR-5).
 
-  Change naming (PRE-12): every new change takes a 3-digit sequential prefix +
-  kebab-case name — NNN-verb-topic (e.g. 001-add-walking-skeleton). NNN is the
-  next number across openspec/changes/ and the archive; numbering never resets.
+  Change naming (PRE-12, amended 2026-07-15): every new change takes a
+  letter-prefixed 3-digit sequential id — cNNN-verb-topic (e.g.
+  c001-add-shared-kernel); the leading `c` satisfies the OpenSpec CLI's
+  letter-first name rule. NNN is the next number across openspec/changes/ and
+  the archive; numbering never resets.
 
 rules:
   proposal:
-    - Confirm the change id carries the next 3-digit sequential prefix (NNN-kebab-name; check openspec/changes/ and the archive for the highest NNN)
+    - Confirm the change id carries the next letter-prefixed 3-digit sequence (cNNN-kebab-name; check openspec/changes/ and the archive for the highest NNN)
     - Create the change's branch off the freshest main before drafting any artifact — `git fetch origin` then `git switch -c <type>/<change-id> origin/main`, where <type> is the Conventional-Commit type the eventual PR title will carry (ADR-0004, trunk-based short-lived branches); never draft a change on main
     - Cite the FR/NFR ids from docs/product/requirements.md and the roadmap milestone this change serves
     - Include a Non-goals section
@@ -83,7 +85,7 @@ rules:
     - Changes touching the AppHost resource graph or Azure topology plan the infra Bicep update explicitly (hand-authored IaC — PRE-9)
   tasks:
     - Slice tasks to complete in one sitting (~2h max), each ending with build and tests green
-    - Changes touching the API contract include an explicit "regenerate TS client" task — one script: FastEndpoints --exportswaggerjson → openapi.json → openapi-typescript types, both committed (CI only gates drift, never generates or commits fixes; PRE-6). A change modifying an existing contract (not a pure addition) also includes tasks to update every TS consumer — facade layer per PRE-5 if adopted, and all usages — in the same change
+    - 'Changes touching the API contract include an explicit "regenerate TS client" task — one script: FastEndpoints --exportswaggerjson → openapi.json → openapi-typescript types, both committed (CI only gates drift, never generates or commits fixes; PRE-6). A change modifying an existing contract (not a pure addition) also includes tasks to update every TS consumer — facade layer per PRE-5 if adopted, and all usages — in the same change'
     - Changes touching the AppHost resource graph or Azure topology include an explicit "update infra Bicep + .bicepparam" task — infra is hand-authored IaC deployed as a deployment stack; the AppHost models local orchestration only (PRE-9)
     - A task adding an endpoint also classifies it in the authorization matrix (kind + arrange recipe) and updates the anonymous allowlist when applicable — the arch/matrix completeness gates fail otherwise (PRE-8, docs/conventions/testing.md)
     - A task introducing a feature flag also schedules the flag's removal

@@ -1,9 +1,13 @@
 <Solution>
-  <Folder Name="/src/" />
-  <Folder Name="/src/doseup.apphost/">
-    <Project Path="src/doseup.apphost/DoseUp.AppHost.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/DoseUp.Api/DoseUp.Api.csproj" />
+    <Project Path="src/DoseUp.AppHost/DoseUp.AppHost.csproj" />
+    <Project Path="src/DoseUp.MigrationService/DoseUp.MigrationService.csproj" />
+    <Project Path="src/DoseUp.ServiceDefaults/DoseUp.ServiceDefaults.csproj" />
   </Folder>
-  <Folder Name="/src/doseup.servicedefaults/">
-    <Project Path="src/doseup.servicedefaults/DoseUp.ServiceDefaults.csproj" />
+  <Folder Name="/tests/">
+    <Project Path="tests/DoseUp.ArchitectureTests/DoseUp.ArchitectureTests.csproj" />
+    <Project Path="tests/DoseUp.IntegrationTests/DoseUp.IntegrationTests.csproj" />
+    <Project Path="tests/DoseUp.UnitTests/DoseUp.UnitTests.csproj" />
   </Folder>
 </Solution>

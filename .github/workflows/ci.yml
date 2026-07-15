@@ -1,0 +1,28 @@
+# Minimal PR gate (c001, design.md D13): build + all three suites, publishes nothing.
+# M0's add-ci-cd-gates refines this into the fast/harness split and the full ADR-0004 set.
+name: ci
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # Docker preinstalled — the harness needs it for postgres
+    timeout-minutes: 30 # Aspire-in-CI hang backstop (design.md D9/D13)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          # Exact preview pin (deterministic; the standing preview-upgrade PR bumps it).
+          # SDK 10 rides along for the net10 AppHost runtime.
+          dotnet-version: |
+            10.0.301
+            11.0.100-preview.6.26359.118
+
+      # CSharpier check mode: the CI formatting gate (conventions § Formatting).
+      - run: dotnet build DoseUp.slnx -p:CSharpier_Check=true
+
+      # GitHub sets CI=true — the harness fixture stretches its timeouts on it (D9).
+      - run: dotnet test --solution DoseUp.slnx
