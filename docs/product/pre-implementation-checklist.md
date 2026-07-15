@@ -26,6 +26,8 @@ Each resolved item lands somewhere durable — an ADR, a convention doc, a requi
 - [ ] **PRE-14** — design personas
 - [ ] **PRE-15** — design code-review
 - [ ] **PRE-16** — Review roslynator config
+- [ ] **PRE-17** — Result.cs — don't like it; deliberately deferred until the first domain, handler and endpoints land, then revisit against real call sites
+- [ ] **PRE-18** — ServiceCollectionExtensions per module
 
 ## Outcomes
 
@@ -49,3 +51,5 @@ Filled in as items are processed — link the ADR / convention / spec / change t
 | PRE-14 | |
 | PRE-15 | |
 | PRE-16 | |
+| PRE-17 | |
+| PRE-18 | |
