@@ -3,3 +3,4 @@
 - [User working style](user-working-style.md) — structured interviews work well; firm tech choices, may override recommendations
 - [Propose in prose](propose-in-prose.md) — decisions get an explained prose proposal, never option menus; implementation only after his go
 - [DoseUp project state](doseup-project-state.md) — PRE-7 + PRE-8 done (domain-rules.md, testing.md); next: SharedKernel + test-infra openspec change; docs are authoritative, software-factory.md is a maintained catalog
+- [codebase-memory-mcp](codebase-memory-mcp.md) — repo's graph-first discovery MCP (PRE-13); v0.9.0 `full` mode crashes, use `moderate`/`fast`

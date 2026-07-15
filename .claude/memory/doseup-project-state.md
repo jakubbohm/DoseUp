@@ -1,6 +1,6 @@
 ---
 name: doseup-project-state
-description: Founding interview 2026-07-13; PRE-7 + PRE-8 resolved; c001 implemented (PR #1 open, awaiting Jakub's review); formatting = .editorconfig-owned since 2026-07-15 (CSharpier reversed)
+description: Founding interview 2026-07-13; PRE-7 + PRE-8 + PRE-13 resolved; c001 implemented (PR #1 open, awaiting Jakub's review); formatting = .editorconfig-owned since 2026-07-15 (CSharpier reversed)
 metadata: 
   node_type: memory
   type: project
