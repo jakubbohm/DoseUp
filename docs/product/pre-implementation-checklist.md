@@ -20,7 +20,7 @@ Each resolved item lands somewhere durable — an ADR, a convention doc, a requi
 - [x] **PRE-8** — testing organisation (unit, integration, e2e, architecture, contract)
 - [x] **PRE-9** — devops, branching strategy incl. neon
 - [x] **PRE-10** — permissions, RBAC, casbin.net
-- [ ] **PRE-11** — re-org the docs/adrs/skills/claude.md/memory
+- [ ] **PRE-11** — re-org the docs/adrs/skills/claude.md/memory/rules
 - [x] **PRE-12** — openspec change numbering
 - [ ] **PRE-13** — setup codebase-memory-mcp
 - [ ] **PRE-14** — design personas
