@@ -79,8 +79,12 @@ public sealed class AspireAppFixture : IAsyncInitializer, IAsyncDisposable {
       SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256),
     });
 
+  #region IAsyncDisposable
+
   public async ValueTask DisposeAsync() {
     if (_app is not null)
       await _app.DisposeAsync();
   }
+
+  #endregion
 }

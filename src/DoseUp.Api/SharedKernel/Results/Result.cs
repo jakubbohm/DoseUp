@@ -16,16 +16,6 @@ public readonly union Result(
   Result.Conflict,
   Result.Forbidden,
   Result.Unexpected) : IEquatable<Result> {
-  public static bool operator ==(Result left, Result right) => left.Equals(right);
-
-  public static bool operator !=(Result left, Result right) => !left.Equals(right);
-
-  public bool Equals(Result other) => Equals(Value, other.Value);
-
-  public override bool Equals(object? obj) => obj is Result other && Equals(other);
-
-  public override int GetHashCode() => Value?.GetHashCode() ?? 0;
-
   /// <summary>The operation completed; there is nothing to report.</summary>
   public readonly record struct Success;
 
@@ -64,4 +54,18 @@ public readonly union Result(
   /// case exists so the mapper's matrix is total → 500, never leaking internals.
   /// </summary>
   public readonly record struct Unexpected;
+
+  #region Object overrides
+
+  public static bool operator ==(Result left, Result right) => left.Equals(right);
+
+  public static bool operator !=(Result left, Result right) => !left.Equals(right);
+
+  public bool Equals(Result other) => Equals(Value, other.Value);
+
+  public override bool Equals(object? obj) => obj is Result other && Equals(other);
+
+  public override int GetHashCode() => Value?.GetHashCode() ?? 0;
+
+  #endregion
 }

@@ -41,9 +41,11 @@ Three rings, engine-free (PRE-10): endpoints secure by default — `AllowAnonymo
 - Wire payloads are plain object literals, never classes (structured clone and React state punish instances) and never hand-written wire types — the generated types are the only TS source of contract truth. React hooks binding (openapi-react-query) and any fluent facade layer: decided at PRE-5.
 - Versioning: not before it hurts — revisit when the first breaking change threatens (record here).
 
-## C# style beyond tooling (skeleton — fill in M0/M1)
+## C# style beyond tooling (first entry 2026-07-15; rest fills in M0/M1)
 
-Naming semantics (endpoints, handlers, ports, events) · file organization within a slice · when to extract a method/type · comment policy (constraints only) · `.claude/rules/` mirrors for path-scoped guidance.
+- **Member layout: payload first, plumbing last** (decided 2026-07-15). A type leads with what it exists for — union cases, properties, constructors, domain operations; the mechanical object plumbing (`operator ==`/`!=`, `Equals` overloads, `GetHashCode`, a `ToString` that adds no domain meaning) sits last, folded in `#region Object overrides`. **A region folds mechanical plumbing only, never meaningful code** — a region around domain logic is a review flag. The dispose pattern is the same kind of tail plumbing: fold it as `#region IDisposable`/`IAsyncDisposable` (named for the implemented interface), before `Object overrides` when both appear. Deliberately untooled, same trade as the width guideline: no analyzer expresses semantic member grouping (StyleCop's SA12xx encode a fixed kind/access order and SA1124 bans regions; Roslynator ships only a manual sort refactoring — [dotnet/roslynator#810](https://github.com/dotnet/roslynator/issues/810) open; ReSharper's file-layout engine could, but its parser can't read preview unions). Carried by the first [`.claude/rules/` mirror](../../.claude/rules/csharp-member-layout.md) + PR review.
+
+Still to fill in M0/M1: naming semantics (endpoints, handlers, ports, events) · file organization within a slice · when to extract a method/type · comment policy (constraints only) · more `.claude/rules/` mirrors for path-scoped guidance.
 
 ## SharedKernel discipline (decided — PRE-7)
 

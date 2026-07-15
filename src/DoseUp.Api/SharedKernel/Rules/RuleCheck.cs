@@ -7,16 +7,6 @@ namespace DoseUp.Api.SharedKernel.Rules;
 /// one-element <see cref="Fail"/>; <see cref="RuleSet"/> aggregates multiple checks.
 /// </summary>
 public readonly union RuleCheck(RuleCheck.Pass, RuleCheck.Fail) : IEquatable<RuleCheck> {
-  public static bool operator ==(RuleCheck left, RuleCheck right) => left.Equals(right);
-
-  public static bool operator !=(RuleCheck left, RuleCheck right) => !left.Equals(right);
-
-  public bool Equals(RuleCheck other) => Equals(Value, other.Value);
-
-  public override bool Equals(object? obj) => obj is RuleCheck other && Equals(other);
-
-  public override int GetHashCode() => Value?.GetHashCode() ?? 0;
-
   /// <summary>The rule holds; nothing is observable.</summary>
   public readonly record struct Pass;
 
@@ -39,4 +29,18 @@ public readonly union RuleCheck(RuleCheck.Pass, RuleCheck.Fail) : IEquatable<Rul
     /// </summary>
     public Result ToResult() => new Result.RuleViolations(Violations);
   }
+
+  #region Object overrides
+
+  public static bool operator ==(RuleCheck left, RuleCheck right) => left.Equals(right);
+
+  public static bool operator !=(RuleCheck left, RuleCheck right) => !left.Equals(right);
+
+  public bool Equals(RuleCheck other) => Equals(Value, other.Value);
+
+  public override bool Equals(object? obj) => obj is RuleCheck other && Equals(other);
+
+  public override int GetHashCode() => Value?.GetHashCode() ?? 0;
+
+  #endregion
 }
