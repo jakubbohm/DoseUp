@@ -6,22 +6,25 @@ This directory is the **source of truth for conventions** (decided in the foundi
 
 Several sections below are deliberately skeletal — they get filled by the change that first makes them real (mostly M0/M1), never invented in advance.
 
-## Formatting (decided)
+## Formatting (decided; formatter reversed 2026-07-15)
 
-- **C# layout is owned by CSharpier** — nobody hand-formats; the one-line-vs-multi-line question is answered by `printWidth`, not by style debates. Config lives in `.editorconfig` (CSharpier reads it). Also formats `.csproj`/XML.
-- Enforcement: IDE format-on-save (committed `.vscode` settings) + `CSharpier.MsBuild` on build + CI check.
-- **TypeScript/React:** ESLint + Prettier, CI-checked.
+- **C# layout is owned by `.editorconfig`** — the file is the single formatting authority (Jakub's reference style: end-of-line braces, 2-space indent, CRLF). CSharpier, the founding pick, was **dropped 2026-07-15**: it reads only the indent/width/EOL basics from `.editorconfig` and hard-codes the rest — Allman braces, forced final newline — so the owner's layout was inexpressible, and coexistence had forced `IDE0055 = none`, silencing exactly the rules that do express it.
+- **Enforcement: the build is the format gate** — layout violations are IDE0055 **build errors** (`EnforceCodeStyleInBuild` + `TreatWarningsAsErrors`; probe-verified to fire). Fixer: `dotnet format whitespace DoseUp.slnx`. IDE format-on-save (committed `.vscode` settings, C# extension) applies the same rules.
+- **Line width: soft ~200-char guideline, deliberately unenforced** (`max_line_length` declares it; no tool reads it). The guideline's positive half: **a statement that fits stays on one line** — a line break expresses structure (a fluent stage list, a multi-property initializer, one condition per line), never a printer's default. The accepted trade of dropping CSharpier: no deterministic width-based wrapping, and `.csproj`/XML formatting is hand-kept.
+- **One-line blocks carry no braces** (decided 2026-07-15); the statement sits on the next line, indented. Enforcement is bidirectional: Roslynator **RCS1002** owns the remove direction (build error; fires only when the single statement fits one line — the pack is otherwise off, see Static analysis) and IDE0011 (`when_multiline`) owns the add direction for multi-line bodies. The next-line *placement* itself is convention, not tooling (`allow_embedded_statements_on_same_line` stays permissive).
+- **TypeScript/React:** ESLint + Prettier, CI-checked — unchanged: Prettier's opinions are adopted wholesale there, which is exactly the condition CSharpier failed on the C# side.
 - No pre-commit hooks (deliberate — on-save/on-build/CI cover it).
 
 ## Static analysis (decided; packs finalized in M0)
 
 - `TreatWarningsAsErrors`, `AnalysisLevel latest-all`, `EnforceCodeStyleInBuild`.
 - Curated third-party packs (candidates: Meziantou.Analyzer, SonarAnalyzer) tuned via `.editorconfig`; every disabled rule carries a comment saying why.
+- **Roslynator.Analyzers is installed but scoped to a single rule** (RCS1002, one-line brace removal — see Formatting): the `category-Roslynator` kill-switch keeps its other 200+ rules off until **PRE-16 ("Review roslynator config")** decides how much of the pack to adopt.
 - **Microsoft.CodeAnalysis.BannedApiAnalyzers** enforces the PRE-7 time discipline: `BannedSymbols.txt` bans `DateTime.Now/UtcNow` and `DateTimeOffset.Now/UtcNow` (Platform's clock composition is the sole exemption) — lands with the shared-kernel change.
 
 ## Architecture (decided — see [ADR-0002](../adr/0002-architecture-style.md))
 
-Modular monolith in one project; dependency rules 1–5 of ADR-0002 are enforced by ArchUnitNET tests. Module grades are declared. Cross-module = contracts + integration events only.
+Modular monolith in one project; dependency rules 1–7 and the persistence boundary rules (catalog 17–19) of ADR-0002 are enforced by ArchUnitNET tests. Module grades are declared. Cross-module = contracts + integration events only.
 
 ## Authorization (decided — see ADR-0002 § Authorization)
 
@@ -38,9 +41,11 @@ Three rings, engine-free (PRE-10): endpoints secure by default — `AllowAnonymo
 - Wire payloads are plain object literals, never classes (structured clone and React state punish instances) and never hand-written wire types — the generated types are the only TS source of contract truth. React hooks binding (openapi-react-query) and any fluent facade layer: decided at PRE-5.
 - Versioning: not before it hurts — revisit when the first breaking change threatens (record here).
 
-## C# style beyond tooling (skeleton — fill in M0/M1)
+## C# style beyond tooling (first entry 2026-07-15; rest fills in M0/M1)
 
-Naming semantics (endpoints, handlers, ports, events) · file organization within a slice · when to extract a method/type · comment policy (constraints only) · `.claude/rules/` mirrors for path-scoped guidance.
+- **Member layout: payload first, plumbing last** (decided 2026-07-15). A type leads with what it exists for — union cases, properties, constructors, domain operations; the mechanical object plumbing (`operator ==`/`!=`, `Equals` overloads, `GetHashCode`, a `ToString` that adds no domain meaning) sits last, folded in `#region Object overrides`. **A region folds mechanical plumbing only, never meaningful code** — a region around domain logic is a review flag. The dispose pattern is the same kind of tail plumbing: fold it as `#region IDisposable`/`IAsyncDisposable` (named for the implemented interface), before `Object overrides` when both appear. Deliberately untooled, same trade as the width guideline: no analyzer expresses semantic member grouping (StyleCop's SA12xx encode a fixed kind/access order and SA1124 bans regions; Roslynator ships only a manual sort refactoring — [dotnet/roslynator#810](https://github.com/dotnet/roslynator/issues/810) open; ReSharper's file-layout engine could, but its parser can't read preview unions). Carried by the first [`.claude/rules/` mirror](../../.claude/rules/csharp-member-layout.md) + PR review.
+
+Still to fill in M0/M1: naming semantics (endpoints, handlers, ports, events) · file organization within a slice · when to extract a method/type · comment policy (constraints only) · more `.claude/rules/` mirrors for path-scoped guidance.
 
 ## SharedKernel discipline (decided — PRE-7)
 
@@ -66,11 +71,13 @@ The full design lives in **[domain-rules.md](domain-rules.md)**: the error taxon
 - **Contract edge: DTOs use plain C# enums** so `openapi.json` emits real enum schemas → openapi-typescript literal unions (PRE-6). The endpoint maps DTO enum ↔ SmartEnum; unmappable values surface as `Result` validation failures, never exceptions.
 - **SmartEnum vs C# union:** SmartEnum for closed *value sets* (named instances, lookup, per-instance data/behavior); unions for closed *shape alternatives* (`Result`). SmartEnum has no exhaustive-switch checking — prefer polymorphic behavior *on* the instances over switching *over* them.
 
-## Persistence — Postgres (migrations/seeding decided; ground rules in M1 design)
+## Persistence — Postgres (module ownership, migrations & seeding decided; rest in M1 design)
 
-Decided (PRE-4): EF Core 11 previews + Npgsql; `DbContext` is the unit of work (no wrapper).
+Decided (PRE-4): EF Core 11 previews + Npgsql; the `DbContext` is the unit of work (no wrapper) — since 2026-07-15 that means the **module's** context (next bullet).
 
-Decided (PRE-7): **no repository layer** — the `DbContext` is the data-access API as well as the UoW; endpoints and domain services query it directly (account-scoped by construction, PRE-10). An abstraction over data access appears only when a genuine second implementation exists — never anticipatory.
+Decided (2026-07-15, caught in the c001 review) — **persistence is module property**: each module owns its `DbContext`, its `IEntityTypeConfiguration<T>` mappings, its design-time factory, and its `Migrations/` under `Modules/<Module>/Infrastructure/Persistence/`; one schema per module, each with its own `__EFMigrationsHistory`. The boundary rules and the full rationale live in [ADR-0002 § Persistence is module property](../adr/0002-architecture-style.md#persistence-is-module-property-2026-07-15). The `DoseUpDbContext` under `Platform/Persistence` is a bootstrap placeholder, removed when the first module context lands (M1).
+
+Decided (PRE-7): **no repository layer** — the module's `DbContext` is the data-access API as well as the UoW; feature handlers query it directly (account-scoped by construction, PRE-10). An abstraction over data access appears only when a genuine second implementation exists — never anticipatory.
 
 Decided (PRE-9) — migrations & seeding:
 
@@ -91,7 +98,7 @@ Still to fill in M1 design: what never goes in the database (secrets, oversized 
 
 ## Testing conventions (decided — PRE-8)
 
-Everything lives in **[testing.md](testing.md)**: layout (three per-layer test projects, path-mirrored) · the placement decision tree ("I wrote X, where does its test go?" — feature handlers = slice tests over HTTP, no repositories ⇒ no honest seam to fake) · Aspire harness mechanics (one session-shared AppHost; isolation **by construction** — each test its own account, no cleanup; real JWT pipeline with a test trust anchor; ASB emulator + Azurite) · authZ-matrix mechanics (reflection census × kind classification, completeness gate) · the architecture-test catalog (16 rules, single enforcement owner each, incl. ADR-0002 rule 7 slice independence) · style (behavior-sentence names, AAA, hand-rolled builders, Shouldly confirmed against TUnit.Assertions) · CI cadence (fast job / harness job split; zero auto-retry, quarantine with paper trail). Headline bans: EF InMemory · SQLite-in-memory · mocked `DbContext` · mocking frameworks by default — **fake only what you don't own** (Entra's signature, the wall clock).
+Everything lives in **[testing.md](testing.md)**: layout (three per-layer test projects, path-mirrored) · the placement decision tree ("I wrote X, where does its test go?" — feature handlers = slice tests over HTTP, no repositories ⇒ no honest seam to fake) · Aspire harness mechanics (one session-shared AppHost; isolation **by construction** — each test its own account, no cleanup; real JWT pipeline with a test trust anchor; ASB emulator + Azurite) · authZ-matrix mechanics (reflection census × kind classification, completeness gate) · the architecture-test catalog (19 rules, single enforcement owner each, incl. ADR-0002 rule 7 slice independence and the persistence boundary rules 17–19) · style (behavior-sentence names, AAA, hand-rolled builders, Shouldly confirmed against TUnit.Assertions) · CI cadence (fast job / harness job split; zero auto-retry, quarantine with paper trail). Headline bans: EF InMemory · SQLite-in-memory · mocked `DbContext` · mocking frameworks by default — **fake only what you don't own** (Entra's signature, the wall clock).
 
 ## Observability (skeleton — wire in M0)
 

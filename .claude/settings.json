@@ -5,5 +5,9 @@
       "Bash(dotnet test:*)",
       "Bash(openspec:*)"
     ]
-  }
+  },
+  "disableClaudeAiConnectors": true,
+  "deniedMcpServers": [
+    { "serverName": "mermaid" }
+  ]
 }

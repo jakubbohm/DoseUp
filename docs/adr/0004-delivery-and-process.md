@@ -1,6 +1,6 @@
 # ADR-0004: Delivery pipeline and development process
 
-**Status:** Accepted · **Date:** 2026-07-13 · **Decided by:** Jakub (interview 2026-07-13) · **Amended:** 2026-07-14 — infra-as-code model, release pipeline, migration & backup strategy; expand/contract mandate dropped (PRE-9)
+**Status:** Accepted · **Date:** 2026-07-13 · **Decided by:** Jakub (interview 2026-07-13) · **Amended:** 2026-07-14 — infra-as-code model, release pipeline, migration & backup strategy; expand/contract mandate dropped (PRE-9) · 2026-07-15 — C# format gate folded into the build: CSharpier dropped for `.editorconfig`/IDE0055 (conventions § Formatting)
 
 ## Context
 
@@ -28,7 +28,7 @@ Full CI/CD from the walking skeleton onward; solo developer + Claude; trunk-to-p
 
 1. Build (dotnet + npm), analyzers as errors
 2. TUnit suites: unit + integration (Aspire harness) + architecture tests
-3. CSharpier check; ESLint + Prettier check + `tsc`
+3. ESLint + Prettier check + `tsc` *(C# formatting needs no separate gate since 2026-07-15: `.editorconfig` layout rides gate 1 as IDE0055 build errors — CSharpier dropped, conventions § Formatting)*
 4. TS-client drift gate: regenerate OpenAPI types, fail on diff
 5. Playwright E2E smoke subset against the Aspire-orchestrated app
 6. CodeQL + dependency review
