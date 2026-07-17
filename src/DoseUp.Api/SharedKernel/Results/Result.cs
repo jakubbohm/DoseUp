@@ -27,7 +27,7 @@ public readonly union Result(
 
   /// <summary>
   /// Class 5 — resource miss: the id is nonexistent or not the caller's — deliberately
-  /// indistinguishable (anti-enumeration, PRE-10) → 404.
+  /// indistinguishable (anti-enumeration — ADR-0002 § Authorization) → 404.
   /// </summary>
   public readonly record struct NotFound;
 

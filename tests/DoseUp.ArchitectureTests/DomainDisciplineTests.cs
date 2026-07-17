@@ -45,7 +45,7 @@ public sealed class DomainDisciplineTests {
   [Test]
   public void Rule_10_every_mapped_entity_of_every_discovered_db_context_is_an_aggregate_root() {
     // testing.md §5 catalog row 10: "For every DbContext discovered in the API assembly,
-    // every mapped entity type implements IAggregateRoot (PRE-7 base types)" — reflection
+    // every mapped entity type implements IAggregateRoot (conventions/README.md § Domain model base types)" — reflection
     // over the offline-built EF models, no database (design.md D11). Discovery itself must
     // be non-vacuous: today it finds the bootstrap DoseUpDbContext, whose empty model keeps
     // the entity assertion vacuous.
@@ -64,7 +64,7 @@ public sealed class DomainDisciplineTests {
   public void Rule_17_a_modules_context_maps_only_its_own_modules_domain_types() {
     // ADR-0002 § Persistence is module property / catalog rule 17: "a module's context maps
     // only its own module's Domain types" — reflection over the offline-built EF models,
-    // no database. Vacuously green until the first module context lands (roadmap M1).
+    // no database. Vacuously green until the first module context lands (roadmap M0 — Membership).
     List<string> offenders = DbContextDiscovery.CollectOffendersAcrossModuleModels(static (module, context) =>
       context.Model.GetEntityTypes()
         .Select(static entityType => entityType.ClrType)
@@ -78,9 +78,9 @@ public sealed class DomainDisciplineTests {
   public void The_bootstrap_placeholder_is_the_only_context_outside_modules() {
     // ADR-0002 § Persistence is module property (transitional note): the empty DoseUpDbContext
     // under Platform/Persistence is a bootstrap placeholder, removed with the first module
-    // context (roadmap M1). Rules 17–19 quantify over module contexts only, so a context
-    // outside Modules/ escapes them — this tripwire keeps that escape exactly one context
-    // wide. When M1 deletes the placeholder, shrink the expected list to empty.
+    // context (roadmap M0 — Membership). Rules 17–19 quantify over module contexts only, so a
+    // context outside Modules/ escapes them — this tripwire keeps that escape exactly one
+    // context wide. When the Membership change deletes the placeholder, shrink the expected list to empty.
     List<string> nonModuleContexts = [
       .. DbContextDiscovery.AllContexts
         .Except(DbContextDiscovery.ModuleContexts.Select(static pair => pair.ContextType))

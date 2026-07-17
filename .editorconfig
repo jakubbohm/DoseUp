@@ -281,8 +281,9 @@ dotnet_naming_style.upper_case.capitalization = all_upper
 
 #### DoseUp adjustments (deviations from the copied reference config) ####
 
-# Roslynator ships 200+ rules; adoption is scoped to exactly one until the PRE-16 config
-# review — the category kill-switch turns the pack off, single rules re-enable below it.
+# Roslynator ships 200+ rules; adoption is scoped to exactly one until the Roslynator-pack
+# review (open design decision — tracked in the Design decisions issues) — the category
+# kill-switch turns the pack off, single rules re-enable below it.
 dotnet_analyzer_diagnostic.category-Roslynator.severity = none
 # One-line blocks carry no braces (conventions § Formatting). The built-in IDE0011 only ever
 # ADDS braces, so the remove direction needs RCS1002; it fires solely on single-line
@@ -298,7 +299,7 @@ dotnet_diagnostic.IDE0058.severity = suggestion
 # with architecture tests over namespaces, not access modifiers (ADR-0002).
 dotnet_diagnostic.CA1515.severity = none
 
-# IDomainEventHandler<T> is the PRE-7/ADR-0002 documented name; the 'EventHandler' suffix
+# IDomainEventHandler<T> is the ADR-0002-documented name; the 'EventHandler' suffix
 # reservation targets .NET delegate types, which this is not.
 dotnet_code_quality.CA1711.allowed_suffixes = EventHandler
 

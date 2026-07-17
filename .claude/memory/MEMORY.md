@@ -2,5 +2,6 @@
 - [User gates stage progression](user-gates-stage-progression.md) — never advance stages or declare a phase done without Jakub's explicit go
 - [User working style](user-working-style.md) — structured interviews work well; firm tech choices, may override recommendations
 - [Propose in prose](propose-in-prose.md) — decisions get an explained prose proposal, never option menus; implementation only after his go
-- [DoseUp project state](doseup-project-state.md) — c001 complete & archived 2026-07-16 (first main specs synced; archive move uncommitted); PR #1 open + green, merge is Jakub's call; docs authoritative, software-factory.md a maintained catalog
-- [codebase-memory-mcp](codebase-memory-mcp.md) — repo's graph-first discovery MCP (PRE-13, v0.9.0, full index 779/1390); relaunch the tool after a self-update before indexing
+- [DoseUp project state](doseup-project-state.md) — c001 complete & archived 2026-07-16 (first main specs synced; archive move uncommitted); PR #1 open + green, merge is Jakub's call; PM rollout PR open 2026-07-18, GitHub execution pass after merge on Jakub's go; docs authoritative, software-factory.md a maintained catalog
+- [codebase-memory-mcp](codebase-memory-mcp.md) — repo's graph-first discovery MCP (v0.9.0, full index 779/1390); relaunch the tool after a self-update before indexing
+- [GitHub project management](github-project-management.md) — human-first tracker process: issues/milestones/project = only work-item home, gh CLI = only channel, decision issues replace the PRE checklist; mutations only after Jakub's sign-off
