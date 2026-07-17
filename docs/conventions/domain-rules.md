@@ -1,6 +1,6 @@
 # Domain rules & the error model
 
-**Status:** decided (PRE-7, 2026-07-14) · part of [conventions](README.md) — docs-first source of truth
+**Status:** decided 2026-07-14 · part of [conventions](README.md) — docs-first source of truth
 
 The conventions here are **binding**; the C# signatures are **directional** — the shared-kernel change implementing them may tune ergonomics (member names, exact generic shapes), never the rules. Written for every future coder, human or Claude: read this before writing an endpoint, a feature handler, or a rule check.
 
@@ -14,7 +14,7 @@ Every non-2xx response is ProblemDetails (RFC 9457). Each error class has exactl
 | 2 | Request-class authorization | revoked account; non-admin on admin group | Platform policies (`ActiveAccount`, `AdminOnly`) | — | 403 |
 | 3 | Routing | unknown path/method | ASP.NET | — | 404/405 |
 | 4 | Contract validation | missing field, bad range/format | FluentValidation — **first step of the feature handler** | `Validation` | 400 |
-| 5 | Resource miss | id nonexistent **or not the caller's** — indistinguishable by design (anti-enumeration, PRE-10) | account-scoped queries in the handler | `NotFound` | 404 |
+| 5 | Resource miss | id nonexistent **or not the caller's** — indistinguishable by design (anti-enumeration — [ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md)) | account-scoped queries in the handler | `NotFound` | 404 |
 | 6 | **Domain rule violation** | "only an active schedule can be edited" | aggregate self-checks + handler `RuleSet` (this document) | `RuleViolations` | 409 |
 | 7 | Concurrency | optimistic-concurrency clash (reserved until needed) | persistence | `Conflict` | 409 (distinct PD `type`) |
 | 8 | Unexpected | bugs, infrastructure failures | global exception middleware | `Unexpected` | 500 — never leaks internals |
@@ -31,7 +31,7 @@ Exceptions belong to class 8 only: a violated `Guard` (null argument, impossible
 - `RuleSet` — the handler-side composer that evaluates checks and aggregates violations (§5).
 - `Result.RuleViolations` — the union case carrying violations to the edge → 409.
 
-**Codes are contract:** `<aggregate>.<rule>` in kebab-case (`schedule.not-active`), stable forever, declared in the endpoint's OpenAPI 409 response so they reach the generated TS types (PRE-6). **Messages are static rule texts:** developer-English, never interpolating user or dose data (NFR-5-safe; OQ-2 i18n will key on the code, not the message). Telemetry logs codes only.
+**Codes are contract:** `<aggregate>.<rule>` in kebab-case (`schedule.not-active`), stable forever, declared in the endpoint's OpenAPI 409 response so they reach the generated TS types ([ADR-0001-platform-and-stack](../adr/0001-platform-and-stack.md)). **Messages are static rule texts:** developer-English, never interpolating user or dose data (NFR-5-safe; OQ-2 i18n will key on the code, not the message). Telemetry logs codes only.
 
 ## 3. Two layers, two jobs
 
@@ -129,21 +129,24 @@ public async Task<Result> Handle(EditScheduleRequest req, CancellationToken ct)
     if (await validator.ValidateAsync(req, ct) is { IsValid: false } v)
         return v.ToResult();                                            // → 400
 
-    // 2. Load, account-scoped — nonexistent and foreign are the same 404 (class 5, PRE-10)
+    // 2. Load, account-scoped — nonexistent and foreign are the same 404 (class 5 — ADR-0002 § Authorization)
     var schedule = await db.Schedules
         .SingleOrDefaultAsync(s => s.ProfileId == caller.ProfileId && s.Id == req.Id, ct);
-    if (schedule is null) return Result.NotFound;
+    if (schedule is null) 
+        return Result.NotFound;
 
     // 3. All rules, aggregated for the user (class 6, §5)
     var rules = await RuleSet
         .Add(schedule.CanEdit())
         .Then(() => NameIsUniqueAsync(req, ct))
         .CheckAsync();
-    if (rules is RuleCheck.Fail f) return f.ToResult();                 // → 409, all violations
+    if (rules is RuleCheck.Fail f) 
+        return f.ToResult();                 // → 409, all violations
 
     // 4. Domain — the aggregate re-asserts its own rules (§3) and raises events
     var result = schedule.Edit(Map(req));
-    if (result is not Result.Success) return result;
+    if (result is not Result.Success) 
+        return result;
 
     // 5. Commit — domain events drain in the SaveChanges interceptor;
     //    outbox envelopes join the same transaction (ADR-0002)

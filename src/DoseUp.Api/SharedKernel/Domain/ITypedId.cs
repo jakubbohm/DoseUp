@@ -6,7 +6,7 @@ namespace DoseUp.Api.SharedKernel.Domain;
 /// § Domain model base types). The shape lets one generic value converter and one Platform
 /// model-builder convention cover every id; ids are compile-time non-interchangeable
 /// across aggregates, which is what makes account-scoped <c>Where</c> clauses (ring 2,
-/// PRE-10) refuse to compile when ids are swapped.
+/// ADR-0002 § Authorization) refuse to compile when ids are swapped.
 /// </summary>
 /// <remarks>
 /// The v7 mint is each id type's own one-line <c>Create()</c>

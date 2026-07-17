@@ -53,7 +53,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
   // rejected — secure by default. M0 wires Entra External ID as the primary authority.
 });
 
-// Secure by default (PRE-10 ring 0): every endpoint without explicit auth metadata
+// Secure by default (ADR-0002 § Authorization, ring 0): every endpoint without explicit auth metadata
 // requires an authenticated caller; anonymous endpoints opt out explicitly.
 builder.Services.AddAuthorization(static options => options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 

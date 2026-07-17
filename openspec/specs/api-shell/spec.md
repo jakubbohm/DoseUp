@@ -2,13 +2,13 @@
 
 ## Purpose
 
-The minimal API surface: secure-by-default posture (PRE-10 ring 0), a DB-free anonymous health probe, and the authenticated identity-echo diagnostic (M0's "response proves identity" endpoint minus the database stage — M0 layers `ActiveAccount`/`CallerContext` on top). The anonymous allowlist's enforcement owner is the architecture-test catalog (rule 12), not this spec.
+The minimal API surface: secure-by-default posture (ring 0 of [ADR-0002-architecture-style § Authorization](../../../docs/adr/0002-architecture-style.md)), a DB-free anonymous health probe, and the authenticated identity-echo diagnostic (M0's "response proves identity" endpoint minus the database stage — M0 layers `ActiveAccount`/`CallerContext` on top). The anonymous allowlist's enforcement owner is the architecture-test catalog (rule 12), not this spec.
 
 ## Requirements
 
 ### Requirement: Endpoints are secure by default
 
-Every endpoint not explicitly allowlisted as anonymous SHALL require a valid bearer token from a trusted authority; requests failing that SHALL be denied with 401 (ProblemDetails per `error-contract`). Token validation SHALL be local — the unauthenticated path never touches the database (PRE-10).
+Every endpoint not explicitly allowlisted as anonymous SHALL require a valid bearer token from a trusted authority; requests failing that SHALL be denied with 401 (ProblemDetails per `error-contract`). Token validation SHALL be local — the unauthenticated path never touches the database ([ADR-0002-architecture-style § Authorization](../../../docs/adr/0002-architecture-style.md)).
 
 #### Scenario: Missing token is denied
 - **WHEN** the identity-echo endpoint is called with no token

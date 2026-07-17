@@ -8,7 +8,7 @@ namespace DoseUp.Api.Platform.Persistence;
 /// path requires an orchestrator-provided connection string, and <c>migrations add</c>
 /// never opens a connection — the placeholder exists only to satisfy the provider.
 /// Design-time side of the bootstrap-placeholder <see cref="DoseUpDbContext"/>, removed
-/// with it when the first module context lands (roadmap M1).
+/// with it when the first module context lands (roadmap M0 — the Membership change).
 /// </summary>
 public sealed class DoseUpDbContextFactory : IDesignTimeDbContextFactory<DoseUpDbContext> {
   public DoseUpDbContext CreateDbContext(string[] args) =>

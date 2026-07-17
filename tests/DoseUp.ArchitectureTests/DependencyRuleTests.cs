@@ -76,8 +76,8 @@ public sealed partial class DependencyRuleTests {
   [Test]
   public void Rule_04_module_db_context_is_consumed_only_by_its_own_module_other_infrastructure_only_by_platform() {
     // ADR-0002 rule 4 (revised 2026-07-15): "The module's DbContext is the module's
-    // data-access API — consumed directly by its own Features, and only them (repository-free,
-    // PRE-7); every other Infrastructure type — port adapters, the published-language
+    // data-access API — consumed directly by its own Features, and only them
+    // (repository-free); every other Infrastructure type — port adapters, the published-language
     // translator — is seen only by the composition root ..., or by nothing at all."
     // For the context the walk allows the owning module's Features (the carve-out) and its
     // own Infrastructure (the design-time factory's mechanical reference) plus the

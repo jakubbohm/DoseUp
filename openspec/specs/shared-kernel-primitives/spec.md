@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Behavioral contracts of the SharedKernel founding seed (PRE-7). Signatures are design-level (member names may be tuned per [domain-rules.md](../../../docs/conventions/domain-rules.md) header); the behaviors below are binding. These primitives are load-bearing for every future module — the unit layer covers them exhaustively (testing.md §2).
+Behavioral contracts of the SharedKernel founding seed ([conventions/README.md § SharedKernel discipline](../../../docs/conventions/README.md)). Signatures are design-level (member names may be tuned per [domain-rules.md](../../../docs/conventions/domain-rules.md) header); the behaviors below are binding. These primitives are load-bearing for every future module — the unit layer covers them exhaustively (testing.md §2).
 
 ## Requirements
 
