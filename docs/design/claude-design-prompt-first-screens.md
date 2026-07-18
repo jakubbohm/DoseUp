@@ -28,8 +28,9 @@ Scope notes: the screens design ahead of the roadmap (schedules are M2; the road
 first planned mockup was the M1 logging UI) — a deliberate direction-setting iteration.
 The schedule-type taxonomy, postpone durations, and agentic parsing exceed FR-10/FR-12's
 current wording; requirements/spec updates are separate steps Jakub kicks off. "Use
-Radix" here is mockup direction only — PRE-5 stays open, as does PRE-14 (design
-personas).
+Radix" here is mockup direction only — the React data & state stack is an open design
+decision (tracked in [#26](https://github.com/jakubbohm/DoseUp/issues/26)), as are the
+design personas ([#35](https://github.com/jakubbohm/DoseUp/issues/35)).
 
 Paste the block below into Claude Design verbatim.
 
