@@ -51,6 +51,8 @@ Division of labor: product docs say **why**, specs say **precisely what**, conve
 
 Trunk-based. **PRs always** (all gates always run), squash merge, PR title = Conventional Commit. Feature flags for incomplete work, each with a removal task. Commit or push only when Jakub asks.
 
+Squash merge is ruleset-enforced on `main`; rationale, rejected alternatives, and its accepted cost are in [ADR-0004-delivery-and-process](docs/adr/0004-delivery-and-process.md) — read it before re-opening the question (twice re-examined already). Branching for openspec changes is automated by the `openspec/config.yaml` proposal rule. Scan open PRs before adding a new file — parallel sessions creating the same one is a real conflict source.
+
 Work items live in GitHub issues/milestones/project (`gh` CLI is the only channel — see [conventions/project-management.md](docs/conventions/project-management.md)); GitHub mutations only after Jakub signs off a plan.
 
 ## Claude memory
