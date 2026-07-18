@@ -12,12 +12,25 @@ translated from a 2026 web-platform demo Jakub supplied) · schedule-type taxono
 (repeats × ends) · agentic natural-language quick-add · notification-landing Dose action
 screen.
 
+Amended same day after the first Claude Design run's clarifying questions. Jakub's own
+words (the notes field): the primary animated direction **auto-themes with time of day**
+— no manual light/dark toggle; manual themes apply only to the dial-down variant — and
+DayArc/input gained the **sun-scrub** interaction (dragging a time dot live-retunes the
+ambient sky). His other answers were closest-offered options, not his words, and he
+refined them afterwards: scope = everything at **full quality** — best possible usability
+as the foundation for future development outranks time/cost savings (the offered "broad,
+less polish per screen" trade-off explicitly rejected); fully interactive prototype, not
+wireframes (the specific interaction enumeration is this prompt's specification, not
+Jakub's); ambient dayparts varied across frames (Today additionally at both poles);
+monogram avatars.
+
 Scope notes: the screens design ahead of the roadmap (schedules are M2; the roadmap's
 first planned mockup was the M1 logging UI) — a deliberate direction-setting iteration.
 The schedule-type taxonomy, postpone durations, and agentic parsing exceed FR-10/FR-12's
 current wording; requirements/spec updates are separate steps Jakub kicks off. "Use
-Radix" here is mockup direction only — PRE-5 stays open, as does PRE-14 (design
-personas).
+Radix" here is mockup direction only — the React data & state stack is an open design
+decision (tracked in [#26](https://github.com/jakubbohm/DoseUp/issues/26)), as are the
+design personas ([#35](https://github.com/jakubbohm/DoseUp/issues/35)).
 
 Paste the block below into Claude Design verbatim.
 
@@ -41,9 +54,16 @@ medical device; no clinical-advice UI.
 3. **Schedule detail/edit** — one screen; view and edit modes share one skeleton
 4. **Dose action** — the screen a push-notification tap lands on
 5. **Agentic quick-add** — natural-language schedule creation flow (3 states)
-6. **Component sheet** — every reusable component + tokens, in light AND dark
+6. **Component sheet** — every reusable component + tokens, at the day AND night poles
 
-Mobile-first at 390×844, both themes for every screen. No desktop this round.
+Mobile-first at 390×844. No desktop this round. **Scope: everything, at full quality** —
+all six deliverables with their listed states, each done properly. Take the time it
+needs: the optimization target is the best possible usability as a foundation for the
+development that follows, never time or token savings. **Build it fully interactive** —
+a working prototype, not wireframes or annotated stills; the interactions specified in
+Motion below (and the sun-scrub) actually run. Theming is automatic (see Art direction):
+vary the ambient daypart across frames to spread the range — and show Today at both the
+day and night poles.
 
 ## Art direction — "the day, instrumented"
 Reference feel: editorial-technical 2026, OKLCH-native, alive — NOT flat 2020 cards, NOT
@@ -80,12 +100,19 @@ checkmark morph on dose-taken with the card settling into Done and the arc node 
 Fast and subtle — used twice a day, every day; delight never slows the loop. Respect
 `prefers-reduced-motion`.
 
-**Themes:** dark = luminous night (glow, stars on the arc, deep indigo space — never gray
-boxes). Light = daylight paper (warm off-white, pastel sky, deeper accent for contrast).
-Both are designed, neither is an inversion.
+**Theming — automatic, not toggled.** The primary direction has NO manual light/dark
+toggle: appearance follows time of day continuously. Daylight hours render as daylight
+paper (warm off-white, pastel sky, deeper accent for contrast); night hours as luminous
+night (glow, stars on the arc, deep indigo space — never gray boxes); dawn/dusk blend
+between the poles. Both poles are fully designed, neither is an inversion of the other.
+Vary the ambient daypart across frames (e.g., Today at morning, Upcoming at midday, Dose
+action at night); show Today at both poles. (A `prefers-color-scheme`/manual override is
+an implementation question, out of scope here.)
 
-**Calibration frames:** render Today twice more — "dial-down" (calm classic, minimal
-effects) and "dial-up" (maximum expressive) — so we can pick how far to push.
+**Calibration frames:** render Today twice more — "dial-down" (calm classic: minimal
+effects, static background, conventional user-selected light/dark themes — the only
+variant with a theme toggle) and "dial-up" (maximum expressive) — so we can pick how
+far to push.
 
 **Engineering note:** cutting-edge CSS (corner-shape, scroll-driven animations, view
 transitions) is progressive enhancement — the core UI must read perfectly without it
@@ -99,7 +126,8 @@ transitions) is progressive enhancement — the core UI must read perfectly with
   `--daypart-{dawn,morning,midday,evening,night}`, `--space-*`, `--radius-*`, `--font-*`,
   `--shadow-*`, `--blur-*`). Light/dark are two values per token.
 - **Every element is an instance of a named reusable component**: `AppBar`, `TabBar`,
-  `SegmentedControl`, `ProfileSwitcher`, `DayArc`, `DoseCard`, `TimeChip`,
+  `SegmentedControl`, `ProfileSwitcher` (monogram avatars: initial + per-profile accent
+  ring — no photos), `DayArc`, `DoseCard`, `TimeChip`,
   `DaypartHeader`, `DayPatternChips`, `RepeatsSelector`, `EndsSelector`, `AdherenceRing`,
   `AdherenceStrip`, `ScheduleCard`, `SubstanceGroupHeader`, `Badge`, `Button`
   (primary/secondary/ghost/destructive), `FAB`, `Sheet`, `Stepper`, `DateField`,
@@ -114,7 +142,11 @@ night-sky rendering of the same geometry. Variants:
   gentle pulse + glow at the sun, overdue = alert-tinted behind the sun, upcoming =
   outlined ahead. Tapping a node highlights its card below.
 - **DayArc/compact** (ScheduleCard, detail): small static arc, dots at scheduled times.
-- **DayArc/input** (edit mode): draggable dots, 5-min snapping, numeric fields alongside.
+- **DayArc/input** (edit mode): draggable dots, 5-min snapping, numeric fields
+  alongside. **Sun-scrub:** while dragging, the dot becomes a small sun (moon past dusk)
+  and the screen's ambient sky follows it live — dragging from AM (left) toward PM
+  (right) sweeps the background morning gold → midday blue → evening amber → night
+  indigo; on release it eases back to the real current daypart.
 Hard rule: the arc never carries information alone — always paired with TimeChips.
 
 ## Schedule type system (drives the edit form and all sample data)
@@ -130,7 +162,9 @@ on/off, tapering, meal-anchored times are future types: exclude them, leave no d
 ## Screens
 
 ### 1. Today (home)
-- AppBar: ProfileSwitcher left (profiles "Jakub", "Ella"), date, overflow w/ theme toggle.
+- AppBar: ProfileSwitcher left (monogram avatars "J" and "E" for profiles "Jakub" and
+  "Ella", distinct accent rings), date, overflow menu (no theme toggle — theming is
+  automatic).
 - DayArc/hero under a subtle living ambient-sky background.
 - Dose list in time order: **Overdue** (1 item, prominent Take / Skip — open app + one
   tap logs it), **Coming up**, **Done today** (collapsed). Interval-chain items show
@@ -163,14 +197,14 @@ on/off, tapering, meal-anchored times are future types: exclude them, leave no d
 - **Edit:** SAME skeleton; values morph into controls in place — amount → Stepper,
   times → DayArc/input + TimeFields, repeats → RepeatsSelector (all five states),
   ends → EndsSelector. Adherence/upcoming collapse away; sticky Save/Cancel bar. Show
-  both modes as frames; indicate the morph.
+  both modes; the morph runs interactively.
 - "New schedule" = edit mode, empty (mention only). If the shared-skeleton morph fights
   the content, counter-propose exactly one alternative side-by-side and argue it.
 
 ### 4. Dose action (notification landing)
 - Ambient background = the daypart of the scheduled dose.
-- Hero: substance, strength, amount, scheduled time — plus the **profile avatar,
-  prominent** (a child's dose must be unmistakable).
+- Hero: substance, strength, amount, scheduled time — plus the **profile monogram
+  avatar with its accent ring, prominent** (a child's dose must be unmistakable).
 - One huge **Take now** button; beneath it, quiet "Log a different time" (defaults to
   now; compact adjuster for backdating).
 - Quieter **Postpone** row: chips 30 min · 1 h · 4 h · custom.
@@ -193,7 +227,8 @@ on/off, tapering, meal-anchored times are future types: exclude them, leave no d
   (Mon/Wed/Fri 08:00) · Amoxicillin 500 mg (every 8 h from 16:00, ends after 24 doses —
   9 taken) · Magnesium 375 mg (daily 21:00) · Salbutamol inhaler (as-needed, max 8/day)
   · "Brush teeth" routine (07:30 + 21:30, no amount) · ad-hoc Ibuprofen 400 mg in Done.
-- Accessibility: WCAG AA contrast in both themes (glass surfaces included), touch targets
+- Accessibility: WCAG AA contrast across the entire ambient range — day, night, and the
+  dawn/dusk blends between them (glass surfaces included), touch targets
   ≥44px, status never color-only (icon + label), arc always paired with text times,
   daypart tint never the sole group indicator (glyph + text label always present),
   `prefers-reduced-motion` respected.
