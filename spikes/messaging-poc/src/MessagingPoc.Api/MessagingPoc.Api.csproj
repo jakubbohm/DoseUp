@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <!--
+    Exact preview-stack pins mirroring the production repo (Directory.Packages.props):
+    EF Core 11 preview.5 + Npgsql EF 11 preview.5. Wolverine 6.20.0 targets net9/net10 only
+    (no net11 TFM) and is consumed here on net11 via TFM roll-forward — proving that path is
+    part of spike #50. All Wolverine EF/Npgsql deps are minimum-version (>= 10.0.2 / >= 9.0.4),
+    so NuGet unifies UP to these previews. Fallback if the preview breaks Wolverine's EF
+    integration at runtime: pin EF Core + Npgsql.EFCore to 10.0.x GA (Wolverine's tested floor).
+  -->
+  <ItemGroup Label="EF (preview, mirrors production pins)">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="11.0.0-preview.5.26302.115" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0-preview.5" />
+  </ItemGroup>
+
+  <ItemGroup Label="Wolverine 6.20.0 (async seam under test)">
+    <PackageReference Include="WolverineFx" Version="6.20.0" />
+    <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="6.20.0" />
+    <PackageReference Include="WolverineFx.Postgresql" Version="6.20.0" />
+    <PackageReference Include="WolverineFx.AzureServiceBus" Version="6.20.0" />
+    <!-- SPIKE FINDING (GH-2876): Wolverine 6.20 removed the runtime Roslyn compiler from core.
+         With TypeLoadMode.Dynamic (the default) it now needs THIS package, else startup throws
+         "no IAssemblyGenerator (Roslyn) is registered". Production should instead adopt STATIC
+         codegen (the `codegen write` command + TypeLoadMode.Static) which ADR-0002 already
+         anticipates ("codegen write for reviewable generated code"). The spike uses runtime
+         compilation for the shortest path to a green round-trip. -->
+    <PackageReference Include="WolverineFx.RuntimeCompilation" Version="6.20.0" />
+  </ItemGroup>
+
+</Project>

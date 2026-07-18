@@ -1,0 +1,20 @@
+{
+  // ---------------------------------------------------------------------------
+  // Spike #62 - Microsoft Graph Bicep extension declaration.
+  //
+  // The Graph Bicep extension went GA on 2025-07-29. Post-GA it needs NO
+  // `experimentalFeaturesEnabled` flag - just this alias declaration plus the
+  // matching `extension microsoftGraphV1` statement inside appreg.bicep.
+  //
+  // Minimum Bicep for the GA extension is v0.36.1; this machine has 0.44.1, so
+  // we are clear. `bicep build` / `az bicep build` restores the extension
+  // package (types + provider) from MCR on first use - network is required for
+  // the *restore*, but NO Azure tenant or login is needed to compile.
+  //
+  // This file must sit in the same directory as appreg.bicep (or an ancestor)
+  // so the compiler discovers it.
+  // ---------------------------------------------------------------------------
+  "extensions": {
+    "microsoftGraphV1": "br:mcr.microsoft.com/bicep/extensions/microsoftgraph/v1.0:1.0.0"
+  }
+}

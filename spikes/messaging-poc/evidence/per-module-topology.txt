@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS adherence.wolverine_dead_letters
+CREATE TABLE IF NOT EXISTS adherence.wolverine_incoming_envelopes
+CREATE TABLE IF NOT EXISTS adherence.wolverine_outgoing_envelopes
+CREATE TABLE IF NOT EXISTS scheduling.wolverine_dead_letters
+CREATE TABLE IF NOT EXISTS scheduling.wolverine_incoming_envelopes
+CREATE TABLE IF NOT EXISTS scheduling.wolverine_outgoing_envelopes
+CREATE TABLE IF NOT EXISTS wolverine.wolverine_agent_restrictions
+CREATE TABLE IF NOT EXISTS wolverine.wolverine_control_queue
+CREATE TABLE IF NOT EXISTS wolverine.wolverine_dead_letters
+CREATE TABLE IF NOT EXISTS wolverine.wolverine_incoming_envelopes
+CREATE TABLE IF NOT EXISTS wolverine.wolverine_node_assignments
+CREATE TABLE IF NOT EXISTS wolverine.wolverine_node_records
+CREATE TABLE IF NOT EXISTS wolverine.wolverine_nodes
+CREATE TABLE IF NOT EXISTS wolverine.wolverine_outgoing_envelopes
+CREATE TABLE adherence.adherence_entries
+CREATE TABLE scheduling.dose_records

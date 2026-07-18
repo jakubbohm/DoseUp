@@ -1,0 +1,14 @@
+<Project>
+
+  <!--
+    Isolation boundary (see Directory.Build.props). The repo root turns on central package
+    management; spikes opt OUT so each throwaway csproj pins its own preview versions inline
+    and self-documents what it needed. This file exists only to stop the walk-up to the root
+    Directory.Packages.props — do not add production package versions here.
+  -->
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+</Project>

@@ -488,3 +488,5 @@ $RECYCLE.BIN/
 
 # Claude Code local overrides
 .claude/settings.local.json
+# Per-machine Azure account selection (subscription/tenant GUIDs — not for a public repo)
+.claude/az-account.local
