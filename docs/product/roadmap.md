@@ -1,6 +1,6 @@
 # DoseUp — Roadmap
 
-**Status:** living document · **Last updated:** 2026-07-17
+**Status:** living document · **Last updated:** 2026-07-18
 
 A milestone is a coherent, shippable slice delivered through OpenSpec changes. When a change is archived: tick it here and update the `Status` column in [requirements.md](requirements.md). Candidate change names are just that — candidates; the actual slicing is decided when each change is proposed. Final change ids carry a letter-prefixed 3-digit sequence (naming rule in [openspec/config.yaml](../../openspec/config.yaml), amended 2026-07-15 — the OpenSpec CLI requires letter-first ids), e.g. `c001-add-shared-kernel`.
 
@@ -60,7 +60,7 @@ Candidate changes: `add-invites-admin`, `harden-authz`, `polish-onboarding`
 
 ## Backlog (unscheduled)
 
-FR-16 stock tracking · FR-17 effects journal · FR-18 export · FR-19 shared catalog · FR-20 offline (won't, revisit) · FR-21 caregiver sharing (won't, revisit) · Czech i18n (OQ-2) · Stryker mutation testing (spike scheduled into the first domain-module change — [conventions/testing.md § 7](../conventions/testing.md); if viable → nightly, never a PR gate) · Claude Design ↔ DesignSync design-system sync maturing
+FR-16 stock tracking · FR-17 effects journal · FR-18 export · FR-19 shared catalog · FR-20 offline (won't, revisit) · FR-21 caregiver sharing (won't, revisit) · Czech i18n (OQ-2) · Stryker mutation testing (spike scheduled into the first domain-module change — [conventions/testing.md § 7](../conventions/testing.md); if viable → nightly, never a PR gate) · the Claude Design workflow maturing (`/design-sync` push-up + handoff-back — [conventions/design.md](../conventions/design.md))
 
 ## Standing activities (no milestone)
 

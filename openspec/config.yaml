@@ -12,7 +12,7 @@ context: |
   - docs/conventions/ (source of truth for conventions)
 
   Stack: .NET 11 previews for services (AppHost stays net10) · Aspire 13.4 ·
-  FastEndpoints · React + Vite + TypeScript PWA · openapi-typescript +
+  FastEndpoints · React + Vite + TypeScript PWA · Tailwind CSS v4 · openapi-typescript +
   openapi-fetch (generated TS contract client) · Neon serverless Postgres
   (Aspire Postgres container locally) · EF Core 11 previews + Npgsql ·
   Ardalis.SmartEnum (domain closed value sets) ·
@@ -88,13 +88,14 @@ rules:
     - Domain-rule denials spec as 409 with stable violation codes (`<aggregate>.<rule>`); contract-shape errors as 400 — per the docs/conventions/domain-rules.md taxonomy
   design:
     - Record cross-cutting decisions as an ADR in docs/adr/ and reference it
-    - UI-heavy changes reference a Claude Design mockup + handoff bundle
+    - UI-heavy changes reference a Claude Design mockup + handoff bundle (workflow: docs/conventions/design.md)
     - Changes touching the API contract plan the TS client regeneration explicitly
     - Changes touching the AppHost resource graph or Azure topology plan the infra Bicep update explicitly (hand-authored IaC — docs/adr/0004-delivery-and-process.md)
   tasks:
     - Slice tasks to complete in one sitting (~2h max), each ending with build and tests green
     - 'Changes touching the API contract include an explicit "regenerate TS client" task — one script: FastEndpoints --exportswaggerjson → openapi.json → openapi-typescript types, both committed (CI only gates drift, never generates or commits fixes; docs/adr/0001-platform-and-stack.md). A change modifying an existing contract (not a pure addition) also includes tasks to update every TS consumer — facade layer if the open React-stack design decision (tracked in issue #26) adopts one, and all usages — in the same change'
     - Changes touching the AppHost resource graph or Azure topology include an explicit "update infra Bicep + .bicepparam" task — infra is hand-authored IaC deployed as a deployment stack; the AppHost models local orchestration only (docs/adr/0004-delivery-and-process.md)
+    - Changes landing design-token or reusable-component changes in the web client include an explicit post-merge "/design-sync push" task, so the DoseUp design-system project stays a current copy of the repo (docs/conventions/design.md § 3)
     - A task adding an endpoint also classifies it in the authorization matrix (kind + arrange recipe) and updates the anonymous allowlist when applicable — the arch/matrix completeness gates fail otherwise (docs/conventions/testing.md § 4)
     - A task introducing a feature flag also schedules the flag's removal
     - 'A change with a "Tracks:" line carries the PR-body duty: the implementing PR body includes "Closes #N" for every issue the change completes — plus the parent UC issue when the change completes the whole UC (GitHub never auto-closes a parent when its children close); opsx:verify checks the PR body against the proposal Tracks line (docs/conventions/project-management.md)'

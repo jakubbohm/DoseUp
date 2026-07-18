@@ -114,7 +114,7 @@ Everything lives in **[project-management.md](project-management.md)**: the sour
 
 ## Design workflow (decided 2026-07-18 — see [design.md](design.md))
 
-Everything lives in **[design.md](design.md)**: Claude Design terms demystified (its "design system" = a tokens+components UI kit every project inherits — not branding) · direction of truth (the repo owns tokens/components; `/design-sync` pushes up to the **DoseUp** design-system project; design work returns only as handoff bundles — the tool never writes to the repo) · the per-change loop (brief in `docs/design/` → canvas iteration → handoff → OpenSpec change translates, never commits bundle content verbatim → explicit re-push task) · repo layout (one `tokens.css`, Tailwind v4 `@theme` consumption, committed `.design-sync/config.json`) · the M0 bootstrap order · re-verify markers for the research-preview product.
+Everything lives in **[design.md](design.md)**: Claude Design terms demystified (its "design system" = a tokens+components UI kit new projects inherit — not branding) · direction of truth (the repo owns tokens/components; `/design-sync` pushes up to the **DoseUp** design-system project; design work returns only as handoff bundles — the tool never writes to the repo) · the per-change loop (brief in `docs/design/` → canvas iteration → handoff → OpenSpec change translates, never commits bundle content verbatim → explicit re-push task) · repo layout (one `tokens.css`, Tailwind v4 `@theme` consumption, committed `.design-sync/config.json`) · the M0 bootstrap order · re-verify markers for the research-preview product.
 
 ## Infrastructure & delivery (decided — see [ADR-0004-delivery-and-process](../adr/0004-delivery-and-process.md))
 

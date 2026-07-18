@@ -3,7 +3,7 @@
 **Status:** ready to run · **Produced:** 2026-07-18 · **Owner:** Jakub Bohm
 
 The input prompt for the first Claude Design iteration (the mockup step required by
-[ADR-0004](../adr/0004-delivery-and-process.md) for UI-heavy changes). Derived from a
+[ADR-0004-delivery-and-process](../adr/0004-delivery-and-process.md) for UI-heavy changes). Derived from a
 design interview with Jakub on 2026-07-18; his decisions embedded here: due-first home
 with adherence below · two-view Schedules (Upcoming forward log / All by substance) ·
 shared-skeleton detail/edit (read-optimized view mode) · DayArc sun-path time
