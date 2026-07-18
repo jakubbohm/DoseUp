@@ -282,7 +282,7 @@ dotnet_naming_style.upper_case.capitalization = all_upper
 #### DoseUp adjustments (deviations from the copied reference config) ####
 
 # Roslynator ships 200+ rules; adoption is scoped to exactly one until the Roslynator-pack
-# review (open design decision — tracked in the Design decisions issues) — the category
+# review (open design decision — tracked in issue #37) — the category
 # kill-switch turns the pack off, single rules re-enable below it.
 dotnet_analyzer_diagnostic.category-Roslynator.severity = none
 # One-line blocks carry no braces (conventions § Formatting). The built-in IDE0011 only ever

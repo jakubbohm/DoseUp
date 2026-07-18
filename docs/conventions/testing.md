@@ -205,7 +205,7 @@ Cadence fixed by [ADR-0003-testing-stack](../adr/0003-testing-stack.md)/[ADR-000
 - **ProblemDetails snapshot tests (Verify):** slice tests already assert the exact contract fields (codes, `violations[]`); an approval workflow adds ceremony for shapes that are hand-asserted on purpose. Trigger: PD assertions become repetitive boilerplate across many slices.
 - **Integration-event contract tooling:** compiler-checked in one repo (§2); versioning discipline activates with the first cross-module contract (conventions § Events). Trigger: a second deployable or external consumer (same trigger as Pact, §2).
 - **Performance/load testing:** nothing at circle scale warrants it; E2E timings give a coarse nightly signal for free. Trigger: a real latency complaint or FR-21-scale growth; k6 is the candidate.
-- **a11y automation (axe-core in Playwright):** belongs to the web-scaffold design (M1 — the open React-stack design decision, tracked in the Design decisions issues), where it's a strong candidate for the PWA-showcase bar — deferred to that decision, not rejected.
+- **a11y automation (axe-core in Playwright):** belongs to the web-scaffold design (M1 — the open React-stack design decision, tracked in [#26](https://github.com/jakubbohm/DoseUp/issues/26)), where it's a strong candidate for the PWA-showcase bar — deferred to that decision, not rejected.
 - **Property-based testing:** §6.5's stance — a deliberate future adoption (CsCheck/FsCheck candidates) if the recurrence engine's edge space outgrows curated tables; never a drift-in.
 
 ## 9. M0 verification checklist
