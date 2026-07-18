@@ -60,7 +60,7 @@ Additionally: a PR that adds migrations gets the idempotent SQL script (`dotnet 
 - **Every change branches off the freshest main at creation** (`<type>/<change-id>`).
 - **A change whose design touches the API contract includes an explicit "regenerate TS client" task** — regeneration is triggered by the change process, CI only verifies (drift gate).
 - **A change touching the AppHost resource graph includes an explicit "update infra Bicep + `.bicepparam`" task** (infra is hand-authored; the AppHost is local-only).
-- UI-heavy changes include a **Claude Design mockup + handoff** step before implementation; the component library syncs to the Claude Design project via DesignSync so designs use real tokens/components.
+- UI-heavy changes include a **Claude Design mockup + handoff** step before implementation; the full workflow — terminology, direction of truth (the repo owns tokens/components; `/design-sync` pushes **up**; design work returns only as handoff bundles), repo layout — is [conventions/design.md](../conventions/design.md).
 - On archive: tick the roadmap, update requirement statuses.
 - Stage progression across the workflow is **Jakub's explicit call** — propose, then wait.
 

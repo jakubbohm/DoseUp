@@ -24,6 +24,13 @@ wireframes (the specific interaction enumeration is this prompt's specification,
 Jakub's); ambient dayparts varied across frames (Today additionally at both poles);
 monogram avatars.
 
+Amended 2026-07-18 (stack): Jakub's verdict — the implementation styles with **Tailwind CSS
+v4** ([ADR-0001-platform-and-stack](../adr/0001-platform-and-stack.md)); the design-system
+rules below now say so — deliberate prompt steering: documented output fidelity comes from
+a linked codebase / pushed design system ([conventions/design.md § 3](../conventions/design.md)),
+which this greenfield run doesn't have yet. Radix remains mockup direction only
+([#26](https://github.com/jakubbohm/DoseUp/issues/26) open).
+
 Scope notes: the screens design ahead of the roadmap (schedules are M2; the roadmap's
 first planned mockup was the M1 logging UI) — a deliberate direction-setting iteration.
 The schedule-type taxonomy, postpone durations, and agentic parsing exceed FR-10/FR-12's
@@ -124,7 +131,11 @@ transitions) is progressive enhancement — the core UI must read perfectly with
 - **Tokens as CSS custom properties**, semantic names (`--hue-ambient`, `--color-bg-*`,
   `--color-text-*`, `--color-accent`, `--color-status-{due,overdue,taken,skipped}`,
   `--daypart-{dawn,morning,midday,evening,night}`, `--space-*`, `--radius-*`, `--font-*`,
-  `--shadow-*`, `--blur-*`). Light/dark are two values per token.
+  `--shadow-*`, `--blur-*`). Light/dark are two values per token. The implementation
+  stack is **Tailwind CSS v4**: static tokens will live in `@theme` and become utilities;
+  runtime-varying tokens (`--hue-ambient`) stay plain custom properties that utilities
+  reference. Style with Tailwind utility classes where they express it; bespoke CSS only
+  for what utilities can't say (the cutting-edge effects above).
 - **Every element is an instance of a named reusable component**: `AppBar`, `TabBar`,
   `SegmentedControl`, `ProfileSwitcher` (monogram avatars: initial + per-profile accent
   ring — no photos), `DayArc`, `DoseCard`, `TimeChip`,
