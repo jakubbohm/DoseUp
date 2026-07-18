@@ -1,0 +1,9 @@
+2026-07-18T01:59:10.2072845Z       ServiceBus Emulator is launching with config :{"Namespaces":[{"Name":"messaging","Queues":[{"Name":"dose-events","Properties":{"DeadLetteringOnMessageExpiration":false,"DefaultMessageTimeToLive":"PT1H","DuplicateDetectionHistoryTimeWindow":"PT20S","ForwardDeadLetteredMessagesTo":null,"ForwardTo":null,"LockDuration":"PT1M","MaxDeliveryCount":3,"RequiresDuplicateDetection":null,"RequiresSession":false}}],"Topics":[]}],"Logging":{"Type":"File"}}
+2026-07-18T01:59:10.2132921Z       Creating queue: dose-events 
+2026-07-18T01:59:16.1990000Z       Started message listening at asb://queue/dose-events
+2026-07-18T01:59:21.8720000Z       Successfully processed message MessagingPoc.Api.Modules.Scheduling.Contracts.DoseRecorded#08dee470-2c79-682c-a82b-dd10114a0000 from asb://queue/dose-events
+2026-07-18T01:59:21.9380000Z       Successfully processed message MessagingPoc.Api.Modules.Scheduling.Contracts.DoseRecorded#08dee470-2c87-fa7a-a82b-dd10114a0000 from asb://queue/dose-events
+2026-07-18T01:59:21.9960000Z       Successfully processed message MessagingPoc.Api.Modules.Scheduling.Contracts.DoseRecorded#08dee470-2f5c-90da-a82b-dd10114a0000 from asb://queue/dose-events
+2026-07-18T01:59:22.1730000Z       Successfully processed message MessagingPoc.Api.Modules.Scheduling.Contracts.DoseRecorded#08dee470-2f89-80e0-a82b-dd10114a0000 from asb://queue/dose-events
+2026-07-18T01:59:23.5250000Z       Successfully processed message MessagingPoc.Api.Modules.Scheduling.Contracts.DoseRecorded#08dee470-303d-ccd7-a82b-dd10114a0000 from asb://queue/dose-events
+2026-07-18T01:59:23.5520000Z       Successfully processed message MessagingPoc.Api.Modules.Scheduling.Contracts.DoseRecorded#08dee470-305f-1f42-a82b-dd10114a0000 from asb://queue/dose-events

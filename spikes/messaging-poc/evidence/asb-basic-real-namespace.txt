@@ -1,0 +1,59 @@
+Spike #50 — round-trip against a REAL Azure Service Bus BASIC namespace
+=======================================================================
+Run 2026-07-18 by Jakub (namespace) + Claude (smoke). This is the one thing the
+emulator could not prove: that the queue-only design actually works on Basic tier.
+No secrets in this file — the connection string never left the machine's scratchpad.
+
+--- The namespace (Jakub, `az servicebus namespace show`) --------------------
+  name:     doseup-spike-sb-basic
+  sku/tier: Basic / Basic          <-- real Basic tier, not the emulator's Standard surface
+  status:   Active
+  location: germanywestcentral
+  queues:   ["dose-events"]        <-- queues only; no topics/subscriptions exist
+
+--- How it was run ----------------------------------------------------------
+  PoC API (unchanged) pointed at the real namespace + a throwaway local Postgres:
+    ConnectionStrings__messaging   = <RootManageSharedAccessKey conn string, Basic ns>
+    ConnectionStrings__messagingdb = Host=localhost;Port=5433;Database=messagingdb;...
+  Wolverine wiring is exactly the production-shaped config: AutoProvision OFF,
+  SystemQueuesAreEnabled(false), explicit ListenTo/Publish on the `dose-events` queue.
+
+--- Startup: connected to the real Basic queue, no system queues --------------
+  info: Wolverine.Runtime.WolverineRuntime[0]
+        Initializing the Wolverine AzureServiceBusTransport
+  info: Wolverine.Transports.ListeningAgent[0]
+        Started message listening at stub://replies/          <-- replies are IN-MEMORY,
+  info: Wolverine.Transports.ListeningAgent[0]                     NOT an ASB system queue
+        Started message listening at asb://queue/dose-events  <-- the only ASB entity used
+
+--- The round-trip (send OUT to Basic queue, receive BACK, write read-side) ---
+  POST /scheduling/record-dose  {"profileId":"11111111-1111-1111-1111-111111111111"}
+    -> {"doseRecordId":"ba3779ae-10dd-4cb9-8e38-78d7a9e3e487"}
+
+  info: MessagingPoc.Api.Modules.Scheduling.Contracts.DoseRecorded[104]
+        Successfully processed message ...DoseRecorded#08dee4dc-... from asb://queue/dose-events
+
+  GET /adherence/entries?profileId=11111111-1111-1111-1111-111111111111
+    -> [{"id":"d5eedd3c-a9a7-460a-a0c9-4f28b4407144",
+         "doseRecordId":"ba3779ae-10dd-4cb9-8e38-78d7a9e3e487",   <-- MATCHES the POST id:
+         "profileId":"11111111-1111-1111-1111-111111111111",           the event really travelled
+         "observedAt":"2026-07-18T14:57:08.474031+00:00"}]
+  Round-trip landed ~2s after the POST.
+
+--- Basic-tier incompatibility scan of the full run log: CLEAN ---------------
+  grep -iE 'MessagingEntityNotFound|topic|subscription|session|not supported|
+           QuotaExceeded|Unauthorized|ServiceBusException'   ->  (no matches)
+  grep -E '^(warn|fail|crit)'                                ->  (no matches)
+  (The only 'EXCEPTION'/'exception_*' lines in the log are PL/pgSQL DDL echoed while
+   Wolverine created its message-store tables — not runtime errors.)
+
+--- Verdict ------------------------------------------------------------------
+  #50 GO — now confirmed on a real ASB Basic namespace, not just the emulator.
+  The queue-only, no-system-queues, AutoProvision-off design runs on Basic tier with
+  a clean send+receive round-trip. Wolverine keeps its reply endpoint in-memory
+  (stub://replies/), so it needs no ASB topic/subscription/session and no system queues
+  — which is exactly why Basic tier is sufficient.
+
+  Cleanup: local Postgres container + PoC process were torn down after the run.
+  The `doseup-spike-sb-basic` namespace in resource group `doseup-spikes` was left
+  running for Jakub to delete (his subscription).

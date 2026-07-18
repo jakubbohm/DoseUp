@@ -1,0 +1,25 @@
+<Project>
+
+  <!--
+    ISOLATION BOUNDARY for the M0 spikes (throwaway PoCs, not production code).
+
+    MSBuild auto-imports the *nearest* Directory.Build.props walking up from each project and
+    stops here — it deliberately does NOT chain to the repo-root Directory.Build.props. That is
+    the point: spikes must not inherit production's TreatWarningsAsErrors, BannedApiAnalyzers,
+    Roslynator, or GenerateDocumentationFile gates. A spike answers a go/no-go question; it is
+    exempt from the conventions that govern src/ and tests/. Nothing under spikes/ is referenced
+    by DoseUp.slnx, Directory.Packages.props at the root, or any production build.
+
+    See spikes/README.md for the go/no-go writeups these projects produce.
+  -->
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>preview</LangVersion>
+    <!-- Deliberately relaxed vs. the repo root: a spike is allowed to be scrappy. -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+</Project>

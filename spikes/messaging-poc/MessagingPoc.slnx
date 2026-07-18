@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MessagingPoc.Api/MessagingPoc.Api.csproj" />
+    <Project Path="src/MessagingPoc.AppHost/MessagingPoc.AppHost.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MessagingPoc.IntegrationTests/MessagingPoc.IntegrationTests.csproj" />
+  </Folder>
+</Solution>
