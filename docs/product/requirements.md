@@ -63,7 +63,7 @@ Priorities: MoSCoW (**M**ust / **S**hould / **C**ould / **W**on't-for-now). Stat
 
 | ID | Requirement |
 |----|-------------|
-| NFR-1 | **Platform reach:** current Android Chrome and iOS Safari (≥ 16.4, installed to home screen for push) |
+| NFR-1 | **Platform reach:** the latest Android Chrome and iOS Safari only — no backward-compatibility floor; the invite-only circle keeps devices current (decided 2026-07-19) — installed to home screen for push |
 | NFR-2 | **Performance:** the core loop feels instant; API reads P95 < 300 ms at circle scale (≤ 50 accounts); app-open → dose-logged < 10 s on a mid-range phone over LTE |
 | NFR-3 | **Reliability:** best-effort availability (hobby operations, no SLO) — but reminder computation and delivery are server-side, so an idle client or scaled-down app never loses them |
 | NFR-4 | **Security:** HTTPS only; every API call authenticated (Entra External ID); per-account authorization enforced server-side and covered by tests — cross-account access indistinguishable from nonexistence (404, no existence leaks — [ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md)); secrets never in the repo — managed identity where available, the Neon connection string via ACA secrets/Key Vault |
