@@ -28,16 +28,22 @@ Amended 2026-07-18 (stack): Jakub's verdict — the implementation styles with *
 v4** ([ADR-0001-platform-and-stack](../adr/0001-platform-and-stack.md)); the design-system
 rules below now say so — deliberate prompt steering: documented output fidelity comes from
 a linked codebase / pushed design system ([conventions/design.md § 3](../conventions/design.md)),
-which this greenfield run doesn't have yet. Radix remains mockup direction only
-([#26](https://github.com/jakubbohm/DoseUp/issues/26) open).
+which this greenfield run doesn't have yet. Radix was mockup direction at this point —
+decided 2026-07-19 (next amendment).
+
+Amended 2026-07-19 (floor + primitives): Jakub's verdicts — the support floor is the
+**latest iOS** ("no one with anything older will ever use it"; the 16.4 floor was a prior
+session's hedge, never his — NFR-1 updated), and **Radix Primitives** is the decided
+behavior layer behind our own components ([ADR-0001-platform-and-stack](../adr/0001-platform-and-stack.md);
+Base UI the named fallback). [#26](https://github.com/jakubbohm/DoseUp/issues/26) stays open for data & state.
 
 Scope notes: the screens design ahead of the roadmap (schedules are M2; the roadmap's
 first planned mockup was the M1 logging UI) — a deliberate direction-setting iteration.
 The schedule-type taxonomy, postpone durations, and agentic parsing exceed FR-10/FR-12's
-current wording; requirements/spec updates are separate steps Jakub kicks off. "Use
-Radix" here is mockup direction only — the React data & state stack is an open design
-decision (tracked in [#26](https://github.com/jakubbohm/DoseUp/issues/26)), as are the
-design personas ([#35](https://github.com/jakubbohm/DoseUp/issues/35)).
+current wording; requirements/spec updates are separate steps Jakub kicks off. The React data & state stack is an open design decision
+(tracked in [#26](https://github.com/jakubbohm/DoseUp/issues/26)), as are the design personas
+([#35](https://github.com/jakubbohm/DoseUp/issues/35)); "use Radix", mockup direction when written, became the
+decided behavior layer on 2026-07-19 ([ADR-0001-platform-and-stack](../adr/0001-platform-and-stack.md)).
 
 Paste the block below into Claude Design verbatim.
 
@@ -121,9 +127,11 @@ effects, static background, conventional user-selected light/dark themes — the
 variant with a theme toggle) and "dial-up" (maximum expressive) — so we can pick how
 far to push.
 
-**Engineering note:** cutting-edge CSS (corner-shape, scroll-driven animations, view
-transitions) is progressive enhancement — the core UI must read perfectly without it
-(iOS Safari 16.4 floor). Mockups may use it all.
+**Engineering note:** the support floor is the **latest iOS Safari / Android Chrome**
+(NFR-1 — the circle keeps devices current; no backward-compatibility tax). Use the
+cutting-edge CSS directly; graceful degradation is owed only where WebKit hasn't shipped
+a feature at all (e.g. `corner-shape` as of 2026-07) — nothing may *break* without it.
+Mockups may use it all.
 
 ## Design-system rules (this seeds a real codebase)
 - Behavior maps to **unstyled Radix Primitives** (Dialog/Sheet, Tabs, Switch, Slider,
