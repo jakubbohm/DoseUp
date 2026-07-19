@@ -71,7 +71,7 @@ The full design lives in **[domain-rules.md](domain-rules.md)**: the error taxon
 - **Contract edge: DTOs use plain C# enums** so `openapi.json` emits real enum schemas → openapi-typescript literal unions ([ADR-0001-platform-and-stack](../adr/0001-platform-and-stack.md)). The endpoint maps DTO enum ↔ SmartEnum; unmappable values surface as `Result` validation failures, never exceptions.
 - **SmartEnum vs C# union:** SmartEnum for closed *value sets* (named instances, lookup, per-instance data/behavior); unions for closed *shape alternatives* (`Result`). SmartEnum has no exhaustive-switch checking — prefer polymorphic behavior *on* the instances over switching *over* them.
 
-## Persistence — Postgres (module ownership, migrations & seeding decided; rest in M1 design)
+## Persistence — Postgres (module ownership, naming, migrations & seeding decided; rest in M1 design)
 
 Decided ([ADR-0002-architecture-style § Unit of work & side effects](../adr/0002-architecture-style.md)): EF Core 11 previews + Npgsql; the `DbContext` is the unit of work (no wrapper) — since 2026-07-15 that means the **module's** context (next bullet).
 
@@ -83,6 +83,8 @@ Decided ([ADR-0004-delivery-and-process](../adr/0004-delivery-and-process.md)) �
 
 - **Migrations may be destructive** — no expand/contract requirement; a deploy carrying migrations takes a maintenance-window recreate (ADR-0004). Applied in CD via the self-contained **migration bundle**; never `Database.Migrate()` at startup in prod; local dev auto-applies on `aspire start` (mechanics land M1).
 - **Seeding, three tiers by post-insert ownership:** static catalogs → `HasData` (model managed data: versioned with migrations, identical everywhere per version, explicit PKs) · one-time global seed → manual data motion inside a migration (`migrationBuilder.InsertData`/`.Sql()` — runs once per database via the history table, later drift untouched) · dev/test data → `UseSeeding`/`UseAsyncSeeding`, registered **only** in the dev/test composition root (fires on `Migrate` even with nothing pending; implement both sync and async — tooling calls the sync one).
+
+Decided (2026-07-19) — **every database identifier is snake_case** (`dose_log.taken_at`), produced by **EFCore.NamingConventions** (`UseSnakeCaseNamingConvention()` on each module context); C# stays PascalCase — the package rewrites store names at model-build time only, so nothing in code changes. Why: Postgres folds unquoted identifiers to lowercase, so the Npgsql default (quoted PascalCase) would tax every hand-written query forever — exactly the ops SQL this project plans (maintenance-window migrations, Neon console) — while snake_case matches the ecosystem and the framework tables already in the database (Wolverine's envelopes), and yields constraint/index names citable unquoted where the [domain-rules.md](domain-rules.md) set-rule backstop maps violations by constraint name. Preview caveat: the package's latest (10.0.1, 2026-07) targets EF Core 10 — proving it on the EF 11 previews is spike [#93](https://github.com/jakubbohm/DoseUp/issues/93), blocking the first migration ([#42](https://github.com/jakubbohm/DoseUp/issues/42)); if it breaks, the fallback is a hand-rolled `IModelFinalizingConvention` (~20 lines) — the mechanism would change, the naming decision wouldn't.
 
 Decided — ids (see § Domain model base types above): client-generated Guid v7 wrapped in per-aggregate typed ids, stored as native `uuid` via one generic converter (see *Domain model base types*).
 
