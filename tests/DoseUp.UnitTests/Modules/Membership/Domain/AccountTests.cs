@@ -32,13 +32,27 @@ public sealed class AccountTests {
   }
 
   [Test]
-  public void Blank_display_name_or_email_is_a_bug_not_a_rule_violation() {
-    EntraObjectId oid = EntraObjectId.From(Guid.CreateVersion7());
+  public void Whitespace_display_name_is_a_bug_and_throws() =>
+    Should.Throw<ArgumentException>(static () => Account.SignUp(EntraObjectId.From(Guid.CreateVersion7()), " ", "jakub@example.test", Now));
 
-    Should.Throw<ArgumentException>(() => Account.SignUp(oid, " ", "jakub@example.test", Now));
-    Should.Throw<ArgumentException>(() => Account.SignUp(oid, "Jakub", " ", Now));
-    Should.Throw<ArgumentNullException>(() => Account.SignUp(oid, null!, "jakub@example.test", Now));
-    Should.Throw<ArgumentNullException>(() => Account.SignUp(oid, "Jakub", null!, Now));
+  [Test]
+  public void Whitespace_email_is_a_bug_and_throws() =>
+    Should.Throw<ArgumentException>(static () => Account.SignUp(EntraObjectId.From(Guid.CreateVersion7()), "Jakub", " ", Now));
+
+  [Test]
+  public void Missing_display_name_is_a_bug_and_throws() =>
+    Should.Throw<ArgumentNullException>(static () => Account.SignUp(EntraObjectId.From(Guid.CreateVersion7()), null!, "jakub@example.test", Now));
+
+  [Test]
+  public void Missing_email_is_a_bug_and_throws() =>
+    Should.Throw<ArgumentNullException>(static () => Account.SignUp(EntraObjectId.From(Guid.CreateVersion7()), "Jakub", null!, Now));
+
+  [Test]
+  public void Status_values_are_the_stable_persistence_contract() {
+    // membership-accounts spec: status round-trips via the stable append-only numeric
+    // value — pinned here so a renumbering fails a test, not a database.
+    AccountStatus.Active.Value.ShouldBe(1);
+    AccountStatus.Disabled.Value.ShouldBe(2);
   }
 
   [Test]

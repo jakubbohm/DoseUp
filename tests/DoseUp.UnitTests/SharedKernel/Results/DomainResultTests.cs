@@ -75,12 +75,20 @@ public sealed class DomainResultTests {
   }
 
   [Test]
-  public void Empty_or_missing_violations_are_a_bug_not_a_case() {
+  public void Missing_violations_are_a_bug_and_throw() =>
     Should.Throw<ArgumentNullException>(static () => new DomainResult.RuleViolations(null!));
+
+  [Test]
+  public void Empty_violations_are_a_bug_and_throw() =>
     Should.Throw<ArgumentOutOfRangeException>(static () => new DomainResult.RuleViolations([]));
+
+  [Test]
+  public void Missing_violations_on_the_value_carrying_form_are_a_bug_and_throw() =>
     Should.Throw<ArgumentNullException>(static () => new DomainResult<int>.RuleViolations(null!));
+
+  [Test]
+  public void Empty_violations_on_the_value_carrying_form_are_a_bug_and_throw() =>
     Should.Throw<ArgumentOutOfRangeException>(static () => new DomainResult<int>.RuleViolations([]));
-  }
 
   [Test]
   public void Domain_results_with_the_same_case_are_equal() {

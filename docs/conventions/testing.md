@@ -162,7 +162,7 @@ Deliberately *not* arch-tested (behavioral, owned elsewhere): ownership scoping 
 
 ### 6.1 Naming: behavior sentences
 
-Test names are snake_case sentences stating **behavior and outcome in domain language** — `Revoked_account_gets_403_with_a_still_valid_token`, `Logging_a_dose_on_a_paused_schedule_is_rejected` — never the implementation. Classes: `<TypeName>Tests` (unit), `<UseCase>Tests` (slice). Rejected: `Method_Scenario_ExpectedResult` — encodes the method name (rots on rename, reads as implementation notes); "which tests cover X" navigation comes from §1 path mirroring and §5 colocation, so names don't need to carry it.
+Test names are snake_case sentences stating **behavior and outcome in domain language** — `Disabled_account_gets_403_with_a_still_valid_token`, `Logging_a_dose_on_a_paused_schedule_is_rejected` — never the implementation. Classes: `<TypeName>Tests` (unit), `<UseCase>Tests` (slice). Rejected: `Method_Scenario_ExpectedResult` — encodes the method name (rots on rename, reads as implementation notes); "which tests cover X" navigation comes from §1 path mirroring and §5 colocation, so names don't need to carry it.
 
 ### 6.2 AAA
 
