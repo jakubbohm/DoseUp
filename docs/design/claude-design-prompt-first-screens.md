@@ -37,6 +37,15 @@ session's hedge, never his — NFR-1 updated), and **Radix Primitives** is the d
 behavior layer behind our own components ([ADR-0001-platform-and-stack](../adr/0001-platform-and-stack.md);
 Base UI the named fallback). [#26](https://github.com/jakubbohm/DoseUp/issues/26) stays open for data & state.
 
+Amended 2026-07-19 (workflow): per Jakub's in-app workflow conversation with Claude Design
+([conventions/design.md](../conventions/design.md)), the run happens in the persistent DoseUp
+design **workspace** project and its handoff is the one **full-export** greenfield drop —
+feature-scoped exports thereafter. The prompt block gained the file-naming/folder line
+(design files are renamed only via chat, so names must be right at creation). The Tailwind
+steering stays, now understood as token-discipline steering: designs are stack-agnostic
+HTML references, and the handoff README defers to the repo's own conventions at
+implementation time.
+
 Scope notes: the screens design ahead of the roadmap (schedules are M2; the roadmap's
 first planned mockup was the M1 logging UI) — a deliberate direction-setting iteration.
 The schedule-type taxonomy, postpone durations, and agentic parsing exceed FR-10/FR-12's
@@ -77,6 +86,11 @@ a working prototype, not wireframes or annotated stills; the interactions specif
 Motion below (and the sun-scrub) actually run. Theming is automatic (see Art direction):
 vary the ambient daypart across frames to spread the range — and show Today at both the
 day and night poles.
+
+Keep this iteration's files in a `features/first-screens/` folder and give every file a
+descriptive name at creation (e.g. `Today.dc.html`, `SchedulesUpcoming.dc.html`,
+`ScheduleDetail.dc.html`, `DoseAction.dc.html`, `QuickAdd.dc.html`,
+`ComponentSheet.dc.html`).
 
 ## Art direction — "the day, instrumented"
 Reference feel: editorial-technical 2026, OKLCH-native, alive — NOT flat 2020 cards, NOT

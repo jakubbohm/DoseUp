@@ -89,6 +89,7 @@ rules:
   design:
     - Record cross-cutting decisions as an ADR in docs/adr/ and reference it
     - UI-heavy changes reference a Claude Design mockup + handoff bundle (workflow: docs/conventions/design.md)
+    - A change implementing a design handoff maps the bundle's output onto existing tokens and components; a genuinely new token or component is flagged in the design artifact as a reviewable decision, never silently introduced (docs/conventions/design.md § 2)
     - Changes touching the API contract plan the TS client regeneration explicitly
     - Changes touching the AppHost resource graph or Azure topology plan the infra Bicep update explicitly (hand-authored IaC — docs/adr/0004-delivery-and-process.md)
   tasks:
