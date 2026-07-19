@@ -37,9 +37,9 @@ Order is dependency-driven; every task ends with `dotnet build DoseUp.slnx` and 
 
 ## 7. GitHub pass (mutations on plan sign-off; PR-body duty)
 
-- [ ] 7.1 Edit issue #53 body: "(active, admin)" → "(active, disabled)".
-- [ ] 7.2 Comment on #38: domain-half resolved (`DomainResult` both forms + `ApiResult` rename, generic shipped by explicit growth-rule exception); handler/endpoint half stays parked for #54's call sites; issue remains open.
-- [ ] 7.3 Set #98's milestone to M0 (it closes with this change).
+- [x] 7.1 Edit issue #53 body: "(active, admin)" → "(active, disabled)".
+- [x] 7.2 Comment on #38: domain-half resolved (`DomainResult` both forms + `ApiResult` rename, generic shipped by explicit growth-rule exception); handler/endpoint half stays parked for #54's call sites; issue remains open.
+- [x] 7.3 Set #98's milestone to M0 (it closes with this change).
 - [ ] 7.4 PR body carries `Closes #53`, `Closes #55`, `Closes #97`, `Closes #98` (matches the proposal Tracks line — opsx:verify checks this).
 
 ## 8. Archive-time note (for opsx:sync/archive, not implementation)
