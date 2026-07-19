@@ -1,8 +1,8 @@
 # M0 spikes — proof-of-concept results
 
-Throwaway PoCs answering the three M0 `spike`-labelled GitHub issues with **evidence**, built
-overnight so the only thing left is the handful of steps that genuinely need a human with a
-tenant/subscription. Everything here is isolated: its own `Directory.Build.props` /
+Throwaway PoCs answering the M0 `spike`-labelled GitHub issues with **evidence**, built so the
+only thing left is the handful of steps that genuinely need a human with a tenant/subscription.
+Everything here is isolated: its own `Directory.Build.props` /
 `Directory.Packages.props` mean nothing under `spikes/` is part of `DoseUp.slnx`, the production
 package set, or any gate. Delete the folder and the repo is unchanged.
 
@@ -13,10 +13,12 @@ package set, or any gate. Delete the folder and the repo is unchanged.
 | [#50](https://github.com/jakubbohm/DoseUp/issues/50) | Wolverine on .NET 11 preview + ASB **Basic**, per-module outbox in own schema | **GO** | Full round-trip green on the exact preview pins; per-module outbox **and** inbox in each module's schema; envelope joins the module transaction; runtime EF Core 11 preview.5 compat | ✅ **done 2026-07-18** — confirmed on a real ASB **Basic** namespace (clean send+receive, no topic/session/system-queue errors); see [`evidence/asb-basic-real-namespace.txt`](messaging-poc/evidence/asb-basic-real-namespace.txt) |
 | [#51](https://github.com/jakubbohm/DoseUp/issues/51) | Wolverine × ASB **emulator** in the Aspire harness | **GO** | 4/4 tests green against `servicebus-emulator:2.0.0`, no cloud | nothing |
 | [#62](https://github.com/jakubbohm/DoseUp/issues/62) | Entra app registration from the pipeline | **CONDITIONAL GO** | `az bicep build` compiles the tenant-scope Graph template; app + SP + FIC bind offline | ➡️ **implementation tracked in [#75](https://github.com/jakubbohm/DoseUp/issues/75)** (not finished live here); two open risks since resolved in our favour — see the entra-pipeline README |
+| [#93](https://github.com/jakubbohm/DoseUp/issues/93) | `EFCore.NamingConventions` (built for EF 10) on our EF **11 previews** | **GO** | 11/11 tests green on the exact preview pins; schema applied to a real `postgres:17` with every identifier unquoted — tables, columns, owned types, PK/AK/FK, indexes, and query translation | nothing now — but the GO **expires**: the package's dependency ceiling is `< 11.0.0`, so bumping EF to 11.0.0 **stable** breaks restore until it ships an 11.x |
 
 Detail lives with each PoC:
 - **[`messaging-poc/README.md`](messaging-poc/README.md)** — spikes #50 + #51, with the topology and round-trip evidence, and **four design findings** worth folding into M0.
 - **[`entra-pipeline/README.md`](entra-pipeline/README.md)** — spike #62, with the proven-vs-needs-tenant split and the CIAM runbook.
+- **[`snake-case-naming/README.md`](snake-case-naming/README.md)** — spike #93, with **three authoring rules** the first real migration ([#42](https://github.com/jakubbohm/DoseUp/issues/42)) must follow and one dated follow-up.
 
 > These are spike outputs (throwaway PoCs), **not** production code and **not** OpenSpec changes.
 > Adopting any of it into `src/` is a separate, Jakub-gated decision. I have **not** touched the
@@ -45,6 +47,18 @@ registration + service principal + federated credential and compiles offline. It
 because DoseUp's identity tenant is Entra External ID (CIAM): no subscription → tenant-scope,
 Graph-only deployment, plus a one-time human bootstrap (consent + ARM elevation). An imperative
 `az ad` fallback avoids the ARM elevation entirely.
+
+**#93 — snake_case rides the previews; the mechanism is what has an expiry date.**
+`EFCore.NamingConventions` 10.0.1 renames everything it should on EF 11 preview.5, and a real
+`postgres:17` accepts the result with no identifier needing quotes — which was the whole point of
+[F-88](../docs/software-factory.md). The value is in the three boundaries it does **not** cross,
+each of which fails silently in normal EF usage: an explicit schema name, an explicit check
+constraint (name *and* raw SQL — the naive spelling emits DDL Postgres rejects outright), and EF's
+own migrations-history table. All three are one-line authoring choices in [#42](https://github.com/jakubbohm/DoseUp/issues/42),
+and all three are cheap only while zero tables exist. Separately, the package's dependency ceiling
+is `< 11.0.0`: today's previews slip under it because SemVer sorts prereleases low, but EF 11.0.0
+**stable** will not — a loud, scheduled break on a bump we control, with the hand-rolled
+`IModelFinalizingConvention` fallback still standing behind it.
 
 ---
 

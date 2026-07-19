@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup Label="EF family — pinned to the SAME versions as the repo root Directory.Packages.props.
+                     The spike is worthless if it proves the package against versions production does not use.
+                     EF is held at preview.5 because Npgsql.EntityFrameworkCore.PostgreSQL has no preview.6
+                     and exact-pins EF (see the root CPM comment).">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="11.0.0-preview.5.26302.115" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="11.0.0-preview.5.26302.115">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0-preview.5" />
+  </ItemGroup>
+
+  <ItemGroup Label="THE SUBJECT OF THIS SPIKE. Latest release is 10.0.1 (2026-07), built and tested against
+                    EF Core 10. Its dependency floor is a minimum, not an exact pin, so NuGet resolves it
+                    happily beside the EF 11 previews above — the question is whether it still WORKS there.">
+    <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+  </ItemGroup>
+
+</Project>

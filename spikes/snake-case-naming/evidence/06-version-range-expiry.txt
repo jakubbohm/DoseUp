@@ -1,0 +1,31 @@
+THE VERSION-RANGE FINDING — why this GO has an expiry date.
+
+The issue assumed EFCore.NamingConventions declares a dependency FLOOR (">= 10.0.0").
+It does not. It declares a BOUNDED RANGE with an exclusive upper bound:
+
+    Microsoft.EntityFrameworkCore            [10.0.1, 11.0.0)
+    Microsoft.EntityFrameworkCore.Relational [10.0.1, 11.0.0)
+
+Today that resolves silently and correctly, because NuGet/SemVer 2.0 sorts a prerelease
+BELOW its release: 11.0.0-preview.5 < 11.0.0, so the previews satisfy "< 11.0.0".
+That is why our restore is clean, with no NU1608, and why the package works at all.
+
+The day EF Core 11.0.0 STABLE ships, that stops being true: 11.0.0 is NOT < 11.0.0.
+NuGet then raises NU1608. Proof below, using the SAME range shape one major earlier
+(NamingConventions 9.0.0, which bounds EF to [9.0.0, 10.0.0), against stable EF 10.0.1):
+
+--- 1. plain restore: NU1608 is only a WARNING, restore still succeeds ---
+C:\Users\jakub\AppData\Local\Temp\claude\D--source-jakubbohm-DoseUp\d381f819-ec26-4358-85fc-5e60e7daedc1\scratchpad\boundcheck\boundcheck.csproj : warning NU1608: Detected package version outside of dependency constraint: EFCore.NamingConventions 9.0.0 requires Microsoft.EntityFrameworkCore (>= 9.0.0 && < 10.0.0) but version Microsoft.EntityFrameworkCore 10.0.1 was resolved.
+  Restored C:\Users\jakub\AppData\Local\Temp\claude\D--source-jakubbohm-DoseUp\d381f819-ec26-4358-85fc-5e60e7daedc1\scratchpad\boundcheck\boundcheck.csproj (in 228 ms).
+
+--- 2. restore with production's <TreatWarningsAsErrors>true</TreatWarningsAsErrors> ---
+C:\Users\jakub\AppData\Local\Temp\claude\D--source-jakubbohm-DoseUp\d381f819-ec26-4358-85fc-5e60e7daedc1\scratchpad\boundcheck\boundcheck.csproj : error NU1608: Warning As Error: Detected package version outside of dependency constraint: EFCore.NamingConventions 9.0.0 requires Microsoft.EntityFrameworkCore (>= 9.0.0 && < 10.0.0) but version Microsoft.EntityFrameworkCore 10.0.1 was resolved.
+
+CONSEQUENCE FOR DoseUp: the repo root Directory.Build.props sets TreatWarningsAsErrors=true,
+so this lands as a HARD RESTORE FAILURE in src/, not a warning — on the day we bump EF to
+11.0.0 stable, which is a bump we control and will be doing deliberately.
+
+This does not change the verdict. It makes the fallback trigger precise and impossible to
+miss: if EFCore.NamingConventions has not shipped an 11.x by our EF-stable bump, either
+NoWarn NU1608 after checking the release notes, or spend the ~20 lines on the hand-rolled
+IModelFinalizingConvention. The naming decision is unaffected either way.

@@ -1,0 +1,15 @@
+Applying the FINAL migration to a clean postgres:17 database.
+Schema, check constraint and EF's history table all authored/renamed snake_case.
+
+DO
+CREATE TABLE
+START TRANSACTION
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+COMMIT

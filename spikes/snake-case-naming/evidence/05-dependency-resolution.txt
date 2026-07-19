@@ -1,0 +1,32 @@
+Which assemblies EFCore.NamingConventions 10.0.1 actually bound against at runtime.
+It declares a MINIMUM EF dependency (>= 10.x), so NuGet unified it onto the EF 11 previews.
+
+=== EFCore.NamingConventions' declared dependencies, and what they resolved to ===
+      "EFCore.NamingConventions/10.0.1": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "[10.0.1, 11.0.0)",
+          "Microsoft.EntityFrameworkCore.Relational": "[10.0.1, 11.0.0)"
+        },
+        "compile": {
+--
+    "EFCore.NamingConventions/10.0.1": {
+      "sha512": "Xs5k8XfNKPkkQSkGmZkmDI1je0prLTdxse+s8PgTFZxyBrlrTLzTBUTVJtQKSsbvu4y+luAv8DdtO5SALJE++A==",
+
+=== EF / Npgsql versions actually resolved in the graph ===
+"EFCore.NamingConventions/10.0.1"
+"Microsoft.EntityFrameworkCore.Abstractions/11.0.0-preview.5.26302.115"
+"Microsoft.EntityFrameworkCore.Analyzers/11.0.0-preview.5.26302.115"
+"Microsoft.EntityFrameworkCore.Design/11.0.0-preview.5.26302.115"
+"Microsoft.EntityFrameworkCore.Relational/11.0.0-preview.5.26302.115"
+"Microsoft.EntityFrameworkCore/11.0.0-preview.5.26302.115"
+"Npgsql.EntityFrameworkCore.PostgreSQL/11.0.0-preview.5"
+"Npgsql/10.0.3"
+
+=== Assemblies in the build output ===
+EFCore.NamingConventions.dll
+Microsoft.EntityFrameworkCore.Abstractions.dll
+Microsoft.EntityFrameworkCore.Relational.dll
+Microsoft.EntityFrameworkCore.dll
+Npgsql.EntityFrameworkCore.PostgreSQL.dll
+Npgsql.dll
