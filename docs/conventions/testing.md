@@ -83,7 +83,7 @@ TUnit runs tests in parallel; isolation comes from **data, not cleanup**. Each t
 
 ### 3c. Test identity: real JWT pipeline, test-only trust anchor
 
-The fixture mints self-signed JWTs with a test signing key; the harness injects a second accepted authority into the API's bearer configuration (the testing builder mutates the app model before start). Bearer middleware, `oid` claim mapping, `ActiveAccount` policy, `CallerContext` resolution, 401/403 semantics — all production code. **Caller classes are (token, seeded-account-state) pairs**: anonymous = no token · member-owner / member-other = two seeded accounts · admin = the DB flag · revoked = valid token + revoked row, which exercises [ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md)'s "revocation bites on the next request" exactly as specced. Rejected: a custom test auth scheme (fakes the middleware — P3 violation); real-Entra ROPC test users (external dependency, secrets, throttling in CI — the only coverage it adds is Entra itself, which the E2E login journey against the deployed environment covers).
+The fixture mints self-signed JWTs with a test signing key; the harness injects a second accepted authority into the API's bearer configuration (the testing builder mutates the app model before start). Bearer middleware, `oid` claim mapping, `ActiveAccount` policy, `CallerContext` resolution, 401/403 semantics — all production code. **Caller classes are (token, seeded-account-state) pairs**: anonymous = no token · member-owner / member-other = two seeded accounts · admin = the DB flag · revoked = valid token + revoked row, which exercises [ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md)'s "revocation bites on the next request" exactly as specced · stranger = valid token, **no** account row at all — the open self-service-sign-up door (decided 2026-07-19) made testable. Rejected: a custom test auth scheme (fakes the middleware — P3 violation); real-Entra ROPC test users (external dependency, secrets, throttling in CI — the only coverage it adds is Entra itself, which the E2E login journey against the deployed environment covers).
 
 ### 3d. Async seam: real transports via emulators
 
@@ -105,11 +105,11 @@ Caveat carried by the M0 spike: Wolverine provisions via control-plane calls, an
 - **Catalog by reflection over the API assembly**: every FastEndpoints endpoint class is enumerated — code cannot hide from reflection. (`openapi.json` rejected as the census: a swagger-excluded endpoint would silently escape the matrix. It remains the contract artifact only.) The ASP.NET health probes (`/health`, `/alive`) are not FastEndpoints endpoints — they enter the matrix as **manual `AnonymousAllowed` rows** outside the reflection census, and the completeness gate diffs the FE census only (confirmed at c001).
 - **Classification = the endpoint's *kind* + one arrange recipe.** The expected-status vector is derived from the kind per the rings of [ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md) — never hand-written per endpoint:
 
-  | Kind | anonymous | revoked | member-other | non-admin | member-owner |
-  |---|---|---|---|---|---|
-  | `AnonymousAllowed` (health, …) | 2xx | — | — | — | — |
-  | `ProfileScoped` (the default) | 401 | 403 | **404** | n/a | 2xx |
-  | `AdminOnly` | 401 | 403 | n/a | **403** | n/a |
+  | Kind | anonymous | stranger | revoked | member-other | non-admin | member-owner |
+  |---|---|---|---|---|---|---|
+  | `AnonymousAllowed` (health, …) | 2xx | — | — | — | — | — |
+  | `ProfileScoped` (the default) | 401 | 403 | 403 | **404** | n/a | 2xx |
+  | `AdminOnly` | 401 | 403 | 403 | n/a | **403** | n/a |
 
   The arrange recipe (a small delegate creating the probe target under account A and returning route args) is the only bespoke part — writing it *is* the deliberate act of classification. Member-owner asserts 2xx-class only; deep happy-path behavior belongs to slice tests.
 - **Completeness gate:** one test diffs the reflection catalog against the classification table and fails on any unclassified endpoint — ADR-0002's "new endpoints fail the matrix until classified", made mechanical.

@@ -54,7 +54,7 @@ The **Key Vault configuration provider** — the app reading the vault itself �
 
 **GitHub Actions variables** — see §10; near-rejected, with one narrow carve-out.
 
-**External systems** — the Entra External ID tenant (redirect URIs, user flows, token lifetimes) and the Neon project hold real configuration that lives in neither the repo nor Azure. Entra is the documented exception to the no-portal rule ([ADR-0004-delivery-and-process § Infrastructure as code](../adr/0004-delivery-and-process.md)) until [#75](https://github.com/jakubbohm/DoseUp/issues/75) makes app registrations pipeline-owned; Neon's setup lives in the M0 runbook.
+**External systems** — the Entra External ID tenant (redirect URIs, user flows, token lifetimes) and the Neon project hold real configuration that lives in neither the repo nor Azure. Entra is the documented exception to the no-portal rule ([ADR-0004-delivery-and-process § Infrastructure as code](../adr/0004-delivery-and-process.md)) until [#75](https://github.com/jakubbohm/DoseUp/issues/75) makes app registrations pipeline-owned; Neon's setup lives in the M0 runbook. Decided user-flow posture (2026-07-19): **self-service sign-up enabled**, no "require user assignment" — accounts are created by the in-app complete-signup, so no per-user IdP configuration exists ([ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md)).
 
 ## 4. `appsettings.json` is the inventory
 

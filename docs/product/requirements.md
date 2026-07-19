@@ -1,6 +1,6 @@
 # DoseUp — Product Requirements
 
-**Status:** living document · **Last updated:** 2026-07-14
+**Status:** living document · **Last updated:** 2026-07-19
 
 Scope-level requirements only — *what*, not precise behavior. Precise, testable behavior lives in `openspec/specs/` and grows change by change. OpenSpec proposals **must cite the FR/NFR ids** they serve (rule in `openspec/config.yaml`).
 
@@ -12,8 +12,8 @@ Priorities: MoSCoW (**M**ust / **S**hould / **C**ould / **W**on't-for-now). Stat
 
 | ID | Prio | Requirement | Status |
 |----|------|-------------|--------|
-| FR-1 | M | Users sign in via Microsoft Entra External ID; only invited/approved accounts can use the app | Idea |
-| FR-2 | M | The instance admin can invite new accounts and revoke access | Idea |
+| FR-1 | M | Users sign in via Microsoft Entra External ID; identity sign-up is self-service, and a signed-in user without an account is forced through an in-app complete-signup that creates their account (decided 2026-07-19 — [ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md)); admission gating beyond account creation is open (OQ-5) | Idea |
+| FR-2 | M | The instance admin can revoke access; further admission control over self-signed-up accounts is OQ-5 | Idea |
 | FR-3 | M | An account contains one or more profiles (self, child, …); every substance, schedule, and dose belongs to exactly one profile; switching the active profile is instant | Idea |
 
 ### Substances
