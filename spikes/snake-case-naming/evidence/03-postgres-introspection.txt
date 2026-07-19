@@ -1,0 +1,82 @@
+Postgres' own view of the schema EF produced. Every identifier prints UNQUOTED,
+which is the whole point of the decision: none of it needs quoting in hand-written SQL.
+
+        List of schemas
+    Name    |       Owner       
+------------+-------------------
+ membership | spike
+ public     | pg_database_owner
+(2 rows)
+
+                  List of relations
+   Schema   |          Name           | Type  | Owner 
+------------+-------------------------+-------+-------
+ membership | __ef_migrations_history | table | spike
+ membership | dose_log_entries        | table | spike
+ membership | medication_profiles     | table | spike
+ membership | user_accounts           | table | spike
+(4 rows)
+
+             Table "membership.medication_profiles"
+        Column        |  Type   | Collation | Nullable | Default 
+----------------------+---------+-----------+----------+---------
+ id                   | uuid    |           | not null | 
+ user_account_id      | uuid    |           | not null | 
+ profile_display_name | text    |           | not null | 
+ daily_dose_limit     | integer |           | not null | 
+ is_archived          | boolean |           | not null | 
+Indexes:
+    "pk_medication_profiles" PRIMARY KEY, btree (id)
+    "ix_medication_profiles_user_account_id_profile_display_name" UNIQUE, btree (user_account_id, profile_display_name)
+Check constraints:
+    "ck_medication_profiles_daily_dose_limit_positive" CHECK (daily_dose_limit > 0)
+Foreign-key constraints:
+    "fk_medication_profiles_user_accounts_user_account_id" FOREIGN KEY (user_account_id) REFERENCES membership.user_accounts(id) ON DELETE CASCADE
+Referenced by:
+    TABLE "membership.dose_log_entries" CONSTRAINT "fk_dose_log_entries_medication_profiles_medication_profile_id" FOREIGN KEY (medication_profile_id) REFERENCES membership.medication_profiles(id) ON DELETE CASCADE
+
+                                Table "membership.user_accounts"
+               Column                |           Type           | Collation | Nullable | Default 
+-------------------------------------+--------------------------+-----------+----------+---------
+ id                                  | uuid                     |           | not null | 
+ external_user_id                    | text                     |           | not null | 
+ display_name                        | text                     |           | not null | 
+ created_at_utc                      | timestamp with time zone |           | not null | 
+ iana_time_zone_id                   | text                     |           | not null | 
+ primary_contact_email_address       | text                     |           | not null | 
+ primary_contact_mobile_phone_number | text                     |           |          | 
+Indexes:
+    "pk_user_accounts" PRIMARY KEY, btree (id)
+    "ak_user_accounts_external_user_id" UNIQUE CONSTRAINT, btree (external_user_id)
+    "ix_user_accounts_display_name" UNIQUE, btree (display_name)
+Referenced by:
+    TABLE "membership.medication_profiles" CONSTRAINT "fk_medication_profiles_user_accounts_user_account_id" FOREIGN KEY (user_account_id) REFERENCES membership.user_accounts(id) ON DELETE CASCADE
+
+                        Table "membership.dose_log_entries"
+        Column         |           Type           | Collation | Nullable | Default 
+-----------------------+--------------------------+-----------+----------+---------
+ id                    | uuid                     |           | not null | 
+ medication_profile_id | uuid                     |           | not null | 
+ taken_at_utc          | timestamp with time zone |           | not null | 
+ amount_taken          | numeric(9,3)             |           | not null | 
+Indexes:
+    "pk_dose_log_entries" PRIMARY KEY, btree (id)
+    "ix_dose_log_entries_medication_profile_id_taken_at_utc" btree (medication_profile_id, taken_at_utc)
+Foreign-key constraints:
+    "fk_dose_log_entries_medication_profiles_medication_profile_id" FOREIGN KEY (medication_profile_id) REFERENCES membership.medication_profiles(id) ON DELETE CASCADE
+
+                Table "membership.__ef_migrations_history"
+     Column      |          Type          | Collation | Nullable | Default 
+-----------------+------------------------+-----------+----------+---------
+ migration_id    | character varying(150) |           | not null | 
+ product_version | character varying(32)  |           | not null | 
+Indexes:
+    "pk___ef_migrations_history" PRIMARY KEY, btree (migration_id)
+
+
+=== Proof nothing needs quoting: an all-lowercase, unquoted query against the real schema ===
+ count 
+-------
+     0
+(1 row)
+

@@ -1,0 +1,22 @@
+Applying the FIRST-CUT migration (check constraint authored PascalCase, schema authored PascalCase)
+against postgres:17. This is the trap this spike exists to find.
+
+CREATE TABLE
+START TRANSACTION
+NOTICE:  relation "__EFMigrationsHistory" already exists, skipping
+DO
+DO
+ERROR:  column "DailyDoseLimit" does not exist
+LINE 8: ...MedicationProfile_DailyDoseLimit_Positive" CHECK ("DailyDose...
+                                                             ^
+QUERY:  CREATE TABLE "Membership".medication_profiles (
+        id uuid NOT NULL,
+        user_account_id uuid NOT NULL,
+        profile_display_name text NOT NULL,
+        daily_dose_limit integer NOT NULL,
+        is_archived boolean NOT NULL,
+        CONSTRAINT pk_medication_profiles PRIMARY KEY (id),
+        CONSTRAINT "CK_MedicationProfile_DailyDoseLimit_Positive" CHECK ("DailyDoseLimit" > 0),
+        CONSTRAINT fk_medication_profiles_user_accounts_user_account_id FOREIGN KEY (user_account_id) REFERENCES "Membership".user_accounts (id) ON DELETE CASCADE
+    )
+CONTEXT:  PL/pgSQL function inline_code_block line 4 at SQL statement
