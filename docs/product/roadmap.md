@@ -1,6 +1,6 @@
 # DoseUp — Roadmap
 
-**Status:** living document · **Last updated:** 2026-07-18
+**Status:** living document · **Last updated:** 2026-07-19
 
 A milestone is a coherent, shippable slice delivered through OpenSpec changes. When a change is archived: tick it here and update the `Status` column in [requirements.md](requirements.md). Candidate change names are just that — candidates; the actual slicing is decided when each change is proposed. Final change ids carry a letter-prefixed 3-digit sequence (naming rule in [openspec/config.yaml](../../openspec/config.yaml), amended 2026-07-15 — the OpenSpec CLI requires letter-first ids), e.g. `c001-add-shared-kernel`.
 
@@ -49,11 +49,11 @@ Candidate changes: `add-schedules`, `add-reminder-engine`, `add-web-push`, `add-
 
 **Goal:** first external users (G2).
 
-Scope: invite/revoke admin (FR-2), onboarding + PWA install UX polish (FR-15 finished, OQ-3 validated), adherence view (FR-14) if not in M2, authZ hardening tests (NFR-4 — the authorization matrix completed per [conventions/testing.md § 4](../conventions/testing.md): kind classification, completeness gate, payload-embedded foreign-id probes), backup restore verified (OQ-4), cost check (OQ-1), "not medical advice" note (NFR-5), language decision (OQ-2).
+Scope: account admin — revoke plus the OQ-5 admission decision (FR-2), onboarding + PWA install UX polish (FR-15 finished, OQ-3 validated, incl. polishing the complete-signup flow — FR-1), adherence view (FR-14) if not in M2, authZ hardening tests (NFR-4 — the authorization matrix completed per [conventions/testing.md § 4](../conventions/testing.md): kind classification, completeness gate, payload-embedded foreign-id probes), backup restore verified (OQ-4), cost check (OQ-1), "not medical advice" note (NFR-5), language decision (OQ-2).
 
 **Done when:** ≥ 2 non-Jakub users active for 2+ consecutive weeks without support.
 
-Candidate changes: `add-invites-admin`, `harden-authz`, `polish-onboarding`
+Candidate changes: `add-account-admin`, `harden-authz`, `polish-onboarding`
 
 - [ ] changes proposed
 - [ ] archived

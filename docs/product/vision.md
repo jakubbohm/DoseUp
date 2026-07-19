@@ -1,6 +1,6 @@
 # DoseUp — Vision
 
-**Owner:** Jakub Bohm · **Status:** living document · **Last updated:** 2026-07-13
+**Owner:** Jakub Bohm · **Status:** living document · **Last updated:** 2026-07-19
 
 ## Problem
 
@@ -13,7 +13,7 @@ DoseUp is a **mobile-first, installable web app (PWA)** for logging doses and ge
 ## Users
 
 - **Jakub** — primary user, admin, and host.
-- **The circle** — household, family, friends invited onto the same instance. No public signup.
+- **The circle** — household, family, friends onboarded by handing them the app URL: identity sign-up is self-service, and the first signed-in visit forces an in-app complete-signup that creates the account ([ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md), decided 2026-07-19). No public offering; how the circle stays private beyond self-signup is OQ-5.
 - One **account** can hold multiple **profiles** — e.g. a parent tracking their own and a child's doses. All data belongs to a profile.
 
 ## Goals
@@ -49,6 +49,7 @@ DoseUp is a **mobile-first, installable web app (PWA)** for logging doses and ge
 | OQ-2 | UI language: English-only, or Czech localization? Strings are externalized either way (NFR-9) | M3 |
 | OQ-3 | iOS push requires installing the PWA to the home screen — acceptable onboarding friction for the circle? | first iOS circle member (M3) |
 | OQ-4 | Backup/restore: how is restore verified, and how often? | M3 hardening |
+| OQ-5 | With self-service signup ([ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md)), what keeps the circle private — the state a fresh account lands in (approval? blocked-until?) and its admin lifecycle | before the M3 account-admin change |
 
 ## Related documents
 
