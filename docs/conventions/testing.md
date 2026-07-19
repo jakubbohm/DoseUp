@@ -145,6 +145,7 @@ Two framing conventions govern the whole catalog:
 | 17 | A module's context maps only its own module's Domain types (ADR-0002 § Persistence is module property, 2026-07-15) | reflection over the offline-built EF models (no DB), in ArchitectureTests |
 | 18 | A module's context is consumed only by its own module and the composition root (ADR-0002 § Persistence is module property) | ArchUnitNET |
 | 19 | Every mapped entity sits in the module's schema (ADR-0002 § Persistence is module property) | reflection over the offline-built EF models (no DB), in ArchitectureTests |
+| 20 | `IConfiguration`/`IConfigurationSection` are referenced only by Platform composition — everything else takes `IOptions<T>` ([conventions/configuration.md § 5](configuration.md)) | ArchUnitNET |
 
 All ArchUnitNET rules **ship with the shared-kernel change and pass vacuously** until their targets exist — no phased introduction to forget.
 
@@ -220,3 +221,4 @@ Mechanics this document asserts directionally — each verified (and this doc co
 6. TUnit `ClassDataSource(Shared = PerTestSession)` fixture behavior under `dotnet test`/MTP matches §3a's assumptions (TUnit churns weekly — re-verify at implementation). — **c001:** **verified** on TUnit 1.60.0 — one AppHost start served the whole session across test classes.
 7. Wolverine × ASB emulator inside the harness (extends the M0 ASB spike — [ADR-0001-platform-and-stack](../adr/0001-platform-and-stack.md); §3d fallback stands ready). — M0.
 8. MTP test reporter / TRX annotation choice (§7). — M0.
+9. Harness secret inheritance ([conventions/configuration.md § 7](configuration.md)): the harness resolves the **AppHost's** user secrets, and does so *only while the environment is `Development`*. — **verified in source 2026-07-19** (the testing factory sets `ApplicationName` to the AppHost assembly; host defaults load that assembly's secrets when `IsDevelopment()`; the environment comes from the AppHost's `launchSettings.json` — both DoseUp profiles set `DOTNET_ENVIRONMENT: Development`). **Failure mode to guard:** losing `launchSettings.json`, dropping the env var from a profile, or passing `--environment=Testing` (as Aspire's own docs example does) falls back to `Production` and skips secrets **silently**. Re-check if the harness ever sets an explicit environment.
