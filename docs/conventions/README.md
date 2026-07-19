@@ -1,6 +1,6 @@
 # DoseUp — Engineering Conventions
 
-**Status:** living document, docs-first · **Last updated:** 2026-07-18
+**Status:** living document, docs-first · **Last updated:** 2026-07-19
 
 This directory is the **source of truth for conventions** (decided in the founding interview): a convention is authored here first, then mirrored into enforcement (formatters, analyzers, architecture tests, CI gates) and into `.claude/rules/` so Claude follows it while writing code. If tooling can't express a rule, this doc is still authoritative. Changing a convention = PR touching this doc **and** its enforcement together.
 
@@ -112,9 +112,9 @@ Trunk-based, PRs always, squash merge, Conventional-Commit PR titles, branch nam
 
 Everything lives in **[project-management.md](project-management.md)**: the source-of-truth split (GitHub issues/milestones/board = the only home of work items · repo docs = the only home of decisions & knowledge · OpenSpec = the execution layer) · work-item taxonomy and the 12-label set · issue anatomy written for Jakub cold (plain outcome titles, collapsed Context-for-Claude block, sub-issues only when board-worthy) · decision records under the evergreen "Design decisions" parent · referencing style (full descriptive slugs; FR/NFR/F-x ids stay) · openspec linkage + PR auto-close mechanics · the planning ritual (reviewable plan → explicit sign-off → one scripted pass) · gh CLI as the single GitHub channel — reads free, mutations only after sign-off.
 
-## Design workflow (decided 2026-07-18 — see [design.md](design.md))
+## Design workflow (decided 2026-07-18, amended 2026-07-19 — see [design.md](design.md))
 
-Everything lives in **[design.md](design.md)**: Claude Design terms demystified (its "design system" = a tokens+components UI kit new projects inherit — not branding) · direction of truth (the repo owns tokens/components; `/design-sync` pushes up to the **DoseUp** design-system project; design work returns only as handoff bundles — the tool never writes to the repo) · the per-change loop (brief in `docs/design/` → canvas iteration → handoff → OpenSpec change translates, never commits bundle content verbatim → explicit re-push task) · repo layout (one `tokens.css`, Tailwind v4 `@theme` consumption, committed `.design-sync/config.json`) · the M0 bootstrap order · re-verify markers for the research-preview product.
+Everything lives in **[design.md](design.md)**: Claude Design terms demystified (its "design system" = a tokens+components UI kit, read by bound projects **at generation time** — not branding, and not copied in at project creation) · direction of truth (the repo owns tokens/components; `/design-sync` pushes up to the **DoseUp** design-system project; design work returns only as handoff bundles — the tool never writes to the repo) · **one persistent design-workspace project** organized by feature folders (fresh-per-iteration superseded 2026-07-19; redesigns start from the synced recreations of shipped screens, designs being snapshots) · the per-change loop (brief in `docs/design/` → canvas iteration → **feature-scoped** handoff, full export only for the greenfield drop → OpenSpec change translates, mapping to existing tokens/components with new ones flagged, never committing bundle content verbatim → explicit post-merge re-push task) · repo layout (one `tokens.css`, Tailwind v4 `@theme` consumption, committed `.design-sync/config.json`) · the M0 bootstrap order · confirm-on-first-use markers for the research-preview product.
 
 ## Infrastructure & delivery (decided — see [ADR-0004-delivery-and-process](../adr/0004-delivery-and-process.md))
 
