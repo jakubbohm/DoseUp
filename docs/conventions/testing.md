@@ -42,10 +42,10 @@ This is precisely why ADR-0003 accepted the Aspire harness's full-graph startup 
 
 | You wrote… | Its test goes… | Form |
 |---|---|---|
-| Aggregate method, affordance (`CanXxx`), domain service, VO, SmartEnum | UnitTests | pure, exhaustive — the pyramid's base |
-| SharedKernel primitive (`Result`, `RuleCheck`/`RuleSet`, base types, id-converter logic) | UnitTests | exhaustive; these are load-bearing |
+| Aggregate method, affordance (`CheckCanXxx`), domain service, VO, SmartEnum | UnitTests | pure, exhaustive — the pyramid's base |
+| SharedKernel primitive (`ApiResult`/`DomainResult`, `RuleCheck`/`RuleSet`, base types, id-converter logic) | UnitTests | exhaustive; these are load-bearing |
 | FluentValidation validator | UnitTests (`FluentValidation.TestHelper`) | exhaustive rules; the slice test asserts only that the 400 channel is wired (one bad-request case per endpoint) |
-| Feature handler | IntegrationTests — **slice test over HTTP** | happy path + each `Result` branch worth the wire: 404 scoping, 409 with exact violation codes |
+| Feature handler | IntegrationTests — **slice test over HTTP** | happy path + each `ApiResult` branch worth the wire: 404 scoping, 409 with exact violation codes |
 | RuleSet composition incl. constraint backstop | IntegrationTests | provoke the race path: the backstop violation maps to the *same* code as the advisory check |
 | Wolverine consumer | IntegrationTests | deliver the message, assert effect **and** idempotency (deliver twice → once-effect) |
 | Published-language translator | mapping = UnitTests (pure); outbox enrollment = IntegrationTests | |
@@ -83,7 +83,7 @@ TUnit runs tests in parallel; isolation comes from **data, not cleanup**. Each t
 
 ### 3c. Test identity: real JWT pipeline, test-only trust anchor
 
-The fixture mints self-signed JWTs with a test signing key; the harness injects a second accepted authority into the API's bearer configuration (the testing builder mutates the app model before start). Bearer middleware, `oid` claim mapping, `ActiveAccount` policy, `CallerContext` resolution, 401/403 semantics — all production code. **Caller classes are (token, seeded-account-state) pairs**: anonymous = no token · member-owner / member-other = two seeded accounts · admin = the DB flag · revoked = valid token + revoked row, which exercises [ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md)'s "revocation bites on the next request" exactly as specced · stranger = valid token, **no** account row at all — the open self-service-sign-up door (decided 2026-07-19) made testable. Rejected: a custom test auth scheme (fakes the middleware — P3 violation); real-Entra ROPC test users (external dependency, secrets, throttling in CI — the only coverage it adds is Entra itself, which the E2E login journey against the deployed environment covers).
+The fixture mints self-signed JWTs with a test signing key; the harness injects a second accepted authority into the API's bearer configuration (the testing builder mutates the app model before start). Bearer middleware, `oid` claim mapping, `ActiveAccount` policy, `CallerContext` resolution, 401/403 semantics — all production code. **Caller classes are (token, seeded-account-state) pairs**: anonymous = no token · member-owner / member-other = two seeded accounts · admin = arranged via the future permission model (recipe defined when it lands — no admin endpoint exists before M3; c002 removed the interim DB flag) · disabled = valid token + disabled row, which exercises [ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md)'s "disabling bites on the next request" exactly as specced · stranger = valid token, **no** account row at all — the open self-service-sign-up door (decided 2026-07-19) made testable. Rejected: a custom test auth scheme (fakes the middleware — P3 violation); real-Entra ROPC test users (external dependency, secrets, throttling in CI — the only coverage it adds is Entra itself, which the E2E login journey against the deployed environment covers).
 
 ### 3d. Async seam: real transports via emulators
 
@@ -105,7 +105,7 @@ Caveat carried by the M0 spike: Wolverine provisions via control-plane calls, an
 - **Catalog by reflection over the API assembly**: every FastEndpoints endpoint class is enumerated — code cannot hide from reflection. (`openapi.json` rejected as the census: a swagger-excluded endpoint would silently escape the matrix. It remains the contract artifact only.) The ASP.NET health probes (`/health`, `/alive`) are not FastEndpoints endpoints — they enter the matrix as **manual `AnonymousAllowed` rows** outside the reflection census, and the completeness gate diffs the FE census only (confirmed at c001).
 - **Classification = the endpoint's *kind* + one arrange recipe.** The expected-status vector is derived from the kind per the rings of [ADR-0002-architecture-style § Authorization](../adr/0002-architecture-style.md) — never hand-written per endpoint:
 
-  | Kind | anonymous | stranger | revoked | member-other | non-admin | member-owner |
+  | Kind | anonymous | stranger | disabled | member-other | non-admin | member-owner |
   |---|---|---|---|---|---|---|
   | `AnonymousAllowed` (health, …) | 2xx | — | — | — | — | — |
   | `ProfileScoped` (the default) | 401 | 403 | 403 | **404** | n/a | 2xx |
@@ -198,7 +198,7 @@ No shared `TestKit` project up front; helpers live beside their consumers. `test
 Cadence fixed by [ADR-0003-testing-stack](../adr/0003-testing-stack.md)/[ADR-0004-delivery-and-process](../adr/0004-delivery-and-process.md) (`ci.yml` gates only · E2E smoke-PR / full-nightly · coverage nightly, no PR threshold · mutation nightly-if-viable · ubuntu runners, health-probe waits + explicit timeouts). This document adds:
 
 - **PR gates: all four .NET suites on every PR, split for fail-fast.** *Fast job* = build + UnitTests + ArchitectureTests (seconds, no Docker); *harness job* = IntegrationTests (Docker: Postgres + emulators + full-graph startup). Both required to merge — integration is the primary coverage layer (§2 P2), it can never be nightly-only; the split only buys a cheap red ✗ fast.
-- **Stryker × TUnit spike is scheduled into the first domain-module change** (not M0): it needs a meaningful corpus of real domain tests to mutate; the shared-kernel change has only primitives. Decision logic unchanged (ADR-0003): viable → nightly with dashboard baseline, never a PR gate.
+- **Stryker × TUnit spike was scheduled into the first domain-module change and explicitly deferred out of it** (c002, 2026-07-19): the corpus argument stands — Membership's small state machine is still thin mutation food — so the slot moves to a later domain-heavy change (M2's recurrence engine at the latest). Decision logic unchanged (ADR-0003): viable → nightly with dashboard baseline, never a PR gate.
 - **Flake policy: zero auto-retry at every layer; quarantine with a paper trail.** Unit/arch are deterministic by construction (§6.4/§6.5); integration flake is a *bug* in the harness model — isolation by construction makes it rare and meaningful (often a real race caught by parallel account-scoped tests). A genuinely flaky test gets `[Skip]` + a linked issue in the same PR that discovers it. Blanket retries would convert the suite's strongest concurrency signal into noise.
 - **Deferred mechanics, named:** test-result reporting (TRX artifacts + PR annotations — exact MTP reporter picked in M0's CI change); what the PR-time E2E smoke targets (ephemeral local compose vs deployed env — decided with the web scaffold in M1; the smoke-on-PR intent stands).
 

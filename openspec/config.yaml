@@ -24,11 +24,11 @@ context: |
   Architecture (ADR-0002): modular monolith in the single API project — modules =
   capability-named bounded contexts (initial set: Membership — accounts and their
   profiles; Scheduling — dose plans and reminders), each with Domain (clean core:
-  aggregates, ports, rules returning Result, domain events), Features (vertical
+  aggregates, ports, rules returning DomainResult, domain events), Features (vertical
   slices: thin endpoint + feature handler + validator per use case),
   Infrastructure (Persistence/ — the module's own DbContext, one schema per
   module, its migrations — plus port adapters), and a declared rigor grade; plus
-  SharedKernel (union Result, Error model, RuleCheck/RuleSet, typed ids,
+  SharedKernel (ApiResult + DomainResult unions, Error model, RuleCheck/RuleSet, typed ids,
   domain-event + publisher ports) and Platform (composition root, auth, the
   single ProblemDetails mapper, persistence mechanism, Wolverine outbox).
   Cross-module communication ONLY via public contracts + integration events
@@ -46,7 +46,8 @@ context: |
   aggregates raise events, one per-module translator publishes thin id-only
   Contracts.* payloads — never from handlers. Entity identity: client-generated
   Guid v7 wrapped in per-aggregate typed ids; no repository layer (the module's
-  DbContext is the data-access API). Expected failures flow as Result end-to-end and map to
+  DbContext is the data-access API). Expected failures flow as union values end-to-end
+  (DomainResult in the domain, ApiResult from handlers) and map to
   ProblemDetails at the edge; validation is two-layer (FluentValidation for
   request shape as handler step 1; domain rules via RuleCheck/RuleSet →
   RuleViolations → 409 with aggregated violations —
@@ -58,7 +59,8 @@ context: |
   default (AllowAnonymous = explicit arch-tested allowlist); an ActiveAccount
   policy resolves the Entra oid claim to the account row and yields the
   request-scoped CallerContext — the only identity type past Platform (account
-  status + admin flag are DB columns, so revocation bites on the next request);
+  status is a DB column, so disabling bites on the next request; admin/permissions
+  are a future permission-model change);
   admin endpoints sit in one AdminOnly group; all profile-scoped data access is
   account-scoped by construction — cross-account access surfaces as NotFound
   (404, anti-enumeration, never 403), Forbidden/403 is reserved for

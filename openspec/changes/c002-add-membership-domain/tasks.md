@@ -30,10 +30,10 @@ Order is dependency-driven; every task ends with `dotnet build DoseUp.slnx` and 
 
 ## 6. Docs & config sweep (all decided 2026-07-19 — design D7/D8)
 
-- [ ] 6.1 ADR-0002: § Authorization ring-1 amendment (`CallerContext` carries `AccountId` only; account **status** is a DB column; admin gate's backing store = future permission-model change; lifecycle-in-app principle survives), caller-class `revoked` → `disabled` in § Testing, dated amendment note in the header.
-- [ ] 6.2 conventions/README.md (§ Authorization mirror; § Persistence: spike-#93 GO + three authoring rules + version-range expiry, replacing the pending-spike clause), testing.md (caller class, new catalog rule, Stryker §7 deferral note), domain-rules.md (`CheckCanXxx` examples in §4/§5/§8; §3/§8 domain methods return `DomainResult`; §1 `ApiResult`), roadmap backlog Stryker line.
-- [ ] 6.3 #98 rename sweep of the remaining mentions: CLAUDE.md, `openspec/config.yaml` context blurb (also drop its "admin flag" phrasing — D7.3); ADR mentions stay historical.
-- [ ] 6.4 Update `.claude/memory/doseup-project-state.md` with the c002 state (memory edits ride this PR — memory-changes-ride-the-pr rule).
+- [x] 6.1 ADR-0002: § Authorization ring-1 amendment (`CallerContext` carries `AccountId` only; account **status** is a DB column; admin gate's backing store = future permission-model change; lifecycle-in-app principle survives), caller-class `revoked` → `disabled` in § Testing, dated amendment note in the header.
+- [x] 6.2 conventions/README.md (§ Authorization mirror; § Persistence: spike-#93 GO + three authoring rules + version-range expiry, replacing the pending-spike clause), testing.md (caller class, new catalog rule, Stryker §7 deferral note), domain-rules.md (`CheckCanXxx` examples in §4/§5/§8; §3/§8 domain methods return `DomainResult`; §1 `ApiResult`), roadmap backlog Stryker line.
+- [x] 6.3 #98 rename sweep of the remaining mentions: CLAUDE.md, `openspec/config.yaml` context blurb (also drop its "admin flag" phrasing — D7.3); ADR mentions stay historical.
+- [x] 6.4 Update `.claude/memory/doseup-project-state.md` with the c002 state (memory edits ride this PR — memory-changes-ride-the-pr rule).
 
 ## 7. GitHub pass (mutations on plan sign-off; PR-body duty)
 
