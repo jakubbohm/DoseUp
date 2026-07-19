@@ -16,7 +16,7 @@ public sealed partial class SliceAnatomyTests {
     // DTOs share one namespace" — checked as: everything a Features endpoint constructor
     // injects from its own module lives in the endpoint's namespace.
     List<string> violations = [
-      .. typeof(DoseUp.Api.SharedKernel.Results.Result).Assembly.GetTypes()
+      .. typeof(DoseUp.Api.SharedKernel.Results.ApiResult).Assembly.GetTypes()
         .Where(static type => typeof(BaseEndpoint).IsAssignableFrom(type) && !type.IsAbstract && FeatureNamespace().IsMatch(type.FullName ?? string.Empty))
         .SelectMany(static endpointType =>
           endpointType.GetConstructors()

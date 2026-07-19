@@ -13,7 +13,22 @@
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.0-preview.6.26359.118" />
   </ItemGroup>
 
+  <ItemGroup Label="Domain">
+    <!-- SmartEnum.EFCore is dormant (compiled vs EF 7; open floor >= 7.0.13 resolves clean
+         beside the EF 11 previews — verified 2026-07-19, c002). Fallback if it ever breaks:
+         ~4-line hand-rolled SmartEnumConverter (c002 design D5); registration stays explicit
+         per type either way — the package's reflection sweep is deliberately unused. -->
+    <PackageVersion Include="Ardalis.SmartEnum" Version="8.2.0" />
+    <PackageVersion Include="Ardalis.SmartEnum.EFCore" Version="8.2.0" />
+  </ItemGroup>
+
   <ItemGroup Label="EF family (held at preview.5 — see note above)">
+    <!-- NamingConventions: spike-#93 GO on these exact preview pins. Its range is
+         [10.0.1, 11.0.0) — satisfied only because SemVer sorts prereleases below the
+         release, so EF 11 STABLE will fail restore loudly (NU1608 → error). Owner: the
+         standing preview-bump activity; fallback: ~20-line hand-rolled
+         IModelFinalizingConvention (conventions § Persistence). -->
+    <PackageVersion Include="EFCore.NamingConventions" Version="10.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="11.0.0-preview.5.26302.115" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="11.0.0-preview.5.26302.115" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0-preview.5" />

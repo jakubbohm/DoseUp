@@ -25,9 +25,15 @@ public readonly union RuleCheck(RuleCheck.Pass, RuleCheck.Fail) : IEquatable<Rul
 
     /// <summary>
     /// Lossless bridge to the edge channel: the same violations, same order, as
-    /// <see cref="Result.RuleViolations"/> → 409.
+    /// <see cref="ApiResult.RuleViolations"/> → 409.
     /// </summary>
-    public Result ToResult() => new Result.RuleViolations(Violations);
+    public ApiResult ToApiResult() => new ApiResult.RuleViolations(Violations);
+
+    /// <summary>
+    /// Lossless bridge to the domain channel — the aggregate's re-assert returns its
+    /// failed check as <see cref="DomainResult.RuleViolations"/> (domain-rules.md §3).
+    /// </summary>
+    public DomainResult ToDomainResult() => new DomainResult.RuleViolations(Violations);
   }
 
   #region Object overrides

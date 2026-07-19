@@ -8,14 +8,14 @@ namespace DoseUp.Api.SharedKernel.Results;
 /// reserved for bugs and infrastructure (class 8). The single Platform mapper converts
 /// failure cases to ProblemDetails at the edge — nothing else crafts error responses.
 /// </summary>
-public readonly union Result(
-  Result.Success,
-  Result.Validation,
-  Result.NotFound,
-  Result.RuleViolations,
-  Result.Conflict,
-  Result.Forbidden,
-  Result.Unexpected) : IEquatable<Result> {
+public readonly union ApiResult(
+  ApiResult.Success,
+  ApiResult.Validation,
+  ApiResult.NotFound,
+  ApiResult.RuleViolations,
+  ApiResult.Conflict,
+  ApiResult.Forbidden,
+  ApiResult.Unexpected) : IEquatable<ApiResult> {
   /// <summary>The operation completed; there is nothing to report.</summary>
   public readonly record struct Success;
 
@@ -57,13 +57,13 @@ public readonly union Result(
 
   #region Object overrides
 
-  public static bool operator ==(Result left, Result right) => left.Equals(right);
+  public static bool operator ==(ApiResult left, ApiResult right) => left.Equals(right);
 
-  public static bool operator !=(Result left, Result right) => !left.Equals(right);
+  public static bool operator !=(ApiResult left, ApiResult right) => !left.Equals(right);
 
-  public bool Equals(Result other) => Equals(Value, other.Value);
+  public bool Equals(ApiResult other) => Equals(Value, other.Value);
 
-  public override bool Equals(object? obj) => obj is Result other && Equals(other);
+  public override bool Equals(object? obj) => obj is ApiResult other && Equals(other);
 
   public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 

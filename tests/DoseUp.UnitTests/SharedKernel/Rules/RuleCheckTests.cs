@@ -45,6 +45,6 @@ public sealed class RuleCheckTests {
     RuleViolation second = new("schedule.name-taken", "A schedule with this name already exists.");
     RuleCheck.Fail fail = new([first, second]);
 
-    fail.ToResult().ShouldBeRuleViolations().Violations.ShouldBe([first, second]);
+    fail.ToApiResult().ShouldBeRuleViolations().Violations.ShouldBe([first, second]);
   }
 }
