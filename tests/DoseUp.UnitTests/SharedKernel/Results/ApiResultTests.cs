@@ -1,5 +1,5 @@
+using DoseUp.Api.SharedKernel.Domain;
 using DoseUp.Api.SharedKernel.Results;
-using DoseUp.Api.SharedKernel.Rules;
 using Shouldly;
 
 namespace DoseUp.UnitTests.SharedKernel.Results;
@@ -63,6 +63,69 @@ public sealed class ApiResultTests {
     ApiResult.Validation validation = result.ShouldBeValidation();
     validation.Errors["name"].ShouldBe(["Name is required."]);
     validation.Errors["timing"].ShouldBe(["Timing is out of range.", "Timing must be in the future."]);
+  }
+
+  [Test]
+  public void Missing_rule_violations_are_a_bug_and_throw() =>
+    Should.Throw<ArgumentNullException>(static () => new ApiResult.RuleViolations(null!));
+
+  [Test]
+  public void Rule_violations_naming_no_violated_rule_are_a_bug_and_throw() =>
+    Should.Throw<ArgumentOutOfRangeException>(static () => new ApiResult.RuleViolations([]));
+
+  [Test]
+  public void Missing_validation_errors_are_a_bug_and_throw() =>
+    Should.Throw<ArgumentNullException>(static () => new ApiResult.Validation(null!));
+
+  [Test]
+  public void Validation_naming_no_field_error_is_a_bug_and_throws() =>
+    Should.Throw<ArgumentOutOfRangeException>(static () => new ApiResult.Validation(new Dictionary<string, string[]>()));
+
+  [Test]
+  public void A_field_with_no_error_messages_is_a_bug_and_throws() =>
+    Should.Throw<ArgumentOutOfRangeException>(static () => new ApiResult.Validation(new Dictionary<string, string[]> { ["name"] = [] }));
+
+  [Test]
+  public void A_field_with_missing_error_messages_is_a_bug_and_throws() =>
+    Should.Throw<ArgumentNullException>(static () => new ApiResult.Validation(new Dictionary<string, string[]> { ["name"] = null! }));
+
+  [Test]
+  public void Converting_a_missing_value_carrying_failure_is_a_bug_and_throws() =>
+    Should.Throw<ArgumentNullException>(static () => ApiResult.From((DomainResult<int>.RuleViolations)null!));
+
+  [Test]
+  public void Converting_a_missing_failed_check_is_a_bug_and_throws() =>
+    Should.Throw<ArgumentNullException>(static () => ApiResult.From((RuleCheck.Fail)null!));
+
+  [Test]
+  public void Violations_are_snapshotted_against_later_caller_mutation() {
+    List<RuleViolation> source = [new("x.y", "Z.")];
+    ApiResult.RuleViolations violated = new(source);
+
+    source.Clear();
+
+    violated.Violations.ShouldHaveSingleItem();
+  }
+
+  [Test]
+  public void Validation_errors_are_snapshotted_against_later_caller_mutation() {
+    Dictionary<string, string[]> errors = new() { ["name"] = ["Name is required."] };
+    ApiResult.Validation validation = new(errors);
+
+    errors.Clear();
+
+    validation.Errors.Count.ShouldBe(1);
+  }
+
+  [Test]
+  public void Validation_error_contents_are_snapshotted_against_later_caller_mutation() {
+    // The arrays are the mutable leaves — a pair-level dictionary copy alone would alias them.
+    string[] messages = ["Name is required."];
+    ApiResult.Validation validation = new(new Dictionary<string, string[]> { ["name"] = messages });
+
+    messages[0] = "mutated";
+
+    validation.Errors["name"][0].ShouldBe("Name is required.");
   }
 
   [Test]

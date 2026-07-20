@@ -361,5 +361,8 @@ dotnet_diagnostic.CA1724.severity = none
 
 # The union `is Union.Case` re-assert idiom (domain-rules.md §3/§8) is module code's
 # error model — same CA1508 union false positive as SharedKernel above (c002).
+# Deliberately module-wide, not Domain-only: the idiom reaches feature handlers too, and
+# the exemption is temporary — expected fixed when the analyzers learn union patterns at
+# .NET 11 GA; removal tracked in #101 (under #100 "Update to .NET 11 GA").
 [src/DoseUp.Api/Modules/**.cs]
 dotnet_diagnostic.CA1508.severity = none

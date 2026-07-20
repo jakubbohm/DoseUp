@@ -1,7 +1,7 @@
-using DoseUp.Api.SharedKernel.Rules;
+using DoseUp.Api.SharedKernel.Domain;
 using Shouldly;
 
-namespace DoseUp.UnitTests.SharedKernel.Rules;
+namespace DoseUp.UnitTests.SharedKernel.Domain;
 
 public sealed class RuleSetTests {
   private static RuleCheck Fail(string code) => new RuleCheck.Fail(code, "Static rule text.");

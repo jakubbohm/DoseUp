@@ -24,6 +24,14 @@ Display name and email SHALL be mandatory: `SignUp` receiving a null or whitespa
 - **WHEN** `SignUp` is called with a whitespace display name or email
 - **THEN** construction throws and no account is created
 
+### Requirement: A missing status on an affordance is a bug
+
+The static affordances SHALL guard their status argument: a null `AccountStatus` SHALL throw (bug-class guard — the enumeration's null-safe equality would otherwise misreport a programming error as a plausible rule refusal, surfacing to the user as a normal-looking 409).
+
+#### Scenario: Null status is a bug, not a rule refusal
+- **WHEN** `CheckCanDisable` or `CheckCanReactivate` is evaluated with a null status
+- **THEN** the check throws and no rule outcome is produced
+
 ### Requirement: Only an active account can be disabled
 
 The account SHALL protect disabling with a pure rule: permitted only in status `Active`, refused otherwise with the stable violation code `account.not-active` (static message, no user data — NFR-5). `Disable` SHALL re-assert the rule itself (two-layer checking, domain-rules.md §3) and SHALL NOT change state on refusal.

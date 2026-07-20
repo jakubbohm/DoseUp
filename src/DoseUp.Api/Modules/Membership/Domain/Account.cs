@@ -1,6 +1,4 @@
 using DoseUp.Api.SharedKernel.Domain;
-using DoseUp.Api.SharedKernel.Results;
-using DoseUp.Api.SharedKernel.Rules;
 
 namespace DoseUp.Api.Modules.Membership.Domain;
 
@@ -23,9 +21,9 @@ public sealed class Account : AggregateRoot<AccountId> {
 
   public EntraObjectId EntraObjectId { get; }
 
-  public string DisplayName { get; private set; }
+  public string DisplayName { get; }
 
-  public string Email { get; private set; }
+  public string Email { get; }
 
   public AccountStatus Status { get; private set; }
 
@@ -48,10 +46,15 @@ public sealed class Account : AggregateRoot<AccountId> {
     return new Account(AccountId.Create(), entraObjectId, displayName, email, AccountStatus.Active, now);
   }
 
-  public static RuleCheck CheckCanDisable(AccountStatus status) =>
-    status == AccountStatus.Active
+  public static RuleCheck CheckCanDisable(AccountStatus status) {
+    // Guard, not a rule: SmartEnum's null-safe == would otherwise turn a null status
+    // (a bug) into a plausible rule refusal (conventions § SharedKernel discipline).
+    ArgumentNullException.ThrowIfNull(status);
+
+    return status == AccountStatus.Active
       ? new RuleCheck.Pass()
       : new RuleCheck.Fail("account.not-active", "Only an active account can be disabled.");
+  }
 
   public RuleCheck CheckCanDisable() => CheckCanDisable(Status);
 
@@ -63,10 +66,13 @@ public sealed class Account : AggregateRoot<AccountId> {
     return new DomainResult.Success();
   }
 
-  public static RuleCheck CheckCanReactivate(AccountStatus status) =>
-    status == AccountStatus.Disabled
+  public static RuleCheck CheckCanReactivate(AccountStatus status) {
+    ArgumentNullException.ThrowIfNull(status);
+
+    return status == AccountStatus.Disabled
       ? new RuleCheck.Pass()
       : new RuleCheck.Fail("account.not-disabled", "Only a disabled account can be reactivated.");
+  }
 
   public RuleCheck CheckCanReactivate() => CheckCanReactivate(Status);
 

@@ -26,18 +26,22 @@ public sealed class DomainDisciplineTests {
   }
 
   [Test]
-  public void Rule_21_domain_namespaces_never_reference_the_edge_api_result() {
-    // #97 / catalog rule 21: the edge union speaks the API's language (NotFound, Forbidden,
-    // Validation …) — meaningless inside an aggregate; domain methods return DomainResult
-    // (c002 design D8, the domain half of #38). RuleCheck/RuleViolation/DomainResult stay allowed.
-    string apiResultFullName = typeof(ApiResult).FullName!;
+  public void Rule_21_domain_side_namespaces_never_reference_the_edge_results_namespace() {
+    // #97, generalized by #99 / catalog rule 21: the dependency rule has a direction —
+    // domain-side namespaces (module Domain and SharedKernel.Domain, which since the
+    // Rules merge holds the whole rule vocabulary) never reference the edge results
+    // namespace; conversions live on the edge union (ApiResult.From), which references
+    // inward. The edge speaks the API's language (NotFound, Forbidden, Validation …) —
+    // meaningless inside an aggregate. The prefix is a typeof anchor, not a string
+    // literal: a rename/move of the edge union updates it or breaks compilation, so the
+    // rule cannot rot into a vacuous pass.
+    string edgeNamespacePrefix = typeof(ApiResult).Namespace + ".";
 
     List<string> offenders = [
       .. DoseUpArchitecture.Instance.Types
-        .Where(static type => Regex.IsMatch(type.FullName, @"^DoseUp\.Api\.Modules\.[^.]+\.Domain\."))
+        .Where(static type => Regex.IsMatch(type.FullName, @"^DoseUp\.Api\.(Modules\.[^.]+\.Domain|SharedKernel\.Domain)\."))
         .Where(type => type.Dependencies.Any(dependency =>
-          dependency.Target.FullName == apiResultFullName
-          || dependency.Target.FullName.StartsWith(apiResultFullName + "+", StringComparison.Ordinal)))
+          dependency.Target.FullName.StartsWith(edgeNamespacePrefix, StringComparison.Ordinal)))
         .Select(static type => type.FullName),
     ];
 

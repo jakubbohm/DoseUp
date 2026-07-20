@@ -31,7 +31,9 @@ public sealed class MembershipDbContext(DbContextOptions<MembershipDbContext> op
   protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder) {
     ArgumentNullException.ThrowIfNull(configurationBuilder);
 
-    TypedIdModelConventions.ApplyTypedIdConversions(configurationBuilder);
+    // Module-scoped on purpose: only Membership's own typed ids register here — anchored
+    // on AccountId so a namespace move can't silently widen or miss the scope.
+    TypedIdModelConventions.ApplyTypedIdConversions(configurationBuilder, typeof(AccountId).Assembly, typeof(AccountId).Namespace);
 
     // Explicit per-type SmartEnum registration — the package's reflection sweep is
     // deliberately unused (c002 design D5; the ~4-line hand-rolled converter is the

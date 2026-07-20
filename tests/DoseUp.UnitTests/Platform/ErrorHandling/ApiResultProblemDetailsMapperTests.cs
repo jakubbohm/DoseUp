@@ -1,6 +1,6 @@
 using DoseUp.Api.Platform.ErrorHandling;
 using DoseUp.Api.SharedKernel.Results;
-using DoseUp.Api.SharedKernel.Rules;
+using DoseUp.Api.SharedKernel.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shouldly;

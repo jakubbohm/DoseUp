@@ -146,7 +146,7 @@ Two framing conventions govern the whole catalog:
 | 18 | A module's context is consumed only by its own module and the composition root (ADR-0002 § Persistence is module property) | ArchUnitNET |
 | 19 | Every mapped entity sits in the module's schema (ADR-0002 § Persistence is module property) | reflection over the offline-built EF models (no DB), in ArchitectureTests |
 | 20 | `IConfiguration`/`IConfigurationSection` are referenced only by Platform composition — everything else takes `IOptions<T>` ([conventions/configuration.md § 5](configuration.md)) | ArchUnitNET |
-| 21 | Domain namespaces never reference the edge `ApiResult` union — domain methods return `DomainResult`; `RuleCheck`/`RuleViolation` stay allowed ([domain-rules.md §3](domain-rules.md), c002/#97) | ArchUnitNET |
+| 21 | Domain-side namespaces (module `Domain` and `SharedKernel.Domain`, which holds the whole rule vocabulary since the Rules merge) never reference the edge results namespace — the dependency points outward-in only: conversions live on the edge union (`ApiResult.From`), domain methods return `DomainResult` ([domain-rules.md §3](domain-rules.md), c002/#97, generalized by #99) | ArchUnitNET |
 
 All ArchUnitNET rules **ship with the shared-kernel change and pass vacuously** until their targets exist — no phased introduction to forget.
 

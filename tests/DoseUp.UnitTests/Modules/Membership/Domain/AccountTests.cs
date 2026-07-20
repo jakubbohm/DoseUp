@@ -1,6 +1,5 @@
 using DoseUp.Api.Modules.Membership.Domain;
-using DoseUp.Api.SharedKernel.Results;
-using DoseUp.Api.SharedKernel.Rules;
+using DoseUp.Api.SharedKernel.Domain;
 using Shouldly;
 
 namespace DoseUp.UnitTests.Modules.Membership.Domain;
@@ -85,6 +84,14 @@ public sealed class AccountTests {
     RuleCheck.Fail fail = Account.CheckCanDisable(AccountStatus.Disabled).Value.ShouldBeOfType<RuleCheck.Fail>();
     fail.Violations.ShouldHaveSingleItem().Code.ShouldBe("account.not-active");
   }
+
+  [Test]
+  public void Missing_status_on_the_disable_affordance_is_a_bug_and_throws() =>
+    Should.Throw<ArgumentNullException>(static () => Account.CheckCanDisable(null!));
+
+  [Test]
+  public void Missing_status_on_the_reactivate_affordance_is_a_bug_and_throws() =>
+    Should.Throw<ArgumentNullException>(static () => Account.CheckCanReactivate(null!));
 
   [Test]
   public void Reactivating_a_disabled_account_succeeds() {

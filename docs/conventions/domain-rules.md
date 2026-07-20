@@ -37,7 +37,7 @@ Exceptions belong to class 8 only: a violated `Guard` (null argument, impossible
 
 Rule checking deliberately happens **twice** on the write path:
 
-- **The aggregate is the guarantee.** Every mutating method re-asserts its own pure rules and fails fast (first violation, as `DomainResult` — the domain layer's own union, c002; the edge union never enters Domain, arch-catalog rule 21). No caller — endpoint, Wolverine consumer, test, future code — can push an aggregate into a state its rules forbid. This is also the stale-UI answer: `canEdit` was true when the page rendered, the state changed since, the write still refuses.
+- **The aggregate is the guarantee.** Every mutating method re-asserts its own pure rules and fails fast (first violation, as `DomainResult` — the domain layer's own union, c002; the edge union never enters the domain side, arch-catalog rule 21). No caller — endpoint, Wolverine consumer, test, future code — can push an aggregate into a state its rules forbid. This is also the stale-UI answer: `canEdit` was true when the page rendered, the state changed since, the write still refuses.
 - **The handler is the courtesy.** Before touching the domain, the feature handler composes *all* rules for the operation — the aggregate's pure checks plus async set checks — in one `RuleSet`, so the user gets **every** violation in a single 409 instead of fixing them one round-trip at a time.
 
 The double evaluation of pure checks is intentional and costs nanoseconds. Never "optimize" it away — removing the aggregate-side check trades a correctness guarantee for nothing.
@@ -84,7 +84,7 @@ var rules = await RuleSet
     .Add(Schedule.CheckCanChangeTiming(req.Timing))     // pure — same stage: failures aggregate
     .Then(() => NameIsUniqueAsync(req, ct))        // async — next stage
     .CheckAsync();
-if (rules is RuleCheck.Fail f) return f.ToApiResult();   // → ApiResult.RuleViolations → 409
+if (rules is RuleCheck.Fail f) return ApiResult.From(f);   // → ApiResult.RuleViolations → 409
 ```
 
 - **Deferred:** nothing async executes until `CheckAsync()`. Pure checks arrive as already-evaluated `RuleCheck` values (they are cheap by §4); async checks arrive as `Func<Task<RuleCheck>>` lambdas the set controls.
@@ -141,12 +141,12 @@ public async Task<ApiResult> Handle(EditScheduleRequest req, CancellationToken c
         .Then(() => NameIsUniqueAsync(req, ct))
         .CheckAsync();
     if (rules is RuleCheck.Fail f) 
-        return f.ToApiResult();                 // → 409, all violations
+        return ApiResult.From(f);               // → 409, all violations
 
     // 4. Domain — the aggregate re-asserts its own rules (§3, in domain vocabulary) and raises events
     DomainResult result = schedule.Edit(Map(req));
     if (result is not DomainResult.Success) 
-        return result.ToApiResult();
+        return ApiResult.From(result);          // conversions live on the edge (#99)
 
     // 5. Commit — domain events drain in the SaveChanges interceptor;
     //    outbox envelopes join the same transaction (ADR-0002)

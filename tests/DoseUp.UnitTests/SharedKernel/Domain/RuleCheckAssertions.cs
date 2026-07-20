@@ -1,7 +1,7 @@
-using DoseUp.Api.SharedKernel.Rules;
+using DoseUp.Api.SharedKernel.Domain;
 using Shouldly;
 
-namespace DoseUp.UnitTests.SharedKernel.Rules;
+namespace DoseUp.UnitTests.SharedKernel.Domain;
 
 /// <summary>
 /// Domain-shaped Shouldly extensions (testing.md §6.6) — tests read as spec and union

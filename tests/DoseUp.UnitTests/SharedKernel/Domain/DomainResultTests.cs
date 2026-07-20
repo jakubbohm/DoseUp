@@ -1,8 +1,10 @@
+using System.Runtime.CompilerServices;
+using DoseUp.Api.SharedKernel.Domain;
 using DoseUp.Api.SharedKernel.Results;
-using DoseUp.Api.SharedKernel.Rules;
+using DoseUp.UnitTests.SharedKernel.Results;
 using Shouldly;
 
-namespace DoseUp.UnitTests.SharedKernel.Results;
+namespace DoseUp.UnitTests.SharedKernel.Domain;
 
 public sealed class DomainResultTests {
   [Test]
@@ -51,7 +53,7 @@ public sealed class DomainResultTests {
   public void Domain_success_converts_to_api_success() {
     DomainResult result = new DomainResult.Success();
 
-    result.ToApiResult().Value.ShouldBeOfType<ApiResult.Success>();
+    ApiResult.From(result).Value.ShouldBeOfType<ApiResult.Success>();
   }
 
   [Test]
@@ -61,7 +63,7 @@ public sealed class DomainResultTests {
 
     DomainResult result = new DomainResult.RuleViolations([first, second]);
 
-    result.ToApiResult().ShouldBeRuleViolations().Violations.ShouldBe([first, second]);
+    ApiResult.From(result).ShouldBeRuleViolations().Violations.ShouldBe([first, second]);
   }
 
   [Test]
@@ -71,7 +73,7 @@ public sealed class DomainResultTests {
 
     DomainResult<int>.RuleViolations violated = new([first, second]);
 
-    violated.ToApiResult().ShouldBeRuleViolations().Violations.ShouldBe([first, second]);
+    ApiResult.From(violated).ShouldBeRuleViolations().Violations.ShouldBe([first, second]);
   }
 
   [Test]
@@ -85,6 +87,33 @@ public sealed class DomainResultTests {
   [Test]
   public void Missing_violations_on_the_value_carrying_form_are_a_bug_and_throw() =>
     Should.Throw<ArgumentNullException>(static () => new DomainResult<int>.RuleViolations(null!));
+
+  [Test]
+  public void Violations_are_snapshotted_against_later_caller_mutation() {
+    List<RuleViolation> source = [new("x.y", "Z.")];
+    DomainResult.RuleViolations violated = new(source);
+
+    source.Clear();
+
+    violated.Violations.ShouldHaveSingleItem();
+  }
+
+  [Test]
+  public void Violations_on_the_value_carrying_form_are_snapshotted_against_later_caller_mutation() {
+    List<RuleViolation> source = [new("x.y", "Z.")];
+    DomainResult<int>.RuleViolations violated = new(source);
+
+    source.Clear();
+
+    violated.Violations.ShouldHaveSingleItem();
+  }
+
+  // c001 design: default union values are never constructed — a runaway default is bug
+  // class 8 and the crash is the designed behavior; a catch-all arm would erase the
+  // closed-union exhaustiveness build error, so none may ever be added.
+  [Test]
+  public void A_defaulted_union_is_a_bug_and_throws_on_conversion() =>
+    Should.Throw<SwitchExpressionException>(static () => ApiResult.From(default(DomainResult)));
 
   [Test]
   public void Empty_violations_on_the_value_carrying_form_are_a_bug_and_throw() =>

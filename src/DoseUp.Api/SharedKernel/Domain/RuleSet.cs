@@ -1,4 +1,4 @@
-namespace DoseUp.Api.SharedKernel.Rules;
+namespace DoseUp.Api.SharedKernel.Domain;
 
 /// <summary>
 /// Handler-side composer of rule checks (domain-rules.md §5). Pure checks arrive as
