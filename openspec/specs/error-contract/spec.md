@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The wire error model (domain-rules.md §1/§7 taxonomy, RFC 9457). One owner per error class; the single Platform mapper is the only producer of Result-derived error responses. (The 403 request-class shape activates with M0's `ActiveAccount` and is specced with that change.)
+The wire error model (domain-rules.md §1/§7 taxonomy, RFC 9457). One owner per error class; the single Platform mapper is the only producer of ApiResult-derived error responses. (The 403 request-class shape activates with M0's `ActiveAccount` and is specced with that change.)
 
 ## Requirements
 
@@ -14,9 +14,9 @@ Every non-2xx response the API produces — including auth-middleware denials an
 - **WHEN** a protected endpoint is called without a valid token
 - **THEN** the 401 response body is ProblemDetails with `application/problem+json`
 
-### Requirement: The Platform mapper implements the Result-case → status matrix
+### Requirement: The Platform mapper implements the ApiResult-case → status matrix
 
-The single Platform mapper SHALL map Result cases to statuses exactly per the conventions matrix: `Validation` → 400, `NotFound` → 404, `RuleViolations` → 409 (rule-violation ProblemDetails `type`), `Conflict` → 409 (distinct ProblemDetails `type`), `Forbidden` → 403, `Unexpected` → 500.
+The single Platform mapper SHALL map `ApiResult` cases to statuses exactly per the conventions matrix: `Validation` → 400, `NotFound` → 404, `RuleViolations` → 409 (rule-violation ProblemDetails `type`), `Conflict` → 409 (distinct ProblemDetails `type`), `Forbidden` → 403, `Unexpected` → 500.
 
 #### Scenario: NotFound maps to 404
 - **WHEN** the mapper receives a `NotFound` result

@@ -44,7 +44,7 @@ Order is dependency-driven; every task ends with `dotnet build DoseUp.slnx` and 
 
 ## 8. Archive-time note (for opsx:sync/archive, not implementation)
 
-- [ ] 8.1 When syncing deltas into main specs, also update the **Purpose** paragraphs of `shared-kernel-primitives` and `error-contract` (they mention `Result`; delta operations cover requirements only) so #98's "every mention in the specs" done-criterion holds.
+- [x] 8.1 When syncing deltas into main specs, also update the **Purpose** paragraphs of `shared-kernel-primitives` and `error-contract` (they mention `Result`; delta operations cover requirements only) so #98's "every mention in the specs" done-criterion holds. Done at archive sync 2026-07-20: error-contract Purpose `Result-derived` → `ApiResult-derived`; shared-kernel-primitives' Purpose carried no mention; full-spec sweep found no other stragglers (the one remaining bare `Result` is the deliberate "renamed from `Result` by #98" historical note).
 
 ## 9. Review response (2026-07-20 — code-review findings + #99 folded in)
 
