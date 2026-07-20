@@ -336,6 +336,11 @@ dotnet_diagnostic.CA1508.severity = none
 [src/DoseUp.Api/Platform/Persistence/Migrations/**.cs]
 generated_code = true
 
+# Module-owned migrations (ADR-0002 § Persistence is module property) — same scaffolds,
+# module home (c002).
+[src/DoseUp.Api/Modules/**/Infrastructure/Persistence/Migrations/**.cs]
+generated_code = true
+
 # Union case types are nested inside the union by design (design.md D3 adopted shape) —
 # CA1034 "nested types should not be visible" contradicts the pattern; and marker
 # interfaces (IDomainEvent) are constraint-bearing, not "empty" in CA1040's sense.
@@ -353,3 +358,11 @@ dotnet_diagnostic.CA1508.severity = none
 # Result case names are the domain-rules.md §1 taxonomy — contract vocabulary; they nest
 # inside Result, so the theoretical clash with framework namespace names cannot bite.
 dotnet_diagnostic.CA1724.severity = none
+
+# The union `is Union.Case` re-assert idiom (domain-rules.md §3/§8) is module code's
+# error model — same CA1508 union false positive as SharedKernel above (c002).
+# Deliberately module-wide, not Domain-only: the idiom reaches feature handlers too, and
+# the exemption is temporary — expected fixed when the analyzers learn union patterns at
+# .NET 11 GA; removal tracked in #101 (under #100 "Update to .NET 11 GA").
+[src/DoseUp.Api/Modules/**.cs]
+dotnet_diagnostic.CA1508.severity = none

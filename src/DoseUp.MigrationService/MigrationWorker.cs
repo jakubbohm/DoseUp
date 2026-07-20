@@ -1,4 +1,4 @@
-using DoseUp.Api.Platform.Persistence;
+using DoseUp.Api.Modules.Membership.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -13,9 +13,9 @@ namespace DoseUp.MigrationService;
 public sealed class MigrationWorker(IServiceProvider serviceProvider, IHostApplicationLifetime lifetime) : BackgroundService {
   protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
     using (IServiceScope scope = serviceProvider.CreateScope()) {
-      // Applies the bootstrap-placeholder DoseUpDbContext today; generalizes to iterate
-      // every module context in M1 (registration shape is an open design decision — tracked in issue #39).
-      DoseUpDbContext context = scope.ServiceProvider.GetRequiredService<DoseUpDbContext>();
+      // Applies the single module context (Membership); generalizes to iterate every
+      // module context when a second module exists (d18 — issue #39).
+      MembershipDbContext context = scope.ServiceProvider.GetRequiredService<MembershipDbContext>();
       IExecutionStrategy strategy = context.Database.CreateExecutionStrategy();
       await strategy.ExecuteAsync(() => context.Database.MigrateAsync(stoppingToken)).ConfigureAwait(false);
     }

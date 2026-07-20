@@ -1,6 +1,5 @@
-using DoseUp.Api.SharedKernel.Results;
 
-namespace DoseUp.Api.SharedKernel.Rules;
+namespace DoseUp.Api.SharedKernel.Domain;
 
 /// <summary>
 /// The outcome of checking one domain rule (domain-rules.md §2). A single failed rule is a
@@ -11,23 +10,19 @@ public readonly union RuleCheck(RuleCheck.Pass, RuleCheck.Fail) : IEquatable<Rul
   public readonly record struct Pass;
 
   /// <summary>One or more violations, in the order they were determined.</summary>
-  public sealed record Fail {
-    public Fail(IReadOnlyList<RuleViolation> violations) {
-      ArgumentNullException.ThrowIfNull(violations);
-      ArgumentOutOfRangeException.ThrowIfZero(violations.Count, nameof(violations));
-      Violations = violations;
-    }
+  public sealed record Fail : RuleViolationCarrier {
+    public Fail(IReadOnlyList<RuleViolation> violations) : base(violations) { }
 
     public Fail(string code, string message)
       : this([new RuleViolation(code, message)]) { }
 
-    public IReadOnlyList<RuleViolation> Violations { get; }
-
     /// <summary>
-    /// Lossless bridge to the edge channel: the same violations, same order, as
-    /// <see cref="Result.RuleViolations"/> → 409.
+    /// Lossless bridge to the domain channel — the aggregate's re-assert returns its
+    /// failed check as <see cref="DomainResult.RuleViolations"/> (domain-rules.md §3).
+    /// No edge bridge exists here: rule vocabulary knows the domain, never the edge —
+    /// outer layers convert from this type (#99, arch rule 21).
     /// </summary>
-    public Result ToResult() => new Result.RuleViolations(Violations);
+    public DomainResult ToDomainResult() => new DomainResult.RuleViolations(Violations);
   }
 
   #region Object overrides

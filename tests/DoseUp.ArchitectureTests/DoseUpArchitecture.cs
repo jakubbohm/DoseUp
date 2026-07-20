@@ -11,7 +11,7 @@ namespace DoseUp.ArchitectureTests;
 /// every catalog rule.
 /// </summary>
 public static class DoseUpArchitecture {
-  public static Architecture Instance { get; } = new ArchLoader().LoadAssemblies(typeof(Result).Assembly, typeof(FastEndpoints.BaseEndpoint).Assembly).Build();
+  public static Architecture Instance { get; } = new ArchLoader().LoadAssemblies(typeof(ApiResult).Assembly, typeof(FastEndpoints.BaseEndpoint).Assembly).Build();
 
   /// <summary>
   /// Evaluates the rule against the shared architecture and fails with the rule's own

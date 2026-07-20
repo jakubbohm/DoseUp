@@ -1,3 +1,4 @@
+using DoseUp.Api.Modules.Membership.Infrastructure.Persistence;
 using DoseUp.Api.Platform.Persistence;
 using DoseUp.Api.SharedKernel.Events;
 using DoseUp.ServiceDefaults;
@@ -19,13 +20,15 @@ builder.Services.AddScoped<DomainEventDispatchInterceptor>();
 string doseupDbConnectionString = builder.Configuration.GetConnectionString("doseupdb")
   ?? throw new InvalidOperationException("Connection string 'doseupdb' is missing — run via the AppHost (aspire start) or the test harness.");
 
-builder.Services.AddDbContext<DoseUpDbContext>((services, options) => options
-    .UseNpgsql(doseupDbConnectionString)
+// The single module context is registered directly; the per-module registration shape
+// generalizes when a second module makes it real (d18 — issue #39).
+builder.Services.AddDbContext<MembershipDbContext>((services, options) => MembershipDbContextOptions
+    .Apply(options, doseupDbConnectionString)
     .AddInterceptors(services.GetRequiredService<DomainEventDispatchInterceptor>()));
 
 // Aspire client integration: OTel + connection retries; the DB health check stays off —
 // the probe path never touches the database (ADR-0001, api-shell spec).
-builder.EnrichNpgsqlDbContext<DoseUpDbContext>(static settings => settings.DisableHealthChecks = true);
+builder.EnrichNpgsqlDbContext<MembershipDbContext>(static settings => settings.DisableHealthChecks = true);
 
 // ── ProblemDetails: every non-2xx carries an RFC 9457 body (D7) ──
 

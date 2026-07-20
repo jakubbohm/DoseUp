@@ -1,8 +1,9 @@
-using DoseUp.Api.SharedKernel.Rules;
+using DoseUp.Api.SharedKernel.Results;
+using DoseUp.Api.SharedKernel.Domain;
 using DoseUp.UnitTests.SharedKernel.Results;
 using Shouldly;
 
-namespace DoseUp.UnitTests.SharedKernel.Rules;
+namespace DoseUp.UnitTests.SharedKernel.Domain;
 
 public sealed class RuleCheckTests {
   [Test]
@@ -40,11 +41,22 @@ public sealed class RuleCheckTests {
   public void A_fail_with_null_violations_is_a_bug_and_throws() => Should.Throw<ArgumentNullException>(static () => new RuleCheck.Fail(null!));
 
   [Test]
+  public void Violations_are_snapshotted_against_later_caller_mutation() {
+    // RuleSet hands Fail its own mutable list — the snapshot is what makes that safe.
+    List<RuleViolation> source = [new("x.y", "Z.")];
+    RuleCheck.Fail fail = new(source);
+
+    source.Clear();
+
+    fail.Violations.ShouldHaveSingleItem();
+  }
+
+  [Test]
   public void Conversion_to_result_is_lossless() {
     RuleViolation first = new("schedule.not-active", "Only an active schedule can be edited.");
     RuleViolation second = new("schedule.name-taken", "A schedule with this name already exists.");
     RuleCheck.Fail fail = new([first, second]);
 
-    fail.ToResult().ShouldBeRuleViolations().Violations.ShouldBe([first, second]);
+    ApiResult.From(fail).ShouldBeRuleViolations().Violations.ShouldBe([first, second]);
   }
 }

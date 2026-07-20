@@ -1,23 +1,23 @@
 using DoseUp.Api.Platform.ErrorHandling;
 using DoseUp.Api.SharedKernel.Results;
-using DoseUp.Api.SharedKernel.Rules;
+using DoseUp.Api.SharedKernel.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shouldly;
 
 namespace DoseUp.UnitTests.Platform.ErrorHandling;
 
-public sealed class ResultProblemDetailsMapperTests {
+public sealed class ApiResultProblemDetailsMapperTests {
   [Test]
   public void Not_found_maps_to_404() {
-    Result result = new Result.NotFound();
+    ApiResult result = new ApiResult.NotFound();
 
     result.ToProblemDetails().Status.ShouldBe(404);
   }
 
   [Test]
   public void Validation_maps_to_400_reporting_every_invalid_field() {
-    Result result = new Result.Validation(new Dictionary<string, string[]> {
+    ApiResult result = new ApiResult.Validation(new Dictionary<string, string[]> {
       ["name"] = ["Name is required."],
       ["timing"] = ["Timing is out of range."],
     });
@@ -34,7 +34,7 @@ public sealed class ResultProblemDetailsMapperTests {
   public void Rule_violations_ride_one_409_with_the_violations_array() {
     RuleViolation first = new("schedule.not-active", "Only an active schedule can be edited.");
     RuleViolation second = new("schedule.name-taken", "A schedule with this name already exists.");
-    Result result = new Result.RuleViolations([first, second]);
+    ApiResult result = new ApiResult.RuleViolations([first, second]);
 
     ProblemDetails problem = result.ToProblemDetails();
 
@@ -45,8 +45,8 @@ public sealed class ResultProblemDetailsMapperTests {
 
   [Test]
   public void The_two_409_classes_carry_distinct_problem_types() {
-    Result ruleViolations = new Result.RuleViolations([new RuleViolation("a.b", "C.")]);
-    Result conflict = new Result.Conflict();
+    ApiResult ruleViolations = new ApiResult.RuleViolations([new RuleViolation("a.b", "C.")]);
+    ApiResult conflict = new ApiResult.Conflict();
 
     ProblemDetails ruleViolationsProblem = ruleViolations.ToProblemDetails();
     ProblemDetails conflictProblem = conflict.ToProblemDetails();
@@ -58,14 +58,14 @@ public sealed class ResultProblemDetailsMapperTests {
 
   [Test]
   public void Forbidden_maps_to_403() {
-    Result result = new Result.Forbidden();
+    ApiResult result = new ApiResult.Forbidden();
 
     result.ToProblemDetails().Status.ShouldBe(403);
   }
 
   [Test]
   public void Unexpected_maps_to_500_carrying_no_internals() {
-    Result result = new Result.Unexpected();
+    ApiResult result = new ApiResult.Unexpected();
 
     ProblemDetails problem = result.ToProblemDetails();
 
@@ -77,7 +77,7 @@ public sealed class ResultProblemDetailsMapperTests {
 
   [Test]
   public void Mapping_success_is_a_caller_bug_and_throws() {
-    Result result = new Result.Success();
+    ApiResult result = new ApiResult.Success();
 
     Should.Throw<ArgumentException>(() => result.ToProblemDetails());
   }

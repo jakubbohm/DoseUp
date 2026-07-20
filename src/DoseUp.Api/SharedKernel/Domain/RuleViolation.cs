@@ -1,4 +1,4 @@
-namespace DoseUp.Api.SharedKernel.Rules;
+namespace DoseUp.Api.SharedKernel.Domain;
 
 /// <summary>
 /// One broken domain rule. <paramref name="Code"/> is contract — stable

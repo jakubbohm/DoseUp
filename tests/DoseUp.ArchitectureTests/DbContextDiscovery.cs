@@ -15,7 +15,7 @@ internal static class DbContextDiscovery {
 
   /// <summary>Every concrete <see cref="DbContext"/> subclass in the Api assembly.</summary>
   public static IReadOnlyList<Type> AllContexts { get; } = [
-    .. typeof(Result).Assembly.GetTypes().Where(static type => !type.IsAbstract && typeof(DbContext).IsAssignableFrom(type)),
+    .. typeof(ApiResult).Assembly.GetTypes().Where(static type => !type.IsAbstract && typeof(DbContext).IsAssignableFrom(type)),
   ];
 
   /// <summary>The module-owned subset of <see cref="AllContexts"/>, paired with the owning module's name.</summary>

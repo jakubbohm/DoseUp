@@ -60,7 +60,7 @@ Candidate changes: `add-account-admin`, `harden-authz`, `polish-onboarding`
 
 ## Backlog (unscheduled)
 
-FR-16 stock tracking · FR-17 effects journal · FR-18 export · FR-19 shared catalog · FR-20 offline (won't, revisit) · FR-21 caregiver sharing (won't, revisit) · Czech i18n (OQ-2) · Stryker mutation testing (spike scheduled into the first domain-module change — [conventions/testing.md § 7](../conventions/testing.md); if viable → nightly, never a PR gate) · the Claude Design workflow maturing (`/design-sync` push-up + handoff-back — [conventions/design.md](../conventions/design.md))
+FR-16 stock tracking · FR-17 effects journal · FR-18 export · FR-19 shared catalog · FR-20 offline (won't, revisit) · FR-21 caregiver sharing (won't, revisit) · Czech i18n (OQ-2) · Stryker mutation testing (spike deferred out of c002, the first domain-module change — re-slotted into a later domain-heavy change, M2's recurrence engine at the latest; [conventions/testing.md § 7](../conventions/testing.md); if viable → nightly, never a PR gate) · the Claude Design workflow maturing (`/design-sync` push-up + handoff-back — [conventions/design.md](../conventions/design.md))
 
 ## Standing activities (no milestone)
 
